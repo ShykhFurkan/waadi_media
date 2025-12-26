@@ -31,25 +31,16 @@ const Footer = () => {
                     <div>
                         <h4 className="font-black uppercase text-sm tracking-widest mb-6" style={{ color: colors.red }}>Explore</h4>
                         <ul className="space-y-3 font-bold text-sm uppercase italic">
-                            <li>
-                                <Link href="/services" passHref>
-                                    <motion.div
-                                        whileHover={{ x: 10, color: colors.red }}
-                                        className="transition-colors block cursor-pointer"
-                                    >
-                                        Services
-                                    </motion.div>
-                                </Link>
-                            </li>
-                            {['Method', 'About'].map(link => (
+                            {['Services', 'Work', 'Method', 'About'].map(link => (
                                 <li key={link}>
-                                    <motion.a
-                                        href={`/#${link.toLowerCase()}`}
-                                        whileHover={{ x: 10, color: colors.red }}
-                                        className="transition-colors block"
-                                    >
-                                        {link}
-                                    </motion.a>
+                                    <Link href={link === 'About' ? '/#about' : `/${link.toLowerCase()}`} passHref>
+                                        <motion.div
+                                            whileHover={{ x: 10, color: colors.red }}
+                                            className="transition-colors block cursor-pointer"
+                                        >
+                                            {link}
+                                        </motion.div>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -60,13 +51,14 @@ const Footer = () => {
                         <ul className="space-y-3 font-bold text-sm uppercase italic">
                             {['Web Design', 'Automations', 'Strategy', 'Ads'].map(link => (
                                 <li key={link}>
-                                    <motion.a
-                                        href="#"
-                                        whileHover={{ x: 10, color: colors.red }}
-                                        className="transition-colors block"
-                                    >
-                                        {link}
-                                    </motion.a>
+                                    <Link href="/services" passHref>
+                                        <motion.div
+                                            whileHover={{ x: 10, color: colors.red }}
+                                            className="transition-colors block cursor-pointer"
+                                        >
+                                            {link}
+                                        </motion.div>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -75,17 +67,27 @@ const Footer = () => {
                     <div>
                         <h4 className="font-black uppercase text-sm tracking-widest mb-6" style={{ color: colors.red }}>Support</h4>
                         <ul className="space-y-3 font-bold text-sm uppercase italic">
-                            {['Contact', 'Privacy', 'Terms'].map(link => (
-                                <li key={link}>
-                                    <motion.a
-                                        href="#"
-                                        whileHover={{ x: 10, color: colors.red }}
-                                        className="transition-colors block"
-                                    >
-                                        {link}
-                                    </motion.a>
-                                </li>
-                            ))}
+                            <li>
+                                <Link href="/lets-talk" passHref>
+                                    <motion.div whileHover={{ x: 10, color: colors.red }} className="transition-colors block cursor-pointer">
+                                        Contact
+                                    </motion.div>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/privacy" passHref>
+                                    <motion.div whileHover={{ x: 10, color: colors.red }} className="transition-colors block cursor-pointer">
+                                        Privacy
+                                    </motion.div>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/terms" passHref>
+                                    <motion.div whileHover={{ x: 10, color: colors.red }} className="transition-colors block cursor-pointer">
+                                        Terms
+                                    </motion.div>
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -95,15 +97,15 @@ const Footer = () => {
                         © {new Date().getFullYear()} Waadi Media Agency — Built for the long term.
                     </p>
                     <div className="flex space-x-6 text-xs font-black uppercase tracking-tighter" style={{ color: colors.teal }}>
-                        {['Instagram', 'LinkedIn', 'Twitter'].map(social => (
-                            <motion.a
-                                key={social}
-                                href="#"
-                                whileHover={{ y: -2, color: colors.red }}
-                            >
-                                {social}
-                            </motion.a>
-                        ))}
+                        <motion.a href="https://www.instagram.com/waadi_media?igsh=dmQ3eXV2ejRuMWsx" target="_blank" rel="noopener noreferrer" whileHover={{ y: -2, color: colors.red }}>
+                            Instagram
+                        </motion.a>
+                        <motion.a href="https://www.linkedin.com/in/shykh-furkan-1193b4249?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" rel="noopener noreferrer" whileHover={{ y: -2, color: colors.red }}>
+                            LinkedIn
+                        </motion.a>
+                        <motion.a href="https://x.com/shykh_furkan?s=21" target="_blank" rel="noopener noreferrer" whileHover={{ y: -2, color: colors.red }}>
+                            Twitter
+                        </motion.a>
                     </div>
                 </div>
             </div>

@@ -63,6 +63,30 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased text-slate-800 bg-slate-50">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Waadi Media',
+              url: 'https://waadimedia.com',
+              logo: 'https://waadimedia.com/logo.png',
+              sameAs: [
+                'https://x.com/shykh_furkan?s=21',
+                'https://www.instagram.com/waadi_media?igsh=dmQ3eXV2ejRuMWsx',
+                'https://www.linkedin.com/in/shykh-furkan-1193b4249?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                telephone: '+91-9876543210',
+                contactType: 'customer service',
+                areaServed: 'IN',
+                availableLanguage: 'en'
+              }
+            }),
+          }}
+        />
         <Navbar />
         {children}
         <Footer />

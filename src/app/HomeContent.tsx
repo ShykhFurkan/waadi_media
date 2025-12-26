@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 import ContactSection from '@/components/ContactSection';
+import Link from 'next/link';
 
 const HomePageContent = () => {
     // Colors based on your palette
@@ -216,32 +217,33 @@ const HomePageContent = () => {
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {services.map((service, i) => (
-                            <motion.div
-                                key={i}
-                                custom={i}
-                                variants={cardHover3D}
-                                initial="initial"
-                                whileHover="hover"
-                                className="group bg-white p-8 rounded-[40px] border-4 border-[#2D6E7D] shadow-[8px_8px_0px_0px_#2D6E7D] hover:shadow-[12px_12px_0px_0px_#F96E5B] hover:border-[#F96E5B] transition-all relative overflow-hidden text-left"
-                            >
-                                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                                    {React.cloneElement(service.icon as React.ReactElement<any>, { size: 100, color: service.color })}
-                                </div>
+                            <Link href="/services" key={i} passHref className="block h-full">
+                                <motion.div
+                                    custom={i}
+                                    variants={cardHover3D}
+                                    initial="initial"
+                                    whileHover="hover"
+                                    className="group bg-white p-8 rounded-[40px] border-4 border-[#2D6E7D] shadow-[8px_8px_0px_0px_#2D6E7D] hover:shadow-[12px_12px_0px_0px_#F96E5B] hover:border-[#F96E5B] transition-all relative overflow-hidden text-left h-full"
+                                >
+                                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        {React.cloneElement(service.icon as React.ReactElement<any>, { size: 100, color: service.color })}
+                                    </div>
 
-                                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 shadow-md" style={{ backgroundColor: service.color }}>
-                                    {service.icon}
-                                </div>
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 shadow-md" style={{ backgroundColor: service.color }}>
+                                        {service.icon}
+                                    </div>
 
-                                <h3 className="text-2xl font-black uppercase italic mb-3 text-[#2D6E7D]">{service.title}</h3>
-                                <p className="font-bold text-sm opacity-60 leading-relaxed mb-6">
-                                    {service.description}
-                                </p>
+                                    <h3 className="text-2xl font-black uppercase italic mb-3 text-[#2D6E7D]">{service.title}</h3>
+                                    <p className="font-bold text-sm opacity-60 leading-relaxed mb-6">
+                                        {service.description}
+                                    </p>
 
-                                <div className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity" style={{ color: service.color }}>
-                                    <span>Learn More</span>
-                                    <ChevronRight size={12} />
-                                </div>
-                            </motion.div>
+                                    <div className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity" style={{ color: service.color }}>
+                                        <span>Learn More</span>
+                                        <ChevronRight size={12} />
+                                    </div>
+                                </motion.div>
+                            </Link>
                         ))}
                     </div>
 

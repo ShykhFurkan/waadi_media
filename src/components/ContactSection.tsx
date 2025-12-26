@@ -158,16 +158,30 @@ const ContactSection = () => {
                         <div className="pt-8 border-t-4 border-[#3F9AAE] border-dashed">
                             <h4 className="font-black uppercase text-xs tracking-[0.3em] mb-4 opacity-60">Follow our journey</h4>
                             <div className="flex space-x-4">
-                                {[Instagram, Linkedin, Twitter].map((Icon, i) => (
-                                    <motion.a
-                                        key={i}
-                                        href="#"
-                                        whileHover={{ scale: 1.2, rotate: i % 2 === 0 ? 15 : -15, backgroundColor: colors.teal, color: 'white' }}
-                                        className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
-                                    >
-                                        <Icon size={20} />
-                                    </motion.a>
-                                ))}
+                                <motion.a
+                                    href="https://www.instagram.com/waadi_media?igsh=dmQ3eXV2ejRuMWsx"
+                                    target="_blank" rel="noopener noreferrer"
+                                    whileHover={{ scale: 1.2, rotate: -15, backgroundColor: colors.teal, color: 'white' }}
+                                    className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
+                                >
+                                    <Instagram size={20} />
+                                </motion.a>
+                                <motion.a
+                                    href="https://www.linkedin.com/in/shykh-furkan-1193b4249?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
+                                    target="_blank" rel="noopener noreferrer"
+                                    whileHover={{ scale: 1.2, rotate: 15, backgroundColor: colors.teal, color: 'white' }}
+                                    className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
+                                >
+                                    <Linkedin size={20} />
+                                </motion.a>
+                                <motion.a
+                                    href="https://x.com/shykh_furkan?s=21"
+                                    target="_blank" rel="noopener noreferrer"
+                                    whileHover={{ scale: 1.2, rotate: -15, backgroundColor: colors.teal, color: 'white' }}
+                                    className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
+                                >
+                                    <Twitter size={20} />
+                                </motion.a>
                             </div>
                         </div>
                     </motion.div>
