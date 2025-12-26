@@ -1,53 +1,45 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from 'next';
+import './globals.css';
+import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://waadimedia.com'), // Replace with actual domain
+  metadataBase: new URL('https://waadimedia.com'),
   title: {
-    default: "Waadi Media | Growth Systems for Brands",
-    template: "%s | Waadi Media"
+    default: 'Waadi Media | Growth Systems for Brands',
+    template: '%s | Waadi Media'
   },
-  description: "Creative growth agency in Kashmir building digital systems, brands, and automation for growing businesses.",
-  keywords: ["Waadi Media", "Digital Agency Kashmir", "Web Design", "Branding", "Growth Marketing", "Business Automation"],
-  authors: [{ name: "Waadi Media Team" }],
-  creator: "Waadi Media",
-  publisher: "Waadi Media",
+  description: 'Waadi Media is a creative growth agency in Kashmir building digital systems, brands, and automation for growing businesses.',
+  keywords: ['Web Design Kashmir', 'Digital Marketing Srinagar', 'Branding Agency', 'Waadi Media', 'Growth Agency'],
+  authors: [{ name: 'Waadi Media Team' }],
+  creator: 'Waadi Media',
+  publisher: 'Waadi Media',
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://waadimedia.com",
-    title: "Waadi Media | Growth Systems for Brands",
-    description: "Creative growth agency in Kashmir building digital systems, brands, and automation for growing businesses.",
-    siteName: "Waadi Media",
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://waadimedia.com',
+    title: 'Waadi Media | Growth Systems for Brands',
+    description: 'We build digital assets and systems for businesses ready to scale.',
+    siteName: 'Waadi Media',
     images: [
       {
-        url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Waadi Media Logo",
-      }
+        url: '/logo.png',
+        width: 800,
+        height: 600,
+        alt: 'Waadi Media Logo',
+      },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Waadi Media | Growth Systems for Brands",
-    description: "Creative growth agency in Kashmir building digital systems, brands, and automation for growing businesses.",
-    images: ["/logo.png"],
-    creator: "@waadimedia",
+    card: 'summary_large_image',
+    title: 'Waadi Media | Growth Systems for Brands',
+    description: 'We build digital assets and systems for businesses ready to scale.',
+    images: ['/logo.png'],
+    creator: '@waadi_media',
   },
   icons: {
     icon: '/logo.png',
+    shortcut: '/logo.png',
     apple: '/logo.png',
   },
   robots: {
@@ -63,19 +55,14 @@ export const metadata: Metadata = {
   },
 };
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased text-slate-800 bg-slate-50">
         <Navbar />
         {children}
         <Footer />
