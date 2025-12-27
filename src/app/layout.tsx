@@ -4,23 +4,22 @@ import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://waadimedia.com'),
+  metadataBase: new URL('https://www.waadimedia.com'),
   title: {
-    default: 'Waadi Media | Growth Systems for Brands',
+    default: 'Digital Marketing & Web Agency in Kashmir | Waadi Media',
     template: '%s | Waadi Media'
   },
-  description: 'Waadi Media is a creative growth agency in Kashmir building digital systems, brands, and automation for growing businesses.',
-  keywords: ['Web Design Kashmir', 'Digital Marketing Srinagar', 'Branding Agency', 'Waadi Media', 'Growth Agency'],
+  description: 'Kashmir-based digital agency offering websites, content creation, automations, and ads for local businesses, hotels, cafés, and startups.',
   authors: [{ name: 'Waadi Media Team' }],
   creator: 'Waadi Media',
   publisher: 'Waadi Media',
   openGraph: {
     type: 'website',
-    locale: 'en_US',
-    url: 'https://waadimedia.com',
-    title: 'Waadi Media | Growth Systems for Brands',
-    description: 'We build digital assets and systems for businesses ready to scale.',
+    locale: 'en_IN',
     siteName: 'Waadi Media',
+    url: 'https://www.waadimedia.com/',
+    title: 'Digital Marketing & Web Agency in Kashmir | Waadi Media',
+    description: 'Kashmir-based digital agency offering websites, content creation, automations, and ads for local businesses.',
     images: [
       {
         url: '/logo.png',
@@ -32,8 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Waadi Media | Growth Systems for Brands',
-    description: 'We build digital assets and systems for businesses ready to scale.',
+    title: 'Digital Marketing & Web Agency in Kashmir | Waadi Media',
+    description: 'Websites, content, automations, and digital growth systems for Kashmir-based businesses.',
     images: ['/logo.png'],
     creator: '@waadi_media',
   },
@@ -53,6 +52,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  alternates: {
+    canonical: 'https://www.waadimedia.com/',
+  }
 };
 
 export default function RootLayout({
@@ -68,10 +70,21 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
-              '@type': 'Organization',
+              '@type': 'ProfessionalService',
               name: 'Waadi Media',
-              url: 'https://waadimedia.com',
-              logo: 'https://waadimedia.com/logo.png',
+              url: 'https://www.waadimedia.com',
+              logo: 'https://www.waadimedia.com/logo.png',
+              image: 'https://www.waadimedia.com/logo.png',
+              description: 'Waadi Media is a Kashmir-based digital agency providing structured digital services for local businesses, hospitality brands, cafés, restaurants, startups, and service providers.',
+              address: {
+                '@type': 'PostalAddress',
+                addressRegion: 'Jammu & Kashmir',
+                addressCountry: 'IN'
+              },
+              areaServed: {
+                '@type': 'Place',
+                name: 'Kashmir, Jammu & Kashmir, India'
+              },
               sameAs: [
                 'https://x.com/shykh_furkan?s=21',
                 'https://www.instagram.com/waadi_media?igsh=dmQ3eXV2ejRuMWsx',
@@ -83,7 +96,15 @@ export default function RootLayout({
                 contactType: 'customer service',
                 areaServed: 'IN',
                 availableLanguage: 'en'
-              }
+              },
+              knowsAbout: [
+                'Website design and development',
+                'Internal management tools',
+                'Content creation',
+                'Social media strategy',
+                'Digital advertising campaigns',
+                'Brand positioning'
+              ]
             }),
           }}
         />

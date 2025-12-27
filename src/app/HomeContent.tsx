@@ -114,7 +114,7 @@ const HomePageContent = () => {
                 <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#3F9AAE]/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#F96E5B]/10 rounded-full blur-3xl"></div>
 
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}>
+                <motion.div initial={{ opacity: 1, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
 
                     {/* Tagline Badge */}
                     <motion.div
@@ -274,24 +274,26 @@ const HomePageContent = () => {
                             { t: "Kaaliedge", c: "Business Website", d: "End-to-end design for credibility." },
                             { t: "BiteZ", c: "POS System", d: "Operational tool for restaurants." }
                         ].map((project, i) => (
-                            <motion.div
-                                key={i} whileHover={{ y: -10 }}
-                                className="group relative h-80 rounded-[50px] bg-white text-[#2D6E7D] p-10 flex flex-col justify-between overflow-hidden border-4 border-transparent hover:border-[#F96E5B]"
-                            >
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFE2AF] rounded-full blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2 group-hover:bg-[#F96E5B] transition-colors"></div>
+                            <Link href="/work" key={i} className="block">
+                                <motion.div
+                                    whileHover={{ y: -10 }}
+                                    className="group relative h-80 rounded-[50px] bg-white text-[#2D6E7D] p-10 flex flex-col justify-between overflow-hidden border-4 border-transparent hover:border-[#F96E5B] cursor-pointer"
+                                >
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFE2AF] rounded-full blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2 group-hover:bg-[#F96E5B] transition-colors"></div>
 
-                                <div className="relative z-10">
-                                    <span className="inline-block px-3 py-1 rounded-full border border-[#2D6E7D]/20 text-[10px] font-black uppercase tracking-widest mb-4">{project.c}</span>
-                                    <h3 className="text-5xl font-black uppercase italic tracking-tighter">{project.t}</h3>
-                                </div>
-
-                                <div className="relative z-10 flex justify-between items-end">
-                                    <p className="font-bold max-w-xs opacity-70 italic">{project.d}</p>
-                                    <div className="w-12 h-12 rounded-full bg-[#2D6E7D] text-white flex items-center justify-center group-hover:bg-[#F96E5B] transition-colors">
-                                        <ArrowRight size={20} />
+                                    <div className="relative z-10">
+                                        <span className="inline-block px-3 py-1 rounded-full border border-[#2D6E7D]/20 text-[10px] font-black uppercase tracking-widest mb-4">{project.c}</span>
+                                        <h3 className="text-5xl font-black uppercase italic tracking-tighter">{project.t}</h3>
                                     </div>
-                                </div>
-                            </motion.div>
+
+                                    <div className="relative z-10 flex justify-between items-end">
+                                        <p className="font-bold max-w-xs opacity-70 italic">{project.d}</p>
+                                        <div className="w-12 h-12 rounded-full bg-[#2D6E7D] text-white flex items-center justify-center group-hover:bg-[#F96E5B] transition-colors">
+                                            <ArrowRight size={20} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </Link>
                         ))}
                     </div>
                 </div>

@@ -84,7 +84,7 @@ export async function POST(request: Request) {
             html: htmlContent, // html body
         });
 
-        console.log("Message sent: %s", info.messageId);
+        // console.log("Message sent: %s", info.messageId);
 
         return NextResponse.json({ success: true, data: info });
     } catch (error) {
