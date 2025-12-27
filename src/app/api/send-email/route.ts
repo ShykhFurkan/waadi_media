@@ -1,10 +1,22 @@
 
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
-
+import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    // Create a transporter using GoDaddy / Office 365 SMTP details
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        secure: true, // true for 465, false for other ports
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        tls: {
+            ciphers: 'SSLv3', // Sometimes needed for legacy connections, harmless otherwise
+            rejectUnauthorized: false
+        }
+    });
 
     try {
         const body = await request.json();
@@ -64,20 +76,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid submission type' }, { status: 400 });
         }
 
-        const emailResponse = await resend.emails.send({
-            from: 'Waadi Media <contact@waadimedia.com>',
-            to: ['contact@waadimedia.com'],
-            // Wait, in previous artifacts I saw 'shykh_furkan-1193b4249' linkedin.
-            // Let's check package.json or other files for an email.
-            // ContactSection has 'val: "hello@waadimedia.com"'.
-            // I will use 'hello@waadimedia.com' but also cc 'onboarding@resend.dev' is not allowed. 
-            // If I use 'onboarding@resend.dev' as FROM, I can only send to the registered email. 
-            // I'll use a placeholder and warn the user.
-            subject: subject,
-            html: htmlContent,
+        // Send email using Nodemailer
+        const info = await transporter.sendMail({
+            from: `"Waadi Media" <${process.env.SMTP_USER}>`, // sender address
+            to: process.env.SMTP_USER, // list of receivers (sending to self)
+            subject: subject, // Subject line
+            html: htmlContent, // html body
         });
 
-        return NextResponse.json({ success: true, data: emailResponse });
+        console.log("Message sent: %s", info.messageId);
+
+        return NextResponse.json({ success: true, data: info });
     } catch (error) {
         console.error('Email send error:', error);
         return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
