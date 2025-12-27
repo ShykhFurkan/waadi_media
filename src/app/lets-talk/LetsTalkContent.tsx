@@ -17,14 +17,66 @@ const LetsTalkPage = () => {
         darkTeal: '#2D6E7D'
     };
 
-    const [hasWebsite, setHasWebsite] = useState('');
+    const [formData, setFormData] = useState({
+        fullName: '',
+        phone: '',
+        email: '',
+        location: '',
+        businessName: '',
+        businessType: '',
+        yearsInOperation: '',
+        goal: '',
+        hasWebsite: '',
+        websiteUrl: '',
+        budget: '',
+        startDate: '',
+        requirement: '',
+        source: '',
+        prefMethod: '',
+        prefTime: ''
+    });
+
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     const toggleService = (service: string) => {
         if (selectedServices.includes(service)) {
             setSelectedServices(selectedServices.filter(s => s !== service));
         } else {
             setSelectedServices([...selectedServices, service]);
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleHasWebsiteChange = (val: string) => {
+        setFormData({ ...formData, hasWebsite: val });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setStatus('submitting');
+        try {
+            const res = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'lets-talk',
+                    data: { ...formData, services: selectedServices }
+                })
+            });
+
+            if (res.ok) {
+                setStatus('success');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                setStatus('error');
+            }
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
         }
     };
 
@@ -43,6 +95,33 @@ const LetsTalkPage = () => {
         "SEO (On-page & Local SEO)", "Complete Digital Setup (End-to-End)",
         "Not sure (Need consultation)"
     ];
+
+    if (status === 'success') {
+        return (
+            <div className="min-h-screen font-sans flex items-center justify-center" style={{ backgroundColor: colors.beige }}>
+                <div className="bg-white p-12 rounded-[60px] border-4 border-[#3F9AAE] shadow-[16px_16px_0px_0px_#3F9AAE] max-w-2xl text-center space-y-6">
+                    <div className="w-24 h-24 bg-[#3F9AAE] rounded-full flex items-center justify-center mx-auto">
+                        <CheckCircle2 className="text-white w-12 h-12" />
+                    </div>
+                    <h2 className="text-4xl font-black uppercase italic text-[#3F9AAE]">Request Received!</h2>
+                    <p className="text-xl font-bold text-gray-600">
+                        Thank you for sharing your details. We have received your inquiry and will review it meticulously.
+                    </p>
+                    <p className="text-lg text-gray-600">
+                        expect a response within <span className="text-[#F96E5B] font-black">24 hours</span>.
+                    </p>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => window.location.href = '/'}
+                        className="px-8 py-4 rounded-full bg-[#F96E5B] text-white font-black uppercase text-lg inline-block"
+                    >
+                        Back to Home
+                    </motion.button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen font-sans selection:bg-[#79C9C5]/30 text-[#2D6E7D]" style={{ backgroundColor: colors.beige }}>
@@ -70,7 +149,7 @@ const LetsTalkPage = () => {
                         {...fadeInUp}
                         className="bg-white rounded-[60px] border-4 border-[#3F9AAE] shadow-[16px_16px_0px_0px_#3F9AAE] overflow-hidden"
                     >
-                        <form className="p-8 md:p-16 space-y-16" onSubmit={(e) => e.preventDefault()}>
+                        <form className="p-8 md:p-16 space-y-16" onSubmit={handleSubmit}>
 
                             {/* Section 1: Basic Contact */}
                             <div className="space-y-8">
@@ -83,26 +162,26 @@ const LetsTalkPage = () => {
                                         <label className="text-xs font-black uppercase tracking-[0.2em] flex items-center space-x-2">
                                             <User size={14} className="text-[#F96E5B]" /> <span>Full Name *</span>
                                         </label>
-                                        <input type="text" placeholder="Your full name" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
+                                        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Your full name" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em] flex items-center space-x-2">
                                             <Smartphone size={14} className="text-[#F96E5B]" /> <span>Phone Number *</span>
                                         </label>
-                                        <input type="tel" placeholder="+91 XXXXX XXXXX" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
+                                        <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+91 XXXXX XXXXX" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
                                         <p className="text-[10px] font-bold text-[#3F9AAE] opacity-70 italic tracking-tight">WhatsApp preferred. We'll contact you on this number.</p>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em] flex items-center space-x-2">
                                             <Mail size={14} className="text-[#F96E5B]" /> <span>Email Address *</span>
                                         </label>
-                                        <input type="email" placeholder="your@email.com" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
+                                        <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="your@email.com" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em] flex items-center space-x-2">
                                             <MapPin size={14} className="text-[#F96E5B]" /> <span>City / Location *</span>
                                         </label>
-                                        <input type="text" placeholder="e.g., Srinagar, Kashmir" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
+                                        <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="e.g., Srinagar, Kashmir" required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
                                     </div>
                                 </div>
                             </div>
@@ -116,11 +195,11 @@ const LetsTalkPage = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">Business / Brand Name</label>
-                                        <input type="text" placeholder="Your business or brand name" className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
+                                        <input type="text" name="businessName" value={formData.businessName} onChange={handleChange} placeholder="Your business or brand name" className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">Type of Business *</label>
-                                        <select required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium cursor-pointer">
+                                        <select name="businessType" value={formData.businessType} onChange={handleChange} required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium cursor-pointer">
                                             <option value="">Select Type</option>
                                             {["Hotel / Homestay", "Restaurant / Cafe", "Local Service Business", "Retail / Shop", "Startup", "Educational Institute", "Agency", "Personal Brand", "Other"].map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
@@ -129,7 +208,7 @@ const LetsTalkPage = () => {
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">Years in Operation</label>
-                                        <select className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium cursor-pointer">
+                                        <select name="yearsInOperation" value={formData.yearsInOperation} onChange={handleChange} className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium cursor-pointer">
                                             <option value="">Select Duration</option>
                                             {["Just starting", "Less than 1 year", "1–3 years", "3–5 years", "5+ years"].map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
@@ -188,7 +267,7 @@ const LetsTalkPage = () => {
                                                         type="radio"
                                                         name="hasWebsite"
                                                         className="w-5 h-5 accent-[#F96E5B] cursor-pointer"
-                                                        onChange={() => setHasWebsite(opt)}
+                                                        onChange={() => handleHasWebsiteChange(opt)}
                                                     />
                                                     <span className="text-sm font-bold uppercase group-hover:text-[#F96E5B]">{opt}</span>
                                                 </label>
@@ -197,7 +276,7 @@ const LetsTalkPage = () => {
                                     </div>
 
                                     <AnimatePresence>
-                                        {(hasWebsite === 'Yes' || hasWebsite === 'Yes, but it needs improvement') && (
+                                        {(formData.hasWebsite === 'Yes' || formData.hasWebsite === 'Yes, but it needs improvement') && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
@@ -205,7 +284,7 @@ const LetsTalkPage = () => {
                                                 className="space-y-2 overflow-hidden"
                                             >
                                                 <label className="text-xs font-black uppercase tracking-[0.2em]">Current Website URL</label>
-                                                <input type="url" placeholder="https://" className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
+                                                <input type="url" name="websiteUrl" value={formData.websiteUrl} onChange={handleChange} placeholder="https://" className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner" />
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
@@ -221,7 +300,7 @@ const LetsTalkPage = () => {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">Estimated Budget Range</label>
-                                        <select className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
+                                        <select name="budget" value={formData.budget} onChange={handleChange} className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
                                             <option value="">Select Budget</option>
                                             {["Under ₹20,000", "₹20,000 – ₹50,000", "₹50,000 – ₹1,00,000", "₹1,00,000 – ₹2,00,000", "₹2,00,000+", "Not sure (Need guidance)"].map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
@@ -230,7 +309,7 @@ const LetsTalkPage = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">When do you want to start? *</label>
-                                        <select required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
+                                        <select name="startDate" value={formData.startDate} onChange={handleChange} required className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
                                             <option value="">Select Start Date</option>
                                             {["Immediately", "Within 1–2 weeks", "Within a month", "Just exploring right now"].map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
@@ -249,11 +328,11 @@ const LetsTalkPage = () => {
                                 <div className="space-y-6">
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">Describe your requirement</label>
-                                        <textarea rows={4} placeholder="Tell us about your business, challenges, or what you want to achieve" className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner"></textarea>
+                                        <textarea name="requirement" value={formData.requirement} onChange={handleChange} rows={4} placeholder="Tell us about your business, challenges, or what you want to achieve" className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium shadow-inner"></textarea>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">How did you hear about us?</label>
-                                        <select className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
+                                        <select name="source" value={formData.source} onChange={handleChange} className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
                                             <option value="">Select Option</option>
                                             {["Instagram", "Google", "Referral", "Friend", "Other"].map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
@@ -275,7 +354,7 @@ const LetsTalkPage = () => {
                                         <div className="flex flex-wrap gap-4">
                                             {["Phone Call", "WhatsApp", "Email"].map((opt) => (
                                                 <label key={opt} className="flex items-center space-x-2 cursor-pointer group">
-                                                    <input type="radio" name="prefMethod" className="w-5 h-5 accent-[#3F9AAE] cursor-pointer" />
+                                                    <input type="radio" value={opt} onChange={handleChange} name="prefMethod" className="w-5 h-5 accent-[#3F9AAE] cursor-pointer" />
                                                     <span className="text-sm font-bold uppercase group-hover:text-[#3F9AAE]">{opt}</span>
                                                 </label>
                                             ))}
@@ -283,7 +362,7 @@ const LetsTalkPage = () => {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-black uppercase tracking-[0.2em]">Preferred Time to Contact</label>
-                                        <select className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
+                                        <select name="prefTime" value={formData.prefTime} onChange={handleChange} className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 font-medium">
                                             <option value="">Select Time</option>
                                             {["Morning (9–12)", "Afternoon (12–4)", "Evening (4–8)"].map(opt => (
                                                 <option key={opt} value={opt}>{opt}</option>
@@ -303,9 +382,13 @@ const LetsTalkPage = () => {
                                     <span>Request a Consultation</span>
                                     <ChevronRight size={24} />
                                 </motion.button>
-                                <div className="flex items-center justify-center space-x-2 text-xs font-bold uppercase opacity-60 tracking-widest">
-                                    <ShieldCheck size={14} className="text-[#3F9AAE]" />
-                                    <span>We review every request personally and respond within 24 hours.</span>
+                                <div className="flex flex-col items-center justify-center space-y-2 text-xs font-bold uppercase opacity-60 tracking-widest">
+                                    <div className="flex items-center space-x-2">
+                                        <ShieldCheck size={14} className="text-[#3F9AAE]" />
+                                        <span>We review every request personally and respond within 24 hours.</span>
+                                    </div>
+                                    {status === 'error' && <span className="text-red-500 text-sm">Action failed. Please try again.</span>}
+                                    {status === 'submitting' && <span className="text-[#3F9AAE] text-sm">Sending...</span>}
                                 </div>
                             </div>
 

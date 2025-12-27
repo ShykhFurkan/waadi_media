@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import {
     User, Briefcase, Smartphone, Mail, Sparkles, Send,
     Phone, MapPin, Instagram, Linkedin, Twitter
@@ -13,6 +13,42 @@ const ContactSection = () => {
         beige: '#FFE2AF',
         red: '#F96E5B',
         darkTeal: '#2D6E7D'
+    };
+
+    const [formData, setFormData] = useState({
+        name: '',
+        role: '',
+        phone: '',
+        email: '',
+        message: ''
+    });
+
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setStatus('submitting');
+        try {
+            const res = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'contact', data: formData })
+            });
+
+            if (res.ok) {
+                setStatus('success');
+                setFormData({ name: '', role: '', phone: '', email: '', message: '' });
+            } else {
+                setStatus('error');
+            }
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
+        }
     };
 
     const fadeInUp = {
@@ -46,78 +82,119 @@ const ContactSection = () => {
                         whileHover={{ rotate: -0.5 }}
                         className="bg-white p-8 md:p-12 rounded-[40px] border-4 border-[#3F9AAE] shadow-[12px_12px_0_0_#3F9AAE]"
                     >
-                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                        <User size={14} className="text-[#F96E5B]" />
-                                        <span>Name</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Your Name"
-                                        className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
-                                    />
+                        {status === 'success' ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-20">
+                                <div className="w-20 h-20 bg-[#3F9AAE] rounded-full flex items-center justify-center">
+                                    <Send className="text-white w-10 h-10" />
                                 </div>
-                                <div>
-                                    <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                        <Briefcase size={14} className="text-[#F96E5B]" />
-                                        <span>What do you do?</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Hotel Owner, Brand Lead, etc."
-                                        className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
-                                    />
-                                </div>
+                                <h3 className="text-2xl font-black uppercase text-[#3F9AAE]">Message Sent!</h3>
+                                <p className="text-lg font-bold text-gray-500">We'll get back to you shortly.</p>
+                                <button
+                                    onClick={() => setStatus('idle')}
+                                    className="mt-6 px-8 py-3 rounded-full bg-slate-100 font-bold uppercase text-sm hover:bg-slate-200 transition-colors"
+                                >
+                                    Send Another
+                                </button>
                             </div>
+                        ) : (
+                            <form className="space-y-6" onSubmit={handleSubmit}>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
+                                            <User size={14} className="text-[#F96E5B]" />
+                                            <span>Name</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Your Name"
+                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
+                                            <Briefcase size={14} className="text-[#F96E5B]" />
+                                            <span>What do you do?</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="role"
+                                            value={formData.role}
+                                            onChange={handleChange}
+                                            placeholder="Hotel Owner, Brand Lead, etc."
+                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                        />
+                                    </div>
+                                </div>
 
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                        <Smartphone size={14} className="text-[#F96E5B]" />
-                                        <span>Contact Number</span>
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        placeholder="+91 XXXXX XXXXX"
-                                        className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
-                                    />
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
+                                            <Smartphone size={14} className="text-[#F96E5B]" />
+                                            <span>Contact Number</span>
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="+91 XXXXX XXXXX"
+                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
+                                            <Mail size={14} className="text-[#F96E5B]" />
+                                            <span>Email Address</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="hello@company.com"
+                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                        <Mail size={14} className="text-[#F96E5B]" />
-                                        <span>Email Address</span>
-                                    </label>
-                                    <input
-                                        type="email"
-                                        placeholder="hello@company.com"
-                                        className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
-                                    />
-                                </div>
-                            </div>
 
-                            <div>
-                                <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                    <Sparkles size={14} className="text-[#F96E5B]" />
-                                    <span>How can we help you?</span>
-                                </label>
-                                <textarea
-                                    rows={4}
-                                    placeholder="Tell us about your project goals..."
-                                    className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
-                                ></textarea>
-                            </div>
-                            <motion.button
-                                variants={buttonHover}
-                                whileHover="hover"
-                                whileTap="tap"
-                                className="w-full py-5 rounded-full bg-[#F96E5B] text-white font-black uppercase text-lg flex items-center justify-center space-x-2 shadow-[0_8px_0_0_#C75748]"
-                            >
-                                <span>Send Message</span>
-                                <Send size={20} />
-                            </motion.button>
-                        </form>
+                                <div>
+                                    <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
+                                        <Sparkles size={14} className="text-[#F96E5B]" />
+                                        <span>How can we help you?</span>
+                                    </label>
+                                    <textarea
+                                        rows={4}
+                                        name="message"
+                                        value={formData.message}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Tell us about your project goals..."
+                                        className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                    ></textarea>
+                                </div>
+
+                                {status === 'error' && (
+                                    <div className="text-red-500 font-bold text-sm text-center">Something went wrong. Please try again.</div>
+                                )}
+
+                                <motion.button
+                                    variants={buttonHover}
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    disabled={status === 'submitting'}
+                                    className="w-full py-5 rounded-full bg-[#F96E5B] text-white font-black uppercase text-lg flex items-center justify-center space-x-2 shadow-[0_8px_0_0_#C75748] disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    <span>{status === 'submitting' ? 'Sending...' : 'Send Message'}</span>
+                                    <Send size={20} />
+                                </motion.button>
+                            </form>
+                        )}
                     </motion.div>
 
                     {/* Right side: Contact Info */}
