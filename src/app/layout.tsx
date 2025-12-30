@@ -36,11 +36,7 @@ export const metadata: Metadata = {
     images: ['/logo.png'],
     creator: '@waadi_media',
   },
-  icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
-  },
+
   robots: {
     index: true,
     follow: true,
