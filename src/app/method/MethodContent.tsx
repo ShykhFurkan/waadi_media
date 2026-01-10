@@ -116,7 +116,11 @@ const MethodPage = () => {
                     </motion.div>
                 </div>
             </section>
-
+            <section>
+                <div>
+                    
+                </div>  
+            </section>
             {/* Methodology Stages */}
             <section className="py-12 space-y-24">
                 {methodStages.map((stage, idx) => (

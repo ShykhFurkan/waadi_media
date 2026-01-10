@@ -72,6 +72,14 @@ export async function POST(request: Request) {
         <p><strong>Method:</strong> ${data.prefMethod}</p>
         <p><strong>Time:</strong> ${data.prefTime}</p>
       `;
+        } else if (type === 'deskash-early-access') {
+            subject = `New Deskash Early Access Request from ${data.name}`;
+            htmlContent = `
+        <h1>New Deskash Early Access Request</h1>
+        <p><strong>Name:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>Roles:</strong> ${Array.isArray(data.role) ? data.role.join(', ') : data.role}</p>
+      `;
         } else {
             return NextResponse.json({ error: 'Invalid submission type' }, { status: 400 });
         }

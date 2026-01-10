@@ -73,6 +73,15 @@ const Navbar = () => {
                                 </motion.div>
                             </Link>
 
+                            <Link href="/deskash" passHref>
+                                <motion.div
+                                    whileHover={{ color: colors.red, y: -2 }}
+                                    className="transition-colors cursor-pointer text-[#F96E5B]"
+                                >
+                                    Product
+                                </motion.div>
+                            </Link>
+
                         </div>
 
                         <Link href="/lets-talk" passHref>
@@ -133,6 +142,17 @@ const Navbar = () => {
                                         style={{ color: colors.teal }}
                                     >
                                         Method
+                                    </motion.div>
+                                </Link>
+
+                                <Link href="/deskash" passHref>
+                                    <motion.div
+                                        onClick={() => setIsMenuOpen(false)}
+                                        whileTap={{ scale: 0.9 }}
+                                        className="text-4xl font-black uppercase italic cursor-pointer"
+                                        style={{ color: colors.red }}
+                                    >
+                                        Product
                                     </motion.div>
                                 </Link>
 
