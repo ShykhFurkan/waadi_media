@@ -70,7 +70,7 @@ const DeskashContent = () => {
                             Introducing <span className="text-[#FFE2AF]">Deskash</span>
                         </h1>
                         <p className="text-xl md:text-2xl font-medium opacity-80 max-w-2xl mx-auto leading-relaxed">
-                            A reliable, all-in-one operating system for modern businesses. <br />
+                            A reliable, all-in-one operating system for modern hotels. <br />
                             Built for simplicity. Engineered to scale.
                         </p>
                     </motion.div>
