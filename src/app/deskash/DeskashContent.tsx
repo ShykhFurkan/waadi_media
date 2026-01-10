@@ -64,7 +64,7 @@ const DeskashContent = () => {
                     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                         <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-[#79C9C5] bg-[#79C9C5]/10 mb-8 backdrop-blur-sm">
                             <Zap size={16} className="text-[#FFE2AF] fill-current" />
-                            <span className="text-xs font-bold uppercase tracking-widest text-[#79C9C5]">Coming Soon</span>
+                            <span className="text-xs font-bold uppercase tracking-widest text-[#79C9C5]">Version 0.0.1.1 is Live</span>
                         </div>
                         <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic uppercase tracking-tighter mb-6 leading-none">
                             Introducing <span className="text-[#FFE2AF]">Deskash</span>
