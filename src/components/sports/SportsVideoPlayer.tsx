@@ -124,28 +124,44 @@ export function SportsVideoPlayer({
 
     async function connectViewerLiveKit() {
       try {
-        const roomName = `match_room_${matchId}`;
+        const roomName = `waadi_match_${matchId}`;
         const identity = `viewer_${Math.random().toString(36).substring(2, 6)}`;
         const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=subscriber`);
         const data = await res.json();
 
         if (data.token) {
-          const room = new Room();
+          const room = new Room({
+            adaptiveStream: true,
+            dynacast: true,
+          });
           livekitRoomRef.current = room;
+
+          const attachViewerTrack = (track: RemoteVideoTrack) => {
+            const videoElement = videoRef.current;
+            if (videoElement) {
+              track.attach(videoElement);
+              videoElement.play().catch(() => {});
+              setHasWebRTCStream(true);
+            }
+          };
 
           room.on(RoomEvent.TrackSubscribed, (track) => {
             if (track.kind === Track.Kind.Video) {
-              const videoElement = videoRef.current;
-              if (videoElement) {
-                (track as RemoteVideoTrack).attach(videoElement);
-                videoElement.play().catch(() => {});
-                setHasWebRTCStream(true);
-              }
+              attachViewerTrack(track as RemoteVideoTrack);
             }
           });
 
           const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
           await room.connect(wsUrl, data.token);
+
+          // Check if stream is already published in room
+          room.remoteParticipants.forEach((participant) => {
+            participant.videoTrackPublications.forEach((pub) => {
+              if (pub.track) {
+                attachViewerTrack(pub.track as RemoteVideoTrack);
+              }
+            });
+          });
         }
       } catch (e) {
         console.warn('LiveKit viewer subscriber connection notice:', e);

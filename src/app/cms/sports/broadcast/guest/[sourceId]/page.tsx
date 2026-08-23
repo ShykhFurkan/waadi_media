@@ -64,8 +64,18 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       setPermissionError(null);
       setConnectionState('connecting');
 
-      const roomName = `guest_room_${sourceId}`;
-      const identity = `guest_${sourceId}_${Math.random().toString(36).substring(2, 6)}`;
+      // Fetch active match ID to connect to the exact studio broadcast room
+      const { data: activeMatch } = await supabase
+        .from('matches')
+        .select('id, status')
+        .or('status.eq.live,status.eq.upcoming')
+        .order('scheduled_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const targetMatchId = activeMatch?.id || 'live_studio';
+      const roomName = `waadi_match_${targetMatchId}`;
+      const identity = `guest_${sourceId}`;
 
       // Fetch Access Token from API
       const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher`);
@@ -76,13 +86,15 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       }
 
       const room = new Room({
+        adaptiveStream: true,
+        dynacast: true,
         videoCaptureDefaults: {
           resolution: VideoPresets.h720.resolution,
           facingMode: 'environment',
         },
         publishDefaults: {
           videoEncoding: {
-            maxBitrate: 2500000, // 2.5 Mbps cap for 4G/5G mobile stability
+            maxBitrate: 1500000, // 1.5 Mbps for ultra-fast, smooth transmission
             maxFramerate: 30,
           },
           simulcast: false,

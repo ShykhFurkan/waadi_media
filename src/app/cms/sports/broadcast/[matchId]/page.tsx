@@ -272,43 +272,56 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
   const studioRoomRef = useRef<Room | null>(null);
 
-  // Setup LiveKit Studio Room Connection on match_room_${matchId}
+  // Setup LiveKit Studio Room Connection on waadi_match_${matchId}
   useEffect(() => {
     if (!matchId) return;
 
     async function connectStudioLiveKit() {
       try {
-        const roomName = `match_room_${matchId}`;
+        const roomName = `waadi_match_${matchId}`;
         const identity = `studio_console_${Math.random().toString(36).substring(2, 6)}`;
         const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher`);
         const data = await res.json();
 
         if (data.token) {
           const room = new Room({
+            adaptiveStream: true,
+            dynacast: true,
             videoCaptureDefaults: { resolution: VideoPresets.h1080.resolution },
             publishDefaults: { videoEncoding: { maxBitrate: 3500000, maxFramerate: 30 } },
           });
           studioRoomRef.current = room;
 
+          const attachGuestTrack = (track: RemoteVideoTrack) => {
+            if (guestVideoRef1.current) {
+              track.attach(guestVideoRef1.current);
+              guestVideoRef1.current.play().catch(() => {});
+            }
+            if (thumbnailGuest1VideoRef.current) {
+              track.attach(thumbnailGuest1VideoRef.current);
+              thumbnailGuest1VideoRef.current.play().catch(() => {});
+            }
+            setGuest1Connected(true);
+            setGuest1ConnectionState('connected');
+          };
+
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
             if (track.kind === Track.Kind.Video) {
-              if (participant.identity.includes('guest') || publication.trackName?.includes('guest')) {
-                if (guestVideoRef1.current) {
-                  (track as RemoteVideoTrack).attach(guestVideoRef1.current);
-                  guestVideoRef1.current.play().catch(() => {});
-                }
-                if (thumbnailGuest1VideoRef.current) {
-                  (track as RemoteVideoTrack).attach(thumbnailGuest1VideoRef.current);
-                  thumbnailGuest1VideoRef.current.play().catch(() => {});
-                }
-                setGuest1Connected(true);
-                setGuest1ConnectionState('connected');
-              }
+              attachGuestTrack(track as RemoteVideoTrack);
             }
           });
 
           const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
           await room.connect(wsUrl, data.token);
+
+          // Check if guest camera is already connected in room
+          room.remoteParticipants.forEach((participant) => {
+            participant.videoTrackPublications.forEach((pub) => {
+              if (pub.track) {
+                attachGuestTrack(pub.track as RemoteVideoTrack);
+              }
+            });
+          });
         }
       } catch (e) {
         console.warn('LiveKit studio room connection warning:', e);
