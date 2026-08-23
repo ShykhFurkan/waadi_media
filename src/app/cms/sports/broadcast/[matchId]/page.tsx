@@ -248,6 +248,38 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     if (eData) setEvents(eData);
   }
 
+  const studioLocalTrackRef = useRef<LocalVideoTrack | null>(null);
+
+  const publishStudioTrackToLiveKit = async () => {
+    const room = studioRoomRef.current;
+    if (!room || room.state !== 'connected') return;
+
+    let targetStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+    if (!targetStream && mainStreamRef.current) targetStream = mainStreamRef.current;
+    if (!targetStream) return;
+
+    const rawVideoTrack = targetStream.getVideoTracks()[0];
+    if (!rawVideoTrack) return;
+
+    try {
+      if (studioLocalTrackRef.current) {
+        await room.localParticipant.unpublishTrack(studioLocalTrackRef.current);
+        studioLocalTrackRef.current.stop();
+        studioLocalTrackRef.current = null;
+      }
+
+      const localTrack = new LocalVideoTrack(rawVideoTrack);
+      studioLocalTrackRef.current = localTrack;
+      await room.localParticipant.publishTrack(localTrack, {
+        name: 'studio_on_air_feed',
+        simulcast: false,
+        videoEncoding: { maxBitrate: 3500000, maxFramerate: 30 },
+      });
+    } catch (e) {
+      console.warn('Error publishing studio track to LiveKit:', e);
+    }
+  };
+
   async function initMainCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -264,6 +296,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         thumbnailMainVideoRef.current.play().catch(() => {});
       }
       setMainCamConnected(true);
+      publishStudioTrackToLiveKit();
     } catch (err) {
       console.warn('Main camera permission denied or not found:', err);
       setMainCamConnected(false);
@@ -313,6 +346,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
           const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
           await room.connect(wsUrl, data.token);
+          publishStudioTrackToLiveKit();
 
           // Check if guest camera is already connected in room
           room.remoteParticipants.forEach((participant) => {
@@ -564,6 +598,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         guestVideoRef1.current.play().catch(() => {});
       }
     }
+
+    publishStudioTrackToLiveKit();
 
     // Instant zero-latency hot-swap of video track across all active viewer peer connections
     if (targetStream) {
