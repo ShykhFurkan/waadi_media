@@ -71,6 +71,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
   const [mainCamConnected, setMainCamConnected] = useState(false);
   const [guest1Connected, setGuest1Connected] = useState(false);
   const [guest2Connected, setGuest2Connected] = useState(false);
+  const [guest1DeviceInfo, setGuest1DeviceInfo] = useState<string>('');
+  const [guest1ConnectionState, setGuest1ConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const [activeCam, setActiveCam] = useState<'main' | 'guest1' | 'guest2'>('main');
 
   const guestPcRef = useRef<RTCPeerConnection | null>(null);
@@ -248,7 +250,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
   async function initMainCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
         audio: true,
       });
       mainStreamRef.current = stream;
@@ -308,16 +310,32 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
       ],
     });
     guestPcRef.current = pc;
 
     let pendingCandidates: RTCIceCandidateInit[] = [];
 
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'connected') {
+        setGuest1Connected(true);
+        setGuest1ConnectionState('connected');
+      } else if (pc.connectionState === 'connecting') {
+        setGuest1ConnectionState('connecting');
+      } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+        setGuest1Connected(false);
+        setGuest1ConnectionState('disconnected');
+      }
+    };
+
     const sendSignal = (payload: any) => {
-      channel.send({ type: 'broadcast', event: 'webrtc', payload }).catch(() => {});
-      bc?.postMessage(payload);
+      const matchInfo = match ? { matchTitle: `${match.home_team?.name} VS ${match.away_team?.name}`, tournamentName: match.tournaments?.name } : undefined;
+      const fullPayload = { ...payload, matchInfo };
+      channel.send({ type: 'broadcast', event: 'webrtc', payload: fullPayload }).catch(() => {});
+      bc?.postMessage(fullPayload);
     };
 
     pc.ontrack = (event) => {
@@ -333,6 +351,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           thumbnailGuest1VideoRef.current.play().catch(() => {});
         }
         setGuest1Connected(true);
+        setGuest1ConnectionState('connected');
       }
     };
 
@@ -344,6 +363,11 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     const handleSignal = async (data: any) => {
       if (!data) return;
+
+      if (data.deviceInfo) {
+        setGuest1DeviceInfo(data.deviceInfo);
+      }
+
       if (data.type === 'offer' && data.offer) {
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
@@ -351,6 +375,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           await pc.setLocalDescription(answer);
           sendSignal({ type: 'answer', answer });
           setGuest1Connected(true);
+          setGuest1ConnectionState('connected');
 
           for (const cand of pendingCandidates) {
             await pc.addIceCandidate(new RTCIceCandidate(cand));
@@ -363,6 +388,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
           setGuest1Connected(true);
+          setGuest1ConnectionState('connected');
 
           for (const cand of pendingCandidates) {
             await pc.addIceCandidate(new RTCIceCandidate(cand));
@@ -799,10 +825,12 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] text-center space-y-3">
                       <Smartphone size={44} className="text-[#E8A33D] animate-pulse" />
                       <div className="font-display text-sm text-[#F7F5F0] tracking-wide uppercase font-bold">
-                        GUEST CAMERA 1 (WAITING FOR SIGNAL)
+                        GUEST CAMERA 1 (1080p HD - WAITING FOR SIGNAL)
                       </div>
                       <p className="text-xs text-[#8A9A91] font-mono max-w-sm">
-                        Open the guest link on a smartphone or second tab, or attach a secondary local camera.
+                        {guest1DeviceInfo
+                          ? `Target Device: ${guest1DeviceInfo} — Establishing 1080p HD stream...`
+                          : 'Open the guest link on a smartphone or second tab to stream live 1080p video.'}
                       </p>
                       <div className="flex items-center gap-2 pt-1">
                         <button
@@ -1046,11 +1074,18 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     {!guest1Connected && (
                       <Smartphone size={18} className={activeCam === 'guest1' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
                     )}
+                    {guest1Connected && (
+                      <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[#E8A33D] font-mono text-[8px] font-bold">
+                        1080p
+                      </span>
+                    )}
                   </div>
-                  <div className="text-center">
-                    <div className="text-[11px] font-mono font-bold text-white uppercase">GUEST CAM 1</div>
-                    <div className="text-[9px] font-mono text-[#8A9A91]">
-                      {guest1Connected ? 'Live Guest Feed' : 'Waiting Signal'}
+                  <div className="text-center w-full min-w-0">
+                    <div className="text-[11px] font-mono font-bold text-white uppercase truncate">GUEST CAM 1</div>
+                    <div className="text-[9px] font-mono text-[#8A9A91] truncate">
+                      {guest1Connected
+                        ? (guest1DeviceInfo ? `📱 ${guest1DeviceInfo}` : '● Connected (1080p)')
+                        : (guest1DeviceInfo ? `📱 ${guest1DeviceInfo} (Connecting)` : 'Waiting Signal')}
                     </div>
                   </div>
                   {activeCam === 'guest1' && (
