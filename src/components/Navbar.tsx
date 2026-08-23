@@ -99,6 +99,11 @@ const Navbar = () => {
                     {/* DESKTOP NAV LINKS */}
                     <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
 
+                        <Link href="/sports" className="px-3 py-2 text-xs font-bold text-[#E8A33D] hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                            <span>Waadi Sports</span>
+                            <span className="px-1.5 py-0.5 text-[9px] font-mono rounded-full bg-[#D62828] text-white font-bold">TV</span>
+                        </Link>
+
                         {/* Services Dropdown Trigger */}
                         <div
                             className="relative"
@@ -177,11 +182,6 @@ const Navbar = () => {
                             Method
                         </Link>
 
-                        <Link href="/sports" className="px-3 py-2 text-xs font-bold text-[#E8A33D] hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">
-                            <span>Waadi Sports</span>
-                            <span className="px-1.5 py-0.5 text-[9px] font-mono rounded-full bg-[#D62828] text-white">TV</span>
-                        </Link>
-
                         <Link href="/about" className="px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             About
                         </Link>
@@ -241,14 +241,33 @@ const Navbar = () => {
                         className="md:hidden bg-white dark:bg-[#090D16] border-b border-slate-200 dark:border-white/10 px-6 py-6 space-y-4 shadow-xl"
                     >
                         <div className="flex flex-col space-y-3 font-bold text-sm text-slate-900 dark:text-white">
-                            <Link href="/services" onClick={() => setMobileMenuOpen(false)}>Services</Link>
-                            <Link href="/services/web-development" onClick={() => setMobileMenuOpen(false)} className="pl-3 text-xs font-medium text-slate-500">→ Web & App Engineering</Link>
-                            <Link href="/services/software-development" onClick={() => setMobileMenuOpen(false)} className="pl-3 text-xs font-medium text-slate-500">→ Software Development</Link>
-                            <Link href="/services/social-media-marketing" onClick={() => setMobileMenuOpen(false)} className="pl-3 text-xs font-medium text-slate-500">→ Social Media Marketing</Link>
-                            <Link href="/work" onClick={() => setMobileMenuOpen(false)}>Work</Link>
-                            <Link href="/insights" onClick={() => setMobileMenuOpen(false)}>Insights</Link>
-                            <Link href="/method" onClick={() => setMobileMenuOpen(false)}>Method</Link>
-                            <Link href="/about" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
+                            <Link 
+                                href="/sports" 
+                                onClick={() => setMobileMenuOpen(false)} 
+                                className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[#E8A33D] font-bold hover:bg-amber-500/20 transition-all mb-1"
+                            >
+                                <span className="flex items-center gap-2">
+                                    <span>Waadi Sports</span>
+                                </span>
+                                <span className="px-2 py-0.5 text-[10px] font-mono font-extrabold rounded-full bg-[#D62828] text-white shadow-sm">
+                                    TV LIVE
+                                </span>
+                            </Link>
+                            <Link href="/services" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Services</Link>
+                            {serviceCategories.map((item, index) => (
+                                <Link 
+                                    key={index} 
+                                    href={item.href} 
+                                    onClick={() => setMobileMenuOpen(false)} 
+                                    className="pl-3 text-xs font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                >
+                                    → {item.title}
+                                </Link>
+                            ))}
+                            <Link href="/work" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Work</Link>
+                            <Link href="/insights" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Insights</Link>
+                            <Link href="/method" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Method</Link>
+                            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">About Us</Link>
                         </div>
 
                         <div className="pt-4 border-t border-slate-100 dark:border-white/5">

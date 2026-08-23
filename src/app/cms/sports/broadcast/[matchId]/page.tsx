@@ -60,8 +60,22 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
   // Camera Feeds
   const mainVideoRef = useRef<HTMLVideoElement>(null);
+  const guestVideoRef1 = useRef<HTMLVideoElement>(null);
+  const guestVideoRef2 = useRef<HTMLVideoElement>(null);
+
+  // Switcher Thumbnail Video Refs
+  const thumbnailMainVideoRef = useRef<HTMLVideoElement>(null);
+  const thumbnailGuest1VideoRef = useRef<HTMLVideoElement>(null);
+  const thumbnailGuest2VideoRef = useRef<HTMLVideoElement>(null);
+
   const [mainCamConnected, setMainCamConnected] = useState(false);
+  const [guest1Connected, setGuest1Connected] = useState(false);
+  const [guest2Connected, setGuest2Connected] = useState(false);
   const [activeCam, setActiveCam] = useState<'main' | 'guest1' | 'guest2'>('main');
+
+  const guestPcRef = useRef<RTCPeerConnection | null>(null);
+  const mainStreamRef = useRef<MediaStream | null>(null);
+  const guest1StreamRef = useRef<MediaStream | null>(null);
 
   // Monitor Settings & Hardware Uptime
   const [showSafeArea, setShowSafeArea] = useState(false);
@@ -118,6 +132,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     const randomId = Math.random().toString(36).substring(2, 9);
     setGuestLinkId(randomId);
+    initGuestWebRTC(randomId);
   }, [matchId]);
 
   // Running Hardware Uptime Timer
@@ -232,13 +247,124 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
   async function initMainCamera() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true,
+      });
+      mainStreamRef.current = stream;
       if (mainVideoRef.current) {
         mainVideoRef.current.srcObject = stream;
-        setMainCamConnected(true);
+        mainVideoRef.current.play().catch(() => {});
       }
+      if (thumbnailMainVideoRef.current) {
+        thumbnailMainVideoRef.current.srcObject = stream;
+        thumbnailMainVideoRef.current.play().catch(() => {});
+      }
+      setMainCamConnected(true);
     } catch (err) {
       console.warn('Main camera permission denied or not found:', err);
+      setMainCamConnected(false);
+    }
+  }
+
+  function initGuestWebRTC(sourceId: string) {
+    if (!sourceId) return;
+    const channelName = `guest_cam_${sourceId}`;
+    const channel = supabase.channel(channelName);
+    const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(channelName) : null;
+
+    const pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ],
+    });
+    guestPcRef.current = pc;
+
+    pc.ontrack = (event) => {
+      if (event.streams && event.streams[0]) {
+        guest1StreamRef.current = event.streams[0];
+        if (guestVideoRef1.current) {
+          guestVideoRef1.current.srcObject = event.streams[0];
+          guestVideoRef1.current.play().catch(() => {});
+        }
+        if (thumbnailGuest1VideoRef.current) {
+          thumbnailGuest1VideoRef.current.srcObject = event.streams[0];
+          thumbnailGuest1VideoRef.current.play().catch(() => {});
+        }
+        setGuest1Connected(true);
+      }
+    };
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        const payload = { type: 'candidate', candidate: event.candidate };
+        channel.send({ type: 'broadcast', event: 'webrtc', payload });
+        bc?.postMessage(payload);
+      }
+    };
+
+    const handleSignal = async (data: any) => {
+      if (!data) return;
+      if (data.type === 'guest_ready') {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        const payload = { type: 'offer', offer };
+        channel.send({ type: 'broadcast', event: 'webrtc', payload });
+        bc?.postMessage(payload);
+      } else if (data.type === 'offer' && data.offer) {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        const payload = { type: 'answer', answer };
+        channel.send({ type: 'broadcast', event: 'webrtc', payload });
+        bc?.postMessage(payload);
+      } else if (data.type === 'answer' && data.answer) {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        setGuest1Connected(true);
+      } else if (data.type === 'candidate' && data.candidate) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch (e) {}
+      }
+    };
+
+    channel.on('broadcast', { event: 'webrtc' }, ({ payload }) => handleSignal(payload)).subscribe();
+
+    if (bc) {
+      bc.onmessage = (e) => handleSignal(e.data);
+    }
+
+    setTimeout(() => {
+      const payload = { type: 'request_offer' };
+      channel.send({ type: 'broadcast', event: 'webrtc', payload });
+      bc?.postMessage(payload);
+    }, 800);
+  }
+
+  async function initLocalGuestCamera() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+      const secondDevice = videoDevices[1] || videoDevices[0];
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: secondDevice ? { deviceId: { exact: secondDevice.deviceId } } : true,
+        audio: true,
+      });
+
+      guest1StreamRef.current = stream;
+      if (guestVideoRef1.current) {
+        guestVideoRef1.current.srcObject = stream;
+        guestVideoRef1.current.play().catch(() => {});
+      }
+      if (thumbnailGuest1VideoRef.current) {
+        thumbnailGuest1VideoRef.current.srcObject = stream;
+        thumbnailGuest1VideoRef.current.play().catch(() => {});
+      }
+      setGuest1Connected(true);
+    } catch (err) {
+      console.warn('Failed to start local guest camera:', err);
     }
   }
 
@@ -555,43 +681,101 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     <span>COMMERCIAL BREAK: {currentActiveAd.sponsorName}</span>
                   </div>
                 </div>
-              ) : mainCamConnected && activeCam === 'main' ? (
-                <video
-                  ref={mainVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover"
-                />
-              ) : activeCam === 'main' && !mainCamConnected ? (
-                /* No Signal State */
-                <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] relative overflow-hidden">
-                  <div
-                    className="absolute inset-0 opacity-15 pointer-events-none"
-                    style={{
-                      backgroundImage: `repeating-linear-gradient(45deg, #1B4332 0, #1B4332 1px, transparent 0, transparent 50%)`,
-                      backgroundSize: '16px 16px',
-                    }}
-                  />
-                  <div className="w-16 h-16 rounded-full bg-[#132A1F] border border-[#22302B] flex items-center justify-center mb-4 text-[#8A9A91] shadow-inner z-10">
-                    <Tv size={32} />
-                  </div>
-                  <h3 className="font-mono text-sm font-bold tracking-widest text-[#F7F5F0] uppercase z-10">
-                    NO SIGNAL DETECTED
-                  </h3>
-                  <p className="text-xs font-mono text-[#8A9A91] mt-1 z-10">
-                    Connect a camera source or select a secondary feed
-                  </p>
-                </div>
               ) : (
-                /* Secondary Guest Feed Placeholder */
-                <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] text-center">
-                  <Smartphone size={40} className="text-[#E8A33D] mb-2 animate-pulse" />
-                  <div className="font-display text-sm text-[#F7F5F0] tracking-wide uppercase">
-                    MOBILE GUEST FEED ({activeCam.toUpperCase()})
-                  </div>
-                  <div className="text-xs text-[#8A9A91] font-mono mt-1">WebRTC Signal Connected & Live</div>
-                </div>
+                <>
+                  {/* Permanent Video Element Mounts */}
+                  <video
+                    ref={mainVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover ${
+                      activeCam === 'main' && mainCamConnected ? 'block' : 'hidden'
+                    }`}
+                  />
+                  <video
+                    ref={guestVideoRef1}
+                    autoPlay
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover ${
+                      activeCam === 'guest1' && guest1Connected ? 'block' : 'hidden'
+                    }`}
+                  />
+                  <video
+                    ref={guestVideoRef2}
+                    autoPlay
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover ${
+                      activeCam === 'guest2' && guest2Connected ? 'block' : 'hidden'
+                    }`}
+                  />
+
+                  {/* Fallback Display if Active Cam Disconnected */}
+                  {activeCam === 'main' && !mainCamConnected && (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] relative overflow-hidden">
+                      <div
+                        className="absolute inset-0 opacity-15 pointer-events-none"
+                        style={{
+                          backgroundImage: `repeating-linear-gradient(45deg, #1B4332 0, #1B4332 1px, transparent 0, transparent 50%)`,
+                          backgroundSize: '16px 16px',
+                        }}
+                      />
+                      <div className="w-16 h-16 rounded-full bg-[#132A1F] border border-[#22302B] flex items-center justify-center mb-3 text-[#8A9A91] shadow-inner z-10">
+                        <Tv size={32} />
+                      </div>
+                      <h3 className="font-mono text-sm font-bold tracking-widest text-[#F7F5F0] uppercase z-10">
+                        MAIN CAMERA NO SIGNAL
+                      </h3>
+                      <p className="text-xs font-mono text-[#8A9A91] mt-1 z-10">
+                        Allow browser camera permissions to display live feed
+                      </p>
+                      <button
+                        onClick={initMainCamera}
+                        className="mt-3 px-4 py-2 rounded-lg bg-[#E8A33D] text-[#0F2A1E] font-mono text-xs font-bold hover:bg-[#F2C878] transition-all z-10 shadow-lg cursor-pointer"
+                      >
+                        📹 Tap to Allow / Connect Main Camera
+                      </button>
+                    </div>
+                  )}
+
+                  {activeCam === 'guest1' && !guest1Connected && (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] text-center space-y-3">
+                      <Smartphone size={44} className="text-[#E8A33D] animate-pulse" />
+                      <div className="font-display text-sm text-[#F7F5F0] tracking-wide uppercase font-bold">
+                        GUEST CAMERA 1 (WAITING FOR SIGNAL)
+                      </div>
+                      <p className="text-xs text-[#8A9A91] font-mono max-w-sm">
+                        Open the guest link on a smartphone or second tab, or attach a secondary local camera.
+                      </p>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={copyGuestLink}
+                          className="px-3.5 py-1.5 rounded-lg bg-[#1B4332] text-[#E8A33D] font-mono text-xs border border-[#22302B] hover:bg-[#225741] transition-all cursor-pointer"
+                        >
+                          {copiedLink ? '✓ Link Copied!' : '📋 Copy Guest Link'}
+                        </button>
+                        <button
+                          onClick={initLocalGuestCamera}
+                          className="px-3.5 py-1.5 rounded-lg bg-[#E8A33D] text-[#0F2A1E] font-mono text-xs font-bold hover:bg-[#F2C878] transition-all cursor-pointer"
+                        >
+                          📷 Use Local 2nd Cam
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeCam === 'guest2' && !guest2Connected && (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] text-center space-y-2">
+                      <Smartphone size={40} className="text-[#8A9A91]" />
+                      <div className="font-display text-sm text-[#F7F5F0] tracking-wide uppercase">
+                        GUEST CAMERA 2 (STANDBY)
+                      </div>
+                      <div className="text-xs text-[#8A9A91] font-mono">No active stream attached</div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -754,20 +938,32 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
               <div className="grid grid-cols-3 gap-2.5 pt-1">
                 {/* Main Camera Card */}
                 <button
-                  onClick={() => setActiveCam('main')}
+                  onClick={() => {
+                    setActiveCam('main');
+                    if (!mainCamConnected) initMainCamera();
+                  }}
                   className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all ${
                     activeCam === 'main'
                       ? 'border-2 border-[#D62828] bg-[#1A0A0B] shadow-lg'
                       : 'border-[#22302B] bg-[#07130E] hover:border-[#1F332A]'
                   }`}
                 >
-                  <div className="w-full aspect-video rounded bg-[#0D1E16] flex items-center justify-center border border-[#1F332A]">
-                    <Video size={18} className={activeCam === 'main' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
+                  <div className="w-full aspect-video rounded bg-[#0D1E16] flex items-center justify-center border border-[#1F332A] overflow-hidden relative">
+                    <video
+                      ref={thumbnailMainVideoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className={`w-full h-full object-cover ${mainCamConnected ? 'block' : 'hidden'}`}
+                    />
+                    {!mainCamConnected && (
+                      <Video size={18} className={activeCam === 'main' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
+                    )}
                   </div>
                   <div className="text-center">
                     <div className="text-[11px] font-mono font-bold text-white uppercase">MAIN CAM</div>
                     <div className="text-[9px] font-mono text-[#8A9A91]">
-                      {mainCamConnected ? 'Capture Card' : 'Webcam Standby'}
+                      {mainCamConnected ? 'Live Camera' : 'Disconnected (Tap)'}
                     </div>
                   </div>
                   {activeCam === 'main' && (
@@ -787,12 +983,23 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                       : 'border-[#22302B] bg-[#07130E] hover:border-[#1F332A]'
                   }`}
                 >
-                  <div className="w-full aspect-video rounded bg-[#0D1E16] flex items-center justify-center border border-[#1F332A]">
-                    <Smartphone size={18} className={activeCam === 'guest1' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
+                  <div className="w-full aspect-video rounded bg-[#0D1E16] flex items-center justify-center border border-[#1F332A] overflow-hidden relative">
+                    <video
+                      ref={thumbnailGuest1VideoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className={`w-full h-full object-cover ${guest1Connected ? 'block' : 'hidden'}`}
+                    />
+                    {!guest1Connected && (
+                      <Smartphone size={18} className={activeCam === 'guest1' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
+                    )}
                   </div>
                   <div className="text-center">
                     <div className="text-[11px] font-mono font-bold text-white uppercase">GUEST CAM 1</div>
-                    <div className="text-[9px] font-mono text-[#8A9A91]">Mobile Operator</div>
+                    <div className="text-[9px] font-mono text-[#8A9A91]">
+                      {guest1Connected ? 'Live Guest Feed' : 'Waiting Signal'}
+                    </div>
                   </div>
                   {activeCam === 'guest1' && (
                     <span className="px-2 py-0.5 rounded-full bg-[#D62828] text-white text-[9px] font-mono font-bold uppercase flex items-center gap-1">
@@ -811,8 +1018,17 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                       : 'border-[#22302B] bg-[#07130E] hover:border-[#1F332A]'
                   }`}
                 >
-                  <div className="w-full aspect-video rounded bg-[#0D1E16] flex items-center justify-center border border-[#1F332A]">
-                    <Smartphone size={18} className={activeCam === 'guest2' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
+                  <div className="w-full aspect-video rounded bg-[#0D1E16] flex items-center justify-center border border-[#1F332A] overflow-hidden relative">
+                    <video
+                      ref={thumbnailGuest2VideoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className={`w-full h-full object-cover ${guest2Connected ? 'block' : 'hidden'}`}
+                    />
+                    {!guest2Connected && (
+                      <Smartphone size={18} className={activeCam === 'guest2' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
+                    )}
                   </div>
                   <div className="text-center">
                     <div className="text-[11px] font-mono font-bold text-white uppercase">GUEST CAM 2</div>
