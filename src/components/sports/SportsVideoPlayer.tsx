@@ -13,10 +13,30 @@ import {
   Tv,
   Check,
   Radio,
-  Sparkles
+  Sparkles,
+  Award
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { LiveBadge } from './LiveBadge';
+
+export interface AdState {
+  active: boolean;
+  currentAd: {
+    id?: string;
+    title?: string;
+    type?: 'image' | 'video';
+    url?: string;
+    sponsorName?: string;
+    durationSeconds?: number;
+  } | null;
+  adDisplayStyle?: 'lower_third' | 'full_screen';
+}
+
+export interface OverlayState {
+  showGoalOverlay: boolean;
+  overlayText: string;
+  overlayPosition: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+}
 
 interface SportsVideoPlayerProps {
   matchId?: string;
@@ -49,9 +69,13 @@ export function SportsVideoPlayer({
   const [showControls, setShowControls] = useState(true);
   const [hasWebRTCStream, setHasWebRTCStream] = useState(false);
 
+  // Advertisement & Graphic Overlay State from Broadcast Console
+  const [adState, setAdState] = useState<AdState | null>(null);
+  const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
+
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // WebRTC Stream Receiver for Viewers from Studio Console (live_stream_${matchId})
+  // WebRTC Stream Receiver & Realtime Ad/Overlay Listener for Viewers
   useEffect(() => {
     if (!matchId || !isLive) return;
 
@@ -99,7 +123,16 @@ export function SportsVideoPlayer({
     };
 
     const handleSignal = async (data: any) => {
-      if (!data || data.viewerId !== viewerId) return;
+      if (!data) return;
+
+      if (data.adState) {
+        setAdState(data.adState);
+      }
+      if (data.overlayState) {
+        setOverlayState(data.overlayState);
+      }
+
+      if (data.viewerId !== viewerId) return;
 
       if (data.type === 'offer' && data.offer) {
         try {
@@ -246,7 +279,7 @@ export function SportsVideoPlayer({
           onLoadedMetadata={() => {
             if (videoRef.current) setDuration(videoRef.current.duration);
           }}
-          className={`w-full h-full object-cover ${streamUrl || hasWebRTCStream ? 'block' : 'hidden'}`}
+          className={`w-full h-full object-cover transition-opacity duration-200 ${streamUrl || hasWebRTCStream ? 'block' : 'hidden'}`}
         />
 
         {!streamUrl && !hasWebRTCStream && (
@@ -272,6 +305,89 @@ export function SportsVideoPlayer({
             <div className="z-10 px-3 py-1 rounded-full bg-[#132A1F] border border-[#22302B] text-[11px] font-mono text-[#E8A33D] font-bold uppercase flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
               <span>CONNECTING LIVE 1080p STREAM...</span>
+            </div>
+          </div>
+        )}
+
+        {/* --- ADVERTISEMENT OVERLAY SYSTEM --- */}
+
+        {/* Fullscreen Ad Overlay */}
+        {adState?.active && adState.currentAd && adState.adDisplayStyle === 'full_screen' && (
+          <div className="absolute inset-0 z-30 bg-black/95 flex flex-col items-center justify-center p-4 animate-fade-in pointer-events-auto">
+            {adState.currentAd.type === 'video' ? (
+              <video
+                src={adState.currentAd.url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="max-w-full max-h-[80%] rounded-xl shadow-2xl object-contain border border-[#22302B]"
+              />
+            ) : (
+              <img
+                src={adState.currentAd.url}
+                alt={adState.currentAd.title}
+                className="max-w-full max-h-[80%] rounded-xl shadow-2xl object-contain border border-[#22302B]"
+              />
+            )}
+            <div className="mt-3 text-center space-y-1">
+              <span className="px-3 py-1 rounded-full bg-[#E8A33D] text-[#0F2A1E] font-mono text-[11px] font-bold uppercase tracking-wider shadow">
+                OFFICIAL SPONSOR AD · {adState.currentAd.sponsorName || 'SPONSOR'}
+              </span>
+              <h4 className="font-display text-base text-white font-bold">{adState.currentAd.title}</h4>
+            </div>
+          </div>
+        )}
+
+        {/* Lower Third Ad Overlay */}
+        {adState?.active && adState.currentAd && adState.adDisplayStyle === 'lower_third' && (
+          <div className="absolute bottom-16 left-4 right-4 z-30 bg-[#07130E]/95 border-2 border-[#E8A33D] rounded-xl p-3 flex items-center justify-between shadow-2xl backdrop-blur-md animate-slide-up pointer-events-auto">
+            <div className="flex items-center gap-3">
+              {adState.currentAd.url ? (
+                adState.currentAd.type === 'video' ? (
+                  <video src={adState.currentAd.url} autoPlay loop muted playsInline className="w-14 h-14 object-cover rounded bg-black border border-[#22302B]" />
+                ) : (
+                  <img src={adState.currentAd.url} alt="Ad Logo" className="w-14 h-14 object-contain rounded bg-black/60 p-1 border border-[#22302B]" />
+                )
+              ) : (
+                <div className="w-12 h-12 rounded bg-[#132A1F] border border-[#E8A33D] flex items-center justify-center text-[#E8A33D]">
+                  <Award size={24} />
+                </div>
+              )}
+              <div>
+                <span className="text-[10px] font-mono text-[#E8A33D] font-bold uppercase tracking-widest block">
+                  SPONSORED ADVERTISEMENT
+                </span>
+                <h4 className="font-display text-sm text-white font-bold">{adState.currentAd.title}</h4>
+                <span className="text-xs font-mono text-[#8A9A91]">{adState.currentAd.sponsorName}</span>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded bg-[#E8A33D] text-[#0F2A1E] font-mono text-[10px] font-bold uppercase tracking-wider shadow">
+              SPONSOR
+            </span>
+          </div>
+        )}
+
+        {/* --- GOAL & GRAPHIC OVERLAY SYSTEM --- */}
+        {overlayState?.showGoalOverlay && (
+          <div
+            className={`absolute z-30 ${
+              overlayState.overlayPosition === 'top-left'
+                ? 'top-14 left-4'
+                : overlayState.overlayPosition === 'top-center'
+                ? 'top-14 left-1/2 -translate-x-1/2'
+                : overlayState.overlayPosition === 'top-right'
+                ? 'top-14 right-4'
+                : overlayState.overlayPosition === 'bottom-left'
+                ? 'bottom-16 left-4'
+                : overlayState.overlayPosition === 'bottom-right'
+                ? 'bottom-16 right-4'
+                : 'bottom-16 left-1/2 -translate-x-1/2'
+            } animate-bounce pointer-events-none`}
+          >
+            <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#E8A33D] via-[#F2C878] to-[#E8A33D] text-[#0F2A1E] font-display text-lg sm:text-xl font-black uppercase tracking-widest shadow-2xl border-2 border-white flex items-center gap-2">
+              <Sparkles size={24} />
+              <span>{overlayState.overlayText || 'GOAL!'}</span>
             </div>
           </div>
         )}

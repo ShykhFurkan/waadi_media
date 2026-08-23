@@ -283,6 +283,21 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       bc?.postMessage(payload);
     };
 
+    const getCurrentAdState = () => {
+      const currentAd = adMode !== 'off' && ads.length > 0 ? (ads[selectedAdIndex] || ads[0]) : null;
+      return {
+        active: adMode !== 'off' && !!currentAd,
+        currentAd,
+        adDisplayStyle,
+      };
+    };
+
+    const getCurrentOverlayState = () => ({
+      showGoalOverlay,
+      overlayText,
+      overlayPosition,
+    });
+
     const handleViewerSignal = async (data: any) => {
       if (!data || !data.viewerId) return;
       const viewerId = data.viewerId;
@@ -306,7 +321,10 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
         const currentActiveStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
         if (currentActiveStream) {
-          currentActiveStream.getTracks().forEach((track) => pc.addTrack(track, currentActiveStream));
+          currentActiveStream.getTracks().forEach((track) => {
+            track.enabled = true;
+            pc.addTrack(track, currentActiveStream);
+          });
         }
 
         pc.onicecandidate = (event) => {
@@ -321,7 +339,13 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         try {
           const offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
-          sendViewerSignal({ type: 'offer', offer: { type: offer.type, sdp: offer.sdp }, viewerId });
+          sendViewerSignal({
+            type: 'offer',
+            offer: { type: offer.type, sdp: offer.sdp },
+            viewerId,
+            adState: getCurrentAdState(),
+            overlayState: getCurrentOverlayState(),
+          });
         } catch (e) {
           console.error('Error creating viewer offer:', e);
         }
@@ -356,7 +380,34 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       supabase.removeChannel(channel);
       bc?.close();
     };
-  }, [matchId, activeCam]);
+  }, [matchId, activeCam, adMode, selectedAdIndex, ads, adDisplayStyle, showGoalOverlay, overlayText, overlayPosition]);
+
+  // Sync Ads and Overlays to Viewers in Real-Time
+  useEffect(() => {
+    if (!matchId) return;
+    const channelName = `live_stream_${matchId}`;
+    const channel = supabase.channel(channelName);
+    const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(channelName) : null;
+
+    const currentAd = adMode !== 'off' && ads.length > 0 ? (ads[selectedAdIndex] || ads[0]) : null;
+    const payload = {
+      type: 'broadcast_state',
+      adState: {
+        active: adMode !== 'off' && !!currentAd,
+        currentAd,
+        adDisplayStyle,
+      },
+      overlayState: {
+        showGoalOverlay,
+        overlayText,
+        overlayPosition,
+      },
+      activeCam,
+    };
+
+    channel.send({ type: 'broadcast', event: 'stream', payload }).catch(() => {});
+    bc?.postMessage(payload);
+  }, [adMode, selectedAdIndex, ads, adDisplayStyle, showGoalOverlay, overlayText, overlayPosition, activeCam, matchId]);
 
   const selectCamera = (cam: 'main' | 'guest1' | 'guest2') => {
     setActiveCam(cam);
@@ -376,10 +427,11 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       }
     }
 
-    // Hot-swaps the video track for all active viewers when active ON AIR camera changes
+    // Instant zero-latency hot-swap of video track across all active viewer peer connections
     if (targetStream) {
       const newVideoTrack = targetStream.getVideoTracks()[0];
       if (newVideoTrack) {
+        newVideoTrack.enabled = true;
         viewerPcsRef.current.forEach((pc) => {
           const senders = pc.getSenders();
           const videoSender = senders.find((s) => s.track?.kind === 'video');
