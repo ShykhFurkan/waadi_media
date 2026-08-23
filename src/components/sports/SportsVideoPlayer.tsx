@@ -136,7 +136,11 @@ export function SportsVideoPlayer({
           });
           livekitRoomRef.current = room;
 
-          const attachViewerTrack = (track: RemoteVideoTrack) => {
+          const attachViewerTrack = (track: RemoteVideoTrack, participantIdentity: string, trackName?: string) => {
+            // Only attach the Studio Console's ON-AIR published feed
+            const isStudioFeed = participantIdentity.includes('studio_console') || trackName === 'studio_on_air_feed';
+            if (!isStudioFeed && room.remoteParticipants.size > 1) return;
+
             const videoElement = videoRef.current;
             if (videoElement) {
               track.attach(videoElement);
@@ -145,9 +149,9 @@ export function SportsVideoPlayer({
             }
           };
 
-          room.on(RoomEvent.TrackSubscribed, (track) => {
+          room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
             if (track.kind === Track.Kind.Video) {
-              attachViewerTrack(track as RemoteVideoTrack);
+              attachViewerTrack(track as RemoteVideoTrack, participant.identity, publication.trackName);
             }
           });
 
@@ -157,8 +161,8 @@ export function SportsVideoPlayer({
           // Check if stream is already published in room
           room.remoteParticipants.forEach((participant) => {
             participant.videoTrackPublications.forEach((pub) => {
-              if (pub.track) {
-                attachViewerTrack(pub.track as RemoteVideoTrack);
+              if (pub.track && pub.track.kind === Track.Kind.Video) {
+                attachViewerTrack(pub.track as RemoteVideoTrack, participant.identity, pub.trackName);
               }
             });
           });

@@ -325,7 +325,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           });
           studioRoomRef.current = room;
 
-          const attachGuestTrack = (track: RemoteVideoTrack) => {
+          const attachGuestTrack = (track: RemoteVideoTrack, participantIdentity: string) => {
+            if (!participantIdentity || participantIdentity.includes('studio_console')) return;
+
             if (guestVideoRef1.current) {
               track.attach(guestVideoRef1.current);
               guestVideoRef1.current.play().catch(() => {});
@@ -336,11 +338,14 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
             }
             setGuest1Connected(true);
             setGuest1ConnectionState('connected');
+            if (track.mediaStreamTrack) {
+              guest1StreamRef.current = new MediaStream([track.mediaStreamTrack]);
+            }
           };
 
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
             if (track.kind === Track.Kind.Video) {
-              attachGuestTrack(track as RemoteVideoTrack);
+              attachGuestTrack(track as RemoteVideoTrack, participant.identity);
             }
           });
 
@@ -350,9 +355,10 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
           // Check if guest camera is already connected in room
           room.remoteParticipants.forEach((participant) => {
+            if (participant.identity.includes('studio_console')) return;
             participant.videoTrackPublications.forEach((pub) => {
-              if (pub.track) {
-                attachGuestTrack(pub.track as RemoteVideoTrack);
+              if (pub.track && pub.track.kind === Track.Kind.Video) {
+                attachGuestTrack(pub.track as RemoteVideoTrack, participant.identity);
               }
             });
           });
