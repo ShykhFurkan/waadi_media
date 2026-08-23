@@ -17,6 +17,7 @@ import {
   Award,
   Trophy
 } from 'lucide-react';
+import { Room, RoomEvent, RemoteVideoTrack, Track } from 'livekit-client';
 import { supabase, Match } from '@/lib/supabase';
 import { LiveBadge } from './LiveBadge';
 
@@ -113,7 +114,48 @@ export function SportsVideoPlayer({
           });
         }
       });
-  }, [matchId]);
+  const livekitRoomRef = useRef<Room | null>(null);
+
+  // Connect Viewer to LiveKit Cloud Room as subscriber
+  useEffect(() => {
+    if (!matchId || !isLive) return;
+
+    async function connectViewerLiveKit() {
+      try {
+        const roomName = `match_room_${matchId}`;
+        const identity = `viewer_${Math.random().toString(36).substring(2, 6)}`;
+        const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=subscriber`);
+        const data = await res.json();
+
+        if (data.token) {
+          const room = new Room();
+          livekitRoomRef.current = room;
+
+          room.on(RoomEvent.TrackSubscribed, (track) => {
+            if (track.kind === Track.Kind.Video) {
+              const videoElement = videoRef.current;
+              if (videoElement) {
+                (track as RemoteVideoTrack).attach(videoElement);
+                videoElement.play().catch(() => {});
+                setHasWebRTCStream(true);
+              }
+            }
+          });
+
+          const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
+          await room.connect(wsUrl, data.token);
+        }
+      } catch (e) {
+        console.warn('LiveKit viewer subscriber connection notice:', e);
+      }
+    }
+
+    connectViewerLiveKit();
+
+    return () => {
+      if (livekitRoomRef.current) livekitRoomRef.current.disconnect();
+    };
+  }, [matchId, isLive]);
 
   // WebRTC Stream Receiver & Realtime Ad/Overlay/Scoreboard Listener for Viewers
   useEffect(() => {

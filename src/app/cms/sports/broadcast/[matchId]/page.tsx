@@ -35,6 +35,7 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
+import { Room, RoomEvent, VideoPresets, LocalVideoTrack, RemoteVideoTrack, Track } from 'livekit-client';
 import { CMSPinGuard } from '@/components/sports/CMSPinGuard';
 import { supabase, Match, Broadcast, MatchEvent, Sponsor } from '@/lib/supabase';
 import { compressImageFile } from '@/lib/imageCompressor';
@@ -268,6 +269,58 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       setMainCamConnected(false);
     }
   }
+
+  const studioRoomRef = useRef<Room | null>(null);
+
+  // Setup LiveKit Studio Room Connection on match_room_${matchId}
+  useEffect(() => {
+    if (!matchId) return;
+
+    async function connectStudioLiveKit() {
+      try {
+        const roomName = `match_room_${matchId}`;
+        const identity = `studio_console_${Math.random().toString(36).substring(2, 6)}`;
+        const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher`);
+        const data = await res.json();
+
+        if (data.token) {
+          const room = new Room({
+            videoCaptureDefaults: { resolution: VideoPresets.h1080.resolution },
+            publishDefaults: { videoEncoding: { maxBitrate: 3500000, maxFramerate: 30 } },
+          });
+          studioRoomRef.current = room;
+
+          room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+            if (track.kind === Track.Kind.Video) {
+              if (participant.identity.includes('guest') || publication.trackName?.includes('guest')) {
+                if (guestVideoRef1.current) {
+                  (track as RemoteVideoTrack).attach(guestVideoRef1.current);
+                  guestVideoRef1.current.play().catch(() => {});
+                }
+                if (thumbnailGuest1VideoRef.current) {
+                  (track as RemoteVideoTrack).attach(thumbnailGuest1VideoRef.current);
+                  thumbnailGuest1VideoRef.current.play().catch(() => {});
+                }
+                setGuest1Connected(true);
+                setGuest1ConnectionState('connected');
+              }
+            }
+          });
+
+          const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
+          await room.connect(wsUrl, data.token);
+        }
+      } catch (e) {
+        console.warn('LiveKit studio room connection warning:', e);
+      }
+    }
+
+    connectStudioLiveKit();
+
+    return () => {
+      if (studioRoomRef.current) studioRoomRef.current.disconnect();
+    };
+  }, [matchId]);
 
   const studioCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasStreamRef = useRef<MediaStream | null>(null);
