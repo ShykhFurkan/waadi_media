@@ -145,6 +145,7 @@ export default function SportsLandingPage() {
             <div className="lg:col-span-8 space-y-4">
               {/* Interactive 1080p Video Player */}
               <SportsVideoPlayer
+                matchId={primaryLiveMatch.id}
                 title={`${primaryLiveMatch.home_team?.name} VS ${primaryLiveMatch.away_team?.name}`}
                 subtitle={`${primaryLiveMatch.tournaments?.name || 'Waadi Championship'} · Live from ${primaryLiveMatch.venue}`}
                 sponsorName={primaryLiveMatch.sponsor?.name || sponsors[0]?.name}

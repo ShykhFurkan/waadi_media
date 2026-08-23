@@ -8,6 +8,7 @@ import { LiveBadge } from '@/components/sports/LiveBadge';
 import { ScoreDisplay } from '@/components/sports/ScoreDisplay';
 import { RidgeLine } from '@/components/sports/RidgeLine';
 import { SponsorCard } from '@/components/sports/SponsorCard';
+import { SportsVideoPlayer } from '@/components/sports/SportsVideoPlayer';
 
 export default function MatchWatchPage({ params }: { params: Promise<{ matchId: string }> }) {
   const resolvedParams = use(params);
@@ -128,55 +129,13 @@ export default function MatchWatchPage({ params }: { params: Promise<{ matchId: 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Video Stream Container */}
           <div className="lg:col-span-8 space-y-4">
-            <div className="relative rounded-xl border border-[#22302B] bg-[#000000] aspect-video flex flex-col justify-between p-4 overflow-hidden shadow-2xl">
-              {/* Background Ridge Line Texture (§6) */}
-              <RidgeLine variant="texture" className="absolute top-2 left-0 right-0" />
-
-              {/* Top Overlay: Live Score Bar */}
-              <div className="relative z-10 flex items-center justify-between bg-[#0F2A1E]/90 backdrop-blur-md border border-[#22302B] rounded-lg px-4 py-2">
-                <div className="flex items-center gap-3 font-display text-sm">
-                  <span className="text-[#F7F5F0]">{match.home_team?.short_name}</span>
-                  <ScoreDisplay
-                    homeScore={match.home_score}
-                    awayScore={match.away_score}
-                    isLive={isLive}
-                    isCompleted={isCompleted}
-                    size="sm"
-                  />
-                  <span className="text-[#F7F5F0]">{match.away_team?.short_name}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-[#E8A33D]">{match.status_detail}</span>
-                  {isLive && <LiveBadge size="sm" />}
-                </div>
-              </div>
-
-              {/* Simulated Browser WebRTC Broadcast Stream Canvas */}
-              <div className="my-auto text-center space-y-3 relative z-10 py-12">
-                <div className="w-16 h-16 rounded-full bg-[#1B4332] border border-[#E8A33D] flex items-center justify-center mx-auto text-2xl animate-pulse">
-                  📡
-                </div>
-                <h2 className="font-display text-lg text-[#F7F5F0]">
-                  {isLive ? 'WAADI TV LIVE BROWSER STREAM' : 'FULL MATCH RECORDED VOD'}
-                </h2>
-                <p className="text-xs text-[#8A9A91] max-w-md mx-auto font-mono">
-                  {isLive
-                    ? 'Composed in-browser multi-camera WebRTC feed. Pushed directly to Waadi TV player.'
-                    : 'Stream completed. High-definition post-match VOD recording.'}
-                </p>
-              </div>
-
-              {/* Bottom Video Controls / Sponsor Overlay Bug */}
-              <div className="relative z-10 flex items-center justify-between bg-[#0F2A1E]/80 backdrop-blur-md px-3 py-1.5 rounded-md text-xs font-mono text-[#8A9A91]">
-                <span>HD 1080p · 60 FPS</span>
-                {sponsor && (
-                  <span className="text-[#E8A33D] font-semibold">
-                    Presented by {sponsor.name}
-                  </span>
-                )}
-              </div>
-            </div>
+            <SportsVideoPlayer
+              matchId={matchId}
+              isLive={isLive}
+              title={`${match.home_team?.name} VS ${match.away_team?.name}`}
+              subtitle={`${match.tournaments?.name || 'Waadi Championship'} · Live from ${match.venue}`}
+              sponsorName={sponsor?.name}
+            />
 
             {/* Sponsor Placement Box (§4) */}
             {sponsor && (

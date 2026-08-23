@@ -269,8 +269,99 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     }
   }
 
+  const viewerPcsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
+
+  // Setup WebRTC Publisher for Viewers watching on live_stream_${matchId}
+  useEffect(() => {
+    if (!matchId) return;
+    const channelName = `live_stream_${matchId}`;
+    const channel = supabase.channel(channelName);
+    const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(channelName) : null;
+
+    const sendViewerSignal = (payload: any) => {
+      channel.send({ type: 'broadcast', event: 'stream', payload }).catch(() => {});
+      bc?.postMessage(payload);
+    };
+
+    const handleViewerSignal = async (data: any) => {
+      if (!data || !data.viewerId) return;
+      const viewerId = data.viewerId;
+
+      if (data.type === 'viewer_ready') {
+        if (viewerPcsRef.current.has(viewerId)) {
+          viewerPcsRef.current.get(viewerId)?.close();
+        }
+
+        const pc = new RTCPeerConnection({
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+          ],
+        });
+
+        viewerPcsRef.current.set(viewerId, pc);
+
+        const currentActiveStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+        if (currentActiveStream) {
+          currentActiveStream.getTracks().forEach((track) => pc.addTrack(track, currentActiveStream));
+        }
+
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            const candJSON = event.candidate.toJSON
+              ? event.candidate.toJSON()
+              : { candidate: event.candidate.candidate, sdpMid: event.candidate.sdpMid, sdpMLineIndex: event.candidate.sdpMLineIndex };
+            sendViewerSignal({ type: 'candidate', candidate: candJSON, viewerId });
+          }
+        };
+
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          sendViewerSignal({ type: 'offer', offer: { type: offer.type, sdp: offer.sdp }, viewerId });
+        } catch (e) {
+          console.error('Error creating viewer offer:', e);
+        }
+      } else if (data.type === 'answer' && data.answer) {
+        const pc = viewerPcsRef.current.get(viewerId);
+        if (pc && pc.signalingState === 'have-local-offer') {
+          try {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          } catch (e) {}
+        }
+      } else if (data.type === 'candidate' && data.candidate) {
+        const pc = viewerPcsRef.current.get(viewerId);
+        if (pc && pc.remoteDescription && pc.remoteDescription.type) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } catch (e) {}
+        }
+      }
+    };
+
+    channel
+      .on('broadcast', { event: 'stream' }, ({ payload }) => handleViewerSignal(payload))
+      .subscribe();
+
+    if (bc) {
+      bc.onmessage = (e) => handleViewerSignal(e.data);
+    }
+
+    return () => {
+      viewerPcsRef.current.forEach((pc) => pc.close());
+      viewerPcsRef.current.clear();
+      supabase.removeChannel(channel);
+      bc?.close();
+    };
+  }, [matchId, activeCam]);
+
   const selectCamera = (cam: 'main' | 'guest1' | 'guest2') => {
     setActiveCam(cam);
+    const targetStream = cam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+
     if (cam === 'main') {
       if (!mainCamConnected) {
         initMainCamera();
@@ -282,6 +373,20 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       if (guest1StreamRef.current && guestVideoRef1.current) {
         guestVideoRef1.current.srcObject = guest1StreamRef.current;
         guestVideoRef1.current.play().catch(() => {});
+      }
+    }
+
+    // Hot-swaps the video track for all active viewers when active ON AIR camera changes
+    if (targetStream) {
+      const newVideoTrack = targetStream.getVideoTracks()[0];
+      if (newVideoTrack) {
+        viewerPcsRef.current.forEach((pc) => {
+          const senders = pc.getSenders();
+          const videoSender = senders.find((s) => s.track?.kind === 'video');
+          if (videoSender) {
+            videoSender.replaceTrack(newVideoTrack).catch(() => {});
+          }
+        });
       }
     }
   };

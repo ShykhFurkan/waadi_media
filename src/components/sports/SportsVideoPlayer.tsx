@@ -15,9 +15,11 @@ import {
   Radio,
   Sparkles
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { LiveBadge } from './LiveBadge';
 
 interface SportsVideoPlayerProps {
+  matchId?: string;
   streamUrl?: string;
   title: string;
   subtitle?: string;
@@ -26,6 +28,7 @@ interface SportsVideoPlayerProps {
 }
 
 export function SportsVideoPlayer({
+  matchId,
   streamUrl,
   title,
   subtitle,
@@ -44,8 +47,113 @@ export function SportsVideoPlayer({
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [hasWebRTCStream, setHasWebRTCStream] = useState(false);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // WebRTC Stream Receiver for Viewers from Studio Console (live_stream_${matchId})
+  useEffect(() => {
+    if (!matchId || !isLive) return;
+
+    const viewerId = Math.random().toString(36).substring(2, 9);
+    const channelName = `live_stream_${matchId}`;
+    const channel = supabase.channel(channelName);
+    const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(channelName) : null;
+
+    const pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+      ],
+    });
+
+    let pendingCandidates: RTCIceCandidateInit[] = [];
+
+    pc.ontrack = (event) => {
+      if (event.streams && event.streams[0]) {
+        const stream = event.streams[0];
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+          setHasWebRTCStream(true);
+        }
+      }
+    };
+
+    const sendSignal = (payload: any) => {
+      const fullPayload = { ...payload, viewerId };
+      channel.send({ type: 'broadcast', event: 'stream', payload: fullPayload }).catch(() => {});
+      bc?.postMessage(fullPayload);
+    };
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        const candJSON = event.candidate.toJSON
+          ? event.candidate.toJSON()
+          : { candidate: event.candidate.candidate, sdpMid: event.candidate.sdpMid, sdpMLineIndex: event.candidate.sdpMLineIndex };
+        sendSignal({ type: 'candidate', candidate: candJSON });
+      }
+    };
+
+    const handleSignal = async (data: any) => {
+      if (!data || data.viewerId !== viewerId) return;
+
+      if (data.type === 'offer' && data.offer) {
+        try {
+          if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            sendSignal({ type: 'answer', answer: { type: answer.type, sdp: answer.sdp } });
+
+            for (const cand of pendingCandidates) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            }
+            pendingCandidates = [];
+          }
+        } catch (e) {
+          console.error('Error handling offer on viewer:', e);
+        }
+      } else if (data.type === 'candidate' && data.candidate) {
+        try {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } else {
+            pendingCandidates.push(data.candidate);
+          }
+        } catch (e) {}
+      }
+    };
+
+    channel
+      .on('broadcast', { event: 'stream' }, ({ payload }) => handleSignal(payload))
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          sendSignal({ type: 'viewer_ready' });
+        }
+      });
+
+    if (bc) {
+      bc.onmessage = (e) => handleSignal(e.data);
+    }
+
+    // Periodic heartbeat until stream attaches
+    const heartbeat = setInterval(() => {
+      if (pc.connectionState !== 'connected') {
+        sendSignal({ type: 'viewer_ready' });
+      }
+    }, 2500);
+
+    return () => {
+      clearInterval(heartbeat);
+      pc.close();
+      supabase.removeChannel(channel);
+      bc?.close();
+    };
+  }, [matchId, isLive]);
 
   useEffect(() => {
     const handleMouseMove = () => {
@@ -125,22 +233,23 @@ export function SportsVideoPlayer({
     >
       {/* Video Viewport / Stream Feed Canvas */}
       <div className="absolute inset-0 flex items-center justify-center bg-[#07130E]" onClick={togglePlay}>
-        {streamUrl ? (
-          <video
-            ref={videoRef}
-            src={streamUrl}
-            autoPlay
-            playsInline
-            muted={isMuted}
-            onTimeUpdate={() => {
-              if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
-            }}
-            onLoadedMetadata={() => {
-              if (videoRef.current) setDuration(videoRef.current.duration);
-            }}
-            className="w-full h-full object-cover"
-          />
-        ) : (
+        {/* Render video element if WebRTC stream or URL stream is active */}
+        <video
+          ref={videoRef}
+          src={streamUrl}
+          autoPlay
+          playsInline
+          muted={isMuted}
+          onTimeUpdate={() => {
+            if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
+          }}
+          onLoadedMetadata={() => {
+            if (videoRef.current) setDuration(videoRef.current.duration);
+          }}
+          className={`w-full h-full object-cover ${streamUrl || hasWebRTCStream ? 'block' : 'hidden'}`}
+        />
+
+        {!streamUrl && !hasWebRTCStream && (
           <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-[#0B1A13] relative overflow-hidden text-center space-y-3">
             <div
               className="absolute inset-0 opacity-15 pointer-events-none"
@@ -162,7 +271,7 @@ export function SportsVideoPlayer({
             </div>
             <div className="z-10 px-3 py-1 rounded-full bg-[#132A1F] border border-[#22302B] text-[11px] font-mono text-[#E8A33D] font-bold uppercase flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <span>SIGNAL ACTIVE · {quality.toUpperCase()} QUALITY</span>
+              <span>CONNECTING LIVE 1080p STREAM...</span>
             </div>
           </div>
         )}
