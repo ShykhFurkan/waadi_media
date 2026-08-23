@@ -269,6 +269,44 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     }
   }
 
+  const studioCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasStreamRef = useRef<MediaStream | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+
+  // Studio Continuous 60 FPS Canvas Compositor for Zero-Latency Camera Switching
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const renderStudioCanvas = () => {
+      if (!isSubscribed) return;
+      const canvas = studioCanvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const activeVideo = activeCam === 'guest1' ? guestVideoRef1.current : mainVideoRef.current;
+          if (activeVideo && activeVideo.readyState >= 2) {
+            ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+          } else {
+            ctx.fillStyle = '#07130E';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#E8A33D';
+            ctx.font = 'bold 32px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('WAADI SPORTS 1080p NETWORK - LIVE', canvas.width / 2, canvas.height / 2);
+          }
+        }
+      }
+      animFrameRef.current = requestAnimationFrame(renderStudioCanvas);
+    };
+
+    renderStudioCanvas();
+
+    return () => {
+      isSubscribed = false;
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [activeCam]);
+
   const viewerPcsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
 
   // Setup WebRTC Publisher for Viewers watching on live_stream_${matchId}
@@ -332,7 +370,15 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
         viewerPcsRef.current.set(viewerId, pc);
 
-        const currentActiveStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+        if (studioCanvasRef.current && !canvasStreamRef.current) {
+          try {
+            canvasStreamRef.current = (studioCanvasRef.current as any).captureStream(60);
+          } catch (e) {
+            canvasStreamRef.current = (studioCanvasRef.current as any).captureStream(30);
+          }
+        }
+
+        const currentActiveStream = canvasStreamRef.current || (activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current);
         if (currentActiveStream) {
           currentActiveStream.getTracks().forEach((track) => {
             track.enabled = true;
@@ -2069,6 +2115,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           </div>
         </div>
       </div>
+      <canvas ref={studioCanvasRef} width={1920} height={1080} className="hidden" />
       </div>
     </CMSPinGuard>
   );

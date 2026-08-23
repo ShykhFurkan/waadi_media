@@ -237,6 +237,23 @@ export function SportsVideoPlayer({
     };
   }, [matchId, isLive]);
 
+  // Ultra-Low Latency Live Edge Pinning (keeps viewer video buffer < 30ms)
+  useEffect(() => {
+    if (!hasWebRTCStream || !videoRef.current) return;
+
+    const liveEdgeInterval = setInterval(() => {
+      const vid = videoRef.current;
+      if (vid && vid.buffered.length > 0) {
+        const liveEnd = vid.buffered.end(vid.buffered.length - 1);
+        if (liveEnd - vid.currentTime > 0.15) {
+          vid.currentTime = liveEnd - 0.02;
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(liveEdgeInterval);
+  }, [hasWebRTCStream]);
+
   useEffect(() => {
     const handleMouseMove = () => {
       setShowControls(true);
