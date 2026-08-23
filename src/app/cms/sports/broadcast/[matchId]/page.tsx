@@ -254,8 +254,15 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     const room = studioRoomRef.current;
     if (!room || room.state !== 'connected') return;
 
-    let targetStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
-    if (!targetStream && mainStreamRef.current) targetStream = mainStreamRef.current;
+    if (studioCanvasRef.current && !canvasStreamRef.current) {
+      try {
+        canvasStreamRef.current = (studioCanvasRef.current as any).captureStream(60);
+      } catch (e) {
+        canvasStreamRef.current = (studioCanvasRef.current as any).captureStream(30);
+      }
+    }
+
+    const targetStream = canvasStreamRef.current || (activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current);
     if (!targetStream) return;
 
     const rawVideoTrack = targetStream.getVideoTracks()[0];
@@ -263,8 +270,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     try {
       if (studioLocalTrackRef.current) {
+        // Unpublish without calling .stop() so camera stream remains alive
         await room.localParticipant.unpublishTrack(studioLocalTrackRef.current);
-        studioLocalTrackRef.current.stop();
         studioLocalTrackRef.current = null;
       }
 
@@ -273,7 +280,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       await room.localParticipant.publishTrack(localTrack, {
         name: 'studio_on_air_feed',
         simulcast: false,
-        videoEncoding: { maxBitrate: 3500000, maxFramerate: 30 },
+        videoEncoding: { maxBitrate: 3500000, maxFramerate: 60 },
       });
     } catch (e) {
       console.warn('Error publishing studio track to LiveKit:', e);
