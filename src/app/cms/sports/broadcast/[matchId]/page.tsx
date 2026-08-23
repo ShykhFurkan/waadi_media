@@ -260,6 +260,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         thumbnailMainVideoRef.current.srcObject = stream;
         thumbnailMainVideoRef.current.play().catch(() => {});
       }
+      setMainCamConnected(true);
     } catch (err) {
       console.warn('Main camera permission denied or not found:', err);
       setMainCamConnected(false);
