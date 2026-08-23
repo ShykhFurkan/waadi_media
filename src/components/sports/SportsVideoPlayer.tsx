@@ -120,14 +120,18 @@ export function SportsVideoPlayer({
 
   // Connect Viewer to LiveKit Cloud Room as subscriber
   useEffect(() => {
-    if (!matchId || !isLive) return;
+    if (!matchId) return;
+
+    let isSubscribed = true;
 
     async function connectViewerLiveKit() {
       try {
         const roomName = `waadi_match_${matchId}`;
-        const identity = `viewer_${Math.random().toString(36).substring(2, 6)}`;
+        const identity = `viewer_${Math.random().toString(36).substring(2, 7)}`;
         const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=subscriber`);
         const data = await res.json();
+
+        if (!isSubscribed) return;
 
         if (data.token) {
           const room = new Room({
@@ -136,29 +140,27 @@ export function SportsVideoPlayer({
           });
           livekitRoomRef.current = room;
 
-          const attachViewerTrack = (track: RemoteVideoTrack, participantIdentity?: string, trackName?: string) => {
-            const videoElement = videoRef.current;
-            if (videoElement) {
-              videoElement.muted = isMuted;
-              track.attach(videoElement);
-              const playPromise = videoElement.play();
-              if (playPromise !== undefined) {
-                playPromise.catch(() => {
-                  videoElement.muted = true;
-                  setIsMuted(true);
-                  videoElement.play().catch(() => {});
+          const attachTrackToVideo = (mediaTrack: MediaStreamTrack) => {
+            const videoEl = videoRef.current;
+            if (videoEl && mediaTrack) {
+              videoEl.muted = true;
+              videoEl.srcObject = new MediaStream([mediaTrack]);
+              videoEl
+                .play()
+                .then(() => {
+                  setHasWebRTCStream(true);
+                })
+                .catch(() => {
+                  videoEl.muted = true;
+                  videoEl.play().catch(() => {});
+                  setHasWebRTCStream(true);
                 });
-              }
-              setHasWebRTCStream(true);
             }
           };
 
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-            if (track.kind === Track.Kind.Video) {
-              const isStudio = participant.identity.includes('studio_console') || publication.trackName === 'studio_on_air_feed';
-              if (isStudio || room.remoteParticipants.size === 1) {
-                attachViewerTrack(track as RemoteVideoTrack, participant.identity, publication.trackName);
-              }
+            if (track.kind === Track.Kind.Video && track.mediaStreamTrack) {
+              attachTrackToVideo(track.mediaStreamTrack);
             }
           });
 
@@ -168,11 +170,8 @@ export function SportsVideoPlayer({
           // Check if stream is already published in room
           room.remoteParticipants.forEach((participant) => {
             participant.videoTrackPublications.forEach((pub) => {
-              if (pub.track && pub.track.kind === Track.Kind.Video) {
-                const isStudio = participant.identity.includes('studio_console') || pub.trackName === 'studio_on_air_feed';
-                if (isStudio || room.remoteParticipants.size === 1) {
-                  attachViewerTrack(pub.track as RemoteVideoTrack, participant.identity, pub.trackName);
-                }
+              if (pub.track && pub.track.kind === Track.Kind.Video && pub.track.mediaStreamTrack) {
+                attachTrackToVideo(pub.track.mediaStreamTrack);
               }
             });
           });
@@ -185,9 +184,10 @@ export function SportsVideoPlayer({
     connectViewerLiveKit();
 
     return () => {
+      isSubscribed = false;
       if (livekitRoomRef.current) livekitRoomRef.current.disconnect();
     };
-  }, [matchId, isLive]);
+  }, [matchId]);
 
   // WebRTC Stream Receiver & Realtime Ad/Overlay/Scoreboard Listener for Viewers
   useEffect(() => {
