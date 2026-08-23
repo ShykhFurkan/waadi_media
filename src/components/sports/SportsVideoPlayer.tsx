@@ -136,22 +136,29 @@ export function SportsVideoPlayer({
           });
           livekitRoomRef.current = room;
 
-          const attachViewerTrack = (track: RemoteVideoTrack, participantIdentity: string, trackName?: string) => {
-            // Only attach the Studio Console's ON-AIR published feed
-            const isStudioFeed = participantIdentity.includes('studio_console') || trackName === 'studio_on_air_feed';
-            if (!isStudioFeed && room.remoteParticipants.size > 1) return;
-
+          const attachViewerTrack = (track: RemoteVideoTrack, participantIdentity?: string, trackName?: string) => {
             const videoElement = videoRef.current;
             if (videoElement) {
+              videoElement.muted = isMuted;
               track.attach(videoElement);
-              videoElement.play().catch(() => {});
+              const playPromise = videoElement.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                  videoElement.muted = true;
+                  setIsMuted(true);
+                  videoElement.play().catch(() => {});
+                });
+              }
               setHasWebRTCStream(true);
             }
           };
 
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
             if (track.kind === Track.Kind.Video) {
-              attachViewerTrack(track as RemoteVideoTrack, participant.identity, publication.trackName);
+              const isStudio = participant.identity.includes('studio_console') || publication.trackName === 'studio_on_air_feed';
+              if (isStudio || room.remoteParticipants.size === 1) {
+                attachViewerTrack(track as RemoteVideoTrack, participant.identity, publication.trackName);
+              }
             }
           });
 
@@ -162,7 +169,10 @@ export function SportsVideoPlayer({
           room.remoteParticipants.forEach((participant) => {
             participant.videoTrackPublications.forEach((pub) => {
               if (pub.track && pub.track.kind === Track.Kind.Video) {
-                attachViewerTrack(pub.track as RemoteVideoTrack, participant.identity, pub.trackName);
+                const isStudio = participant.identity.includes('studio_console') || pub.trackName === 'studio_on_air_feed';
+                if (isStudio || room.remoteParticipants.size === 1) {
+                  attachViewerTrack(pub.track as RemoteVideoTrack, participant.identity, pub.trackName);
+                }
               }
             });
           });
