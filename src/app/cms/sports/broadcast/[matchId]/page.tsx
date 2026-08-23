@@ -357,7 +357,10 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        sendSignal({ type: 'candidate', candidate: event.candidate });
+        const candJSON = event.candidate.toJSON
+          ? event.candidate.toJSON()
+          : { candidate: event.candidate.candidate, sdpMid: event.candidate.sdpMid, sdpMLineIndex: event.candidate.sdpMLineIndex };
+        sendSignal({ type: 'candidate', candidate: candJSON });
       }
     };
 
@@ -370,43 +373,50 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
       if (data.type === 'offer' && data.offer) {
         try {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          sendSignal({ type: 'answer', answer });
-          setGuest1Connected(true);
-          setGuest1ConnectionState('connected');
+          if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            const answerJSON = { type: answer.type, sdp: answer.sdp };
+            sendSignal({ type: 'answer', answer: answerJSON });
+            setGuest1Connected(true);
+            setGuest1ConnectionState('connected');
 
-          for (const cand of pendingCandidates) {
-            await pc.addIceCandidate(new RTCIceCandidate(cand));
+            for (const cand of pendingCandidates) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            }
+            pendingCandidates = [];
           }
-          pendingCandidates = [];
         } catch (e) {
           console.error('Error handling offer on console:', e);
         }
       } else if (data.type === 'answer' && data.answer) {
         try {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-          setGuest1Connected(true);
-          setGuest1ConnectionState('connected');
+          if (pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            setGuest1Connected(true);
+            setGuest1ConnectionState('connected');
 
-          for (const cand of pendingCandidates) {
-            await pc.addIceCandidate(new RTCIceCandidate(cand));
+            for (const cand of pendingCandidates) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            }
+            pendingCandidates = [];
           }
-          pendingCandidates = [];
         } catch (e) {
           console.error('Error handling answer on console:', e);
         }
       } else if (data.type === 'candidate' && data.candidate) {
         try {
-          if (pc.remoteDescription) {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
             await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
           } else {
             pendingCandidates.push(data.candidate);
           }
         } catch (e) {}
       } else if (data.type === 'guest_ready') {
-        sendSignal({ type: 'request_offer' });
+        if (pc.signalingState === 'stable' && !pc.remoteDescription) {
+          sendSignal({ type: 'request_offer' });
+        }
       }
     };
 

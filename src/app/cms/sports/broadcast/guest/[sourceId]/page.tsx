@@ -132,15 +132,20 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        sendSignal({ type: 'candidate', candidate: event.candidate });
+        const candJSON = event.candidate.toJSON
+          ? event.candidate.toJSON()
+          : { candidate: event.candidate.candidate, sdpMid: event.candidate.sdpMid, sdpMLineIndex: event.candidate.sdpMLineIndex };
+        sendSignal({ type: 'candidate', candidate: candJSON });
       }
     };
 
     const createAndSendOffer = async () => {
       try {
+        if (pc.signalingState !== 'stable') return;
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        sendSignal({ type: 'offer', offer });
+        const offerJSON = { type: offer.type, sdp: offer.sdp };
+        sendSignal({ type: 'offer', offer: offerJSON });
         setStreamSent(true);
       } catch (err) {
         console.error('Error creating WebRTC offer:', err);
@@ -154,28 +159,52 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
         setMatchInfo(data.matchInfo);
       }
 
-      if (data.type === 'answer' && data.answer) {
+      if (data.type === 'offer' && data.offer) {
         try {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-          setStreamSent(true);
-          setConnectionState('connected');
-          for (const cand of pendingCandidates) {
-            await pc.addIceCandidate(new RTCIceCandidate(cand));
+          if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            const answerJSON = { type: answer.type, sdp: answer.sdp };
+            sendSignal({ type: 'answer', answer: answerJSON });
+            setStreamSent(true);
+            setConnectionState('connected');
+
+            for (const cand of pendingCandidates) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            }
+            pendingCandidates = [];
           }
-          pendingCandidates = [];
+        } catch (e) {
+          console.error('Error handling offer on guest camera:', e);
+        }
+      } else if (data.type === 'answer' && data.answer) {
+        try {
+          if (pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            setStreamSent(true);
+            setConnectionState('connected');
+
+            for (const cand of pendingCandidates) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            }
+            pendingCandidates = [];
+          }
         } catch (e) {
           console.error('Error setting remote description from answer:', e);
         }
       } else if (data.type === 'candidate' && data.candidate) {
         try {
-          if (pc.remoteDescription) {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
             await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
           } else {
             pendingCandidates.push(data.candidate);
           }
         } catch (e) {}
       } else if (data.type === 'request_offer') {
-        await createAndSendOffer();
+        if (pc.signalingState === 'stable') {
+          await createAndSendOffer();
+        }
       } else if (data.type === 'match_info' && data.matchInfo) {
         setMatchInfo(data.matchInfo);
       }
