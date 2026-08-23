@@ -260,12 +260,42 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         thumbnailMainVideoRef.current.srcObject = stream;
         thumbnailMainVideoRef.current.play().catch(() => {});
       }
-      setMainCamConnected(true);
     } catch (err) {
       console.warn('Main camera permission denied or not found:', err);
       setMainCamConnected(false);
     }
   }
+
+  const selectCamera = (cam: 'main' | 'guest1' | 'guest2') => {
+    setActiveCam(cam);
+    if (cam === 'main') {
+      if (!mainCamConnected) {
+        initMainCamera();
+      } else if (mainStreamRef.current && mainVideoRef.current) {
+        mainVideoRef.current.srcObject = mainStreamRef.current;
+        mainVideoRef.current.play().catch(() => {});
+      }
+    } else if (cam === 'guest1') {
+      if (guest1StreamRef.current && guestVideoRef1.current) {
+        guestVideoRef1.current.srcObject = guest1StreamRef.current;
+        guestVideoRef1.current.play().catch(() => {});
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (activeCam === 'main' && mainStreamRef.current && mainVideoRef.current) {
+      if (mainVideoRef.current.srcObject !== mainStreamRef.current) {
+        mainVideoRef.current.srcObject = mainStreamRef.current;
+      }
+      mainVideoRef.current.play().catch(() => {});
+    } else if (activeCam === 'guest1' && guest1StreamRef.current && guestVideoRef1.current) {
+      if (guestVideoRef1.current.srcObject !== guest1StreamRef.current) {
+        guestVideoRef1.current.srcObject = guest1StreamRef.current;
+      }
+      guestVideoRef1.current.play().catch(() => {});
+    }
+  }, [activeCam, guest1Connected, mainCamConnected]);
 
   function initGuestWebRTC(sourceId: string) {
     if (!sourceId) return;
@@ -276,20 +306,29 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
       ],
     });
     guestPcRef.current = pc;
 
+    let pendingCandidates: RTCIceCandidateInit[] = [];
+
+    const sendSignal = (payload: any) => {
+      channel.send({ type: 'broadcast', event: 'webrtc', payload }).catch(() => {});
+      bc?.postMessage(payload);
+    };
+
     pc.ontrack = (event) => {
       if (event.streams && event.streams[0]) {
-        guest1StreamRef.current = event.streams[0];
+        const stream = event.streams[0];
+        guest1StreamRef.current = stream;
         if (guestVideoRef1.current) {
-          guestVideoRef1.current.srcObject = event.streams[0];
+          guestVideoRef1.current.srcObject = stream;
           guestVideoRef1.current.play().catch(() => {});
         }
         if (thumbnailGuest1VideoRef.current) {
-          thumbnailGuest1VideoRef.current.srcObject = event.streams[0];
+          thumbnailGuest1VideoRef.current.srcObject = stream;
           thumbnailGuest1VideoRef.current.play().catch(() => {});
         }
         setGuest1Connected(true);
@@ -298,48 +337,63 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        const payload = { type: 'candidate', candidate: event.candidate };
-        channel.send({ type: 'broadcast', event: 'webrtc', payload });
-        bc?.postMessage(payload);
+        sendSignal({ type: 'candidate', candidate: event.candidate });
       }
     };
 
     const handleSignal = async (data: any) => {
       if (!data) return;
-      if (data.type === 'guest_ready') {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        const payload = { type: 'offer', offer };
-        channel.send({ type: 'broadcast', event: 'webrtc', payload });
-        bc?.postMessage(payload);
-      } else if (data.type === 'offer' && data.offer) {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        const payload = { type: 'answer', answer };
-        channel.send({ type: 'broadcast', event: 'webrtc', payload });
-        bc?.postMessage(payload);
+      if (data.type === 'offer' && data.offer) {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          sendSignal({ type: 'answer', answer });
+          setGuest1Connected(true);
+
+          for (const cand of pendingCandidates) {
+            await pc.addIceCandidate(new RTCIceCandidate(cand));
+          }
+          pendingCandidates = [];
+        } catch (e) {
+          console.error('Error handling offer on console:', e);
+        }
       } else if (data.type === 'answer' && data.answer) {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-        setGuest1Connected(true);
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          setGuest1Connected(true);
+
+          for (const cand of pendingCandidates) {
+            await pc.addIceCandidate(new RTCIceCandidate(cand));
+          }
+          pendingCandidates = [];
+        } catch (e) {
+          console.error('Error handling answer on console:', e);
+        }
       } else if (data.type === 'candidate' && data.candidate) {
         try {
-          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          if (pc.remoteDescription) {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } else {
+            pendingCandidates.push(data.candidate);
+          }
         } catch (e) {}
+      } else if (data.type === 'guest_ready') {
+        sendSignal({ type: 'request_offer' });
       }
     };
 
-    channel.on('broadcast', { event: 'webrtc' }, ({ payload }) => handleSignal(payload)).subscribe();
+    channel
+      .on('broadcast', { event: 'webrtc' }, ({ payload }) => handleSignal(payload))
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          sendSignal({ type: 'request_offer' });
+        }
+      });
 
     if (bc) {
       bc.onmessage = (e) => handleSignal(e.data);
     }
-
-    setTimeout(() => {
-      const payload = { type: 'request_offer' };
-      channel.send({ type: 'broadcast', event: 'webrtc', payload });
-      bc?.postMessage(payload);
-    }, 800);
   }
 
   async function initLocalGuestCamera() {
@@ -938,11 +992,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
               <div className="grid grid-cols-3 gap-2.5 pt-1">
                 {/* Main Camera Card */}
                 <button
-                  onClick={() => {
-                    setActiveCam('main');
-                    if (!mainCamConnected) initMainCamera();
-                  }}
-                  className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all ${
+                  onClick={() => selectCamera('main')}
+                  className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                     activeCam === 'main'
                       ? 'border-2 border-[#D62828] bg-[#1A0A0B] shadow-lg'
                       : 'border-[#22302B] bg-[#07130E] hover:border-[#1F332A]'
@@ -976,8 +1027,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
                 {/* Guest Cam 1 Card */}
                 <button
-                  onClick={() => setActiveCam('guest1')}
-                  className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all ${
+                  onClick={() => selectCamera('guest1')}
+                  className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                     activeCam === 'guest1'
                       ? 'border-2 border-[#D62828] bg-[#1A0A0B] shadow-lg'
                       : 'border-[#22302B] bg-[#07130E] hover:border-[#1F332A]'
@@ -1011,8 +1062,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
                 {/* Guest Cam 2 Card */}
                 <button
-                  onClick={() => setActiveCam('guest2')}
-                  className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all ${
+                  onClick={() => selectCamera('guest2')}
+                  className={`relative rounded-lg border p-2.5 flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                     activeCam === 'guest2'
                       ? 'border-2 border-[#D62828] bg-[#1A0A0B] shadow-lg'
                       : 'border-[#22302B] bg-[#07130E] hover:border-[#1F332A]'

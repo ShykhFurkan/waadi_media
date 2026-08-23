@@ -55,59 +55,76 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
       ],
     });
     pcRef.current = pc;
 
+    let pendingCandidates: RTCIceCandidateInit[] = [];
+
     stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+    const sendSignal = (payload: any) => {
+      channel.send({ type: 'broadcast', event: 'webrtc', payload }).catch(() => {});
+      bc?.postMessage(payload);
+    };
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        const payload = { type: 'candidate', candidate: event.candidate };
-        channel.send({ type: 'broadcast', event: 'webrtc', payload });
-        bc?.postMessage(payload);
+        sendSignal({ type: 'candidate', candidate: event.candidate });
+      }
+    };
+
+    const createAndSendOffer = async () => {
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        sendSignal({ type: 'offer', offer });
+        setStreamSent(true);
+      } catch (err) {
+        console.error('Error creating WebRTC offer:', err);
       }
     };
 
     const handleSignal = async (data: any) => {
       if (!data) return;
-      if (data.type === 'offer' && data.offer) {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-
-        const payload = { type: 'answer', answer };
-        channel.send({ type: 'broadcast', event: 'webrtc', payload });
-        bc?.postMessage(payload);
-        setStreamSent(true);
+      if (data.type === 'answer' && data.answer) {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          setStreamSent(true);
+          for (const cand of pendingCandidates) {
+            await pc.addIceCandidate(new RTCIceCandidate(cand));
+          }
+          pendingCandidates = [];
+        } catch (e) {
+          console.error('Error setting remote description from answer:', e);
+        }
       } else if (data.type === 'candidate' && data.candidate) {
         try {
-          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          if (pc.remoteDescription) {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } else {
+            pendingCandidates.push(data.candidate);
+          }
         } catch (e) {}
       } else if (data.type === 'request_offer') {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-
-        const payload = { type: 'offer', offer };
-        channel.send({ type: 'broadcast', event: 'webrtc', payload });
-        bc?.postMessage(payload);
-        setStreamSent(true);
+        await createAndSendOffer();
       }
     };
 
-    channel.on('broadcast', { event: 'webrtc' }, ({ payload }) => handleSignal(payload)).subscribe();
+    channel
+      .on('broadcast', { event: 'webrtc' }, ({ payload }) => handleSignal(payload))
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          sendSignal({ type: 'guest_ready', sourceId });
+          createAndSendOffer();
+        }
+      });
 
     if (bc) {
       bc.onmessage = (e) => handleSignal(e.data);
     }
-
-    // Announce guest presence
-    setTimeout(() => {
-      const payload = { type: 'guest_ready', sourceId };
-      channel.send({ type: 'broadcast', event: 'webrtc', payload });
-      bc?.postMessage(payload);
-    }, 500);
   }
 
   return (
