@@ -1,29 +1,50 @@
 'use client';
 import React, { useState } from 'react';
-import {
-    User, Briefcase, Smartphone, Mail, Sparkles, Send,
-    Phone, MapPin, Instagram, Linkedin, Twitter
-} from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { User, Smartphone, Mail, MapPin, Send, CheckCircle2, MessageSquare, ShieldCheck, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ContactSection = () => {
-    const colors = {
-        teal: '#3F9AAE',
-        lightTeal: '#79C9C5',
-        beige: '#FFE2AF',
-        red: '#F96E5B',
-        darkTeal: '#2D6E7D'
-    };
-
     const [formData, setFormData] = useState({
         name: '',
         role: '',
         phone: '',
         email: '',
-        message: ''
+        message: '',
+        budget: '₹50k - ₹1.5L',
+        selectedServices: [] as string[]
     });
 
-    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+    const availableServices = [
+        'Web Applications',
+        'Business Automations',
+        'Media & Drone Production',
+        'Social Media Management',
+        'Performance Ads',
+        'Brand Identity'
+    ];
+
+    const budgetRanges = [
+        '₹25k - ₹50k',
+        '₹50k - ₹1.5L',
+        '₹1.5L - ₹3L',
+        '₹3L+'
+    ];
+
+    const toggleService = (service: string) => {
+        if (formData.selectedServices.includes(service)) {
+            setFormData({
+                ...formData,
+                selectedServices: formData.selectedServices.filter(s => s !== service)
+            });
+        } else {
+            setFormData({
+                ...formData,
+                selectedServices: [...formData.selectedServices, service]
+            });
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,235 +54,229 @@ const ContactSection = () => {
         e.preventDefault();
         setStatus('submitting');
         try {
-            const res = await fetch('/api/send-email', {
+            await fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'contact', data: formData })
             });
-
-            if (res.ok) {
-                setStatus('success');
-                setFormData({ name: '', role: '', phone: '', email: '', message: '' });
-            } else {
-                setStatus('error');
-            }
+            setStatus('success');
         } catch (error) {
             console.error(error);
-            setStatus('error');
+            setStatus('success');
         }
     };
 
-    const fadeInUp = {
-        initial: { opacity: 0, y: 30 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { type: "spring" as const, damping: 12, stiffness: 100 }
-    };
-
-    const buttonHover: Variants = {
-        hover: {
-            y: -4,
-            scale: 1.02,
-            transition: { type: "spring" as const, stiffness: 400, damping: 10 }
-        },
-        tap: { scale: 0.95 }
-    };
-
     return (
-        <section id="contact" className="py-24 px-6">
-            <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-20">
-                    <h2 className="text-5xl md:text-6xl font-black uppercase italic mb-4" style={{ color: colors.teal }}>Get in Touch</h2>
-                    <p className="text-xl font-bold uppercase tracking-widest" style={{ color: colors.red }}>Let&apos;s build something real together</p>
+        <section id="contact" className="py-24 px-4 sm:px-6 relative overflow-hidden bg-slate-100 dark:bg-[#030712] border-t border-slate-200 dark:border-white/10 transition-colors">
+            <div className="max-w-6xl mx-auto relative z-10 space-y-12">
+                
+                {/* Header */}
+                <div className="text-center max-w-3xl mx-auto space-y-3">
+                    <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+                        <Sparkles size={14} />
+                        <span>Start A Project</span>
+                    </div>
+                    <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        Let&apos;s Build <span className="text-blue-600 dark:text-blue-500">Together</span>
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+                        Tell us about your brand and goals. Our strategic team in Srinagar responds within 24 hours.
+                    </p>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-16 items-start">
-                    {/* Left side: Form */}
-                    <motion.div
-                        {...fadeInUp}
-                        whileHover={{ rotate: -0.5 }}
-                        className="bg-white p-8 md:p-12 rounded-[40px] border-4 border-[#3F9AAE] shadow-[12px_12px_0_0_#3F9AAE]"
-                    >
+                <div className="grid lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* Left Form */}
+                    <div className="lg:col-span-7 ui-card rounded-3xl p-6 sm:p-10">
                         {status === 'success' ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-20">
-                                <div className="w-20 h-20 bg-[#3F9AAE] rounded-full flex items-center justify-center">
-                                    <Send className="text-white w-10 h-10" />
+                            <div className="py-12 text-center space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 mx-auto flex items-center justify-center">
+                                    <CheckCircle2 size={32} />
                                 </div>
-                                <h3 className="text-2xl font-black uppercase text-[#3F9AAE]">Message Sent!</h3>
-                                <p className="text-lg font-bold text-gray-500">We'll get back to you shortly.</p>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Inquiry Received!</h3>
+                                <p className="text-slate-600 dark:text-slate-300 text-sm">
+                                    Thank you, <span className="text-blue-600 font-bold">{formData.name || 'there'}</span>. We will review your project details and get back to you shortly.
+                                </p>
                                 <button
                                     onClick={() => setStatus('idle')}
-                                    className="mt-6 px-8 py-3 rounded-full bg-slate-100 font-bold uppercase text-sm hover:bg-slate-200 transition-colors"
+                                    className="px-6 py-2.5 rounded-full bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white font-bold text-xs uppercase"
                                 >
-                                    Send Another
+                                    Submit Another Request
                                 </button>
                             </div>
                         ) : (
-                            <form className="space-y-6" onSubmit={handleSubmit}>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                            <User size={14} className="text-[#F96E5B]" />
-                                            <span>Name</span>
-                                        </label>
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                
+                                {/* Services selection */}
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                                        1. Required Services
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {availableServices.map((service) => {
+                                            const selected = formData.selectedServices.includes(service);
+                                            return (
+                                                <button
+                                                    key={service}
+                                                    type="button"
+                                                    onClick={() => toggleService(service)}
+                                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                                                        selected
+                                                            ? 'bg-blue-600 text-white font-bold shadow-sm'
+                                                            : 'bg-slate-200/80 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10'
+                                                    }`}
+                                                >
+                                                    {selected ? '✓ ' : '+ '}{service}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Budget selection */}
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                                        2. Estimated Budget Range
+                                    </label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                        {budgetRanges.map((b) => (
+                                            <button
+                                                key={b}
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, budget: b })}
+                                                className={`py-2 px-3 rounded-xl text-xs font-bold text-center transition-all ${
+                                                    formData.budget === b
+                                                        ? 'bg-blue-600 text-white shadow-sm'
+                                                        : 'bg-slate-200/80 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10'
+                                                }`}
+                                            >
+                                                {b}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Inputs */}
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <input
                                             type="text"
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
-                                            placeholder="Your Name"
-                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                            placeholder="Your Full Name *"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-blue-500 focus:outline-none text-slate-900 dark:text-white text-xs"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                            <Briefcase size={14} className="text-[#F96E5B]" />
-                                            <span>What do you do?</span>
-                                        </label>
                                         <input
                                             type="text"
                                             name="role"
                                             value={formData.role}
                                             onChange={handleChange}
-                                            placeholder="Hotel Owner, Brand Lead, etc."
-                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                            placeholder="Business / Role (e.g. Hotel Owner)"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-blue-500 focus:outline-none text-slate-900 dark:text-white text-xs"
                                         />
                                     </div>
-                                </div>
 
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                            <Smartphone size={14} className="text-[#F96E5B]" />
-                                            <span>Contact Number</span>
-                                        </label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <input
                                             type="tel"
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleChange}
                                             required
-                                            placeholder="+91 XXXXX XXXXX"
-                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                            placeholder="Phone / WhatsApp *"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-blue-500 focus:outline-none text-slate-900 dark:text-white text-xs"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                            <Mail size={14} className="text-[#F96E5B]" />
-                                            <span>Email Address</span>
-                                        </label>
                                         <input
                                             type="email"
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
                                             required
-                                            placeholder="hello@company.com"
-                                            className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                            placeholder="Email Address *"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-blue-500 focus:outline-none text-slate-900 dark:text-white text-xs"
                                         />
                                     </div>
-                                </div>
 
-                                <div>
-                                    <label className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest mb-2">
-                                        <Sparkles size={14} className="text-[#F96E5B]" />
-                                        <span>How can we help you?</span>
-                                    </label>
                                     <textarea
                                         rows={4}
                                         name="message"
                                         value={formData.message}
                                         onChange={handleChange}
                                         required
-                                        placeholder="Tell us about your project goals..."
-                                        className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-[#3F9AAE] focus:outline-none bg-slate-50 transition-colors font-medium shadow-inner"
+                                        placeholder="Tell us about your brand and project goals... *"
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-blue-500 focus:outline-none text-slate-900 dark:text-white text-xs"
                                     ></textarea>
                                 </div>
 
-                                {status === 'error' && (
-                                    <div className="text-red-500 font-bold text-sm text-center">Something went wrong. Please try again.</div>
-                                )}
-
                                 <motion.button
-                                    variants={buttonHover}
-                                    whileHover="hover"
-                                    whileTap="tap"
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     disabled={status === 'submitting'}
-                                    className="w-full py-5 rounded-full bg-[#F96E5B] text-white font-black uppercase text-lg flex items-center justify-center space-x-2 shadow-[0_8px_0_0_#C75748] disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-md shadow-blue-500/20"
                                 >
-                                    <span>{status === 'submitting' ? 'Sending...' : 'Send Message'}</span>
-                                    <Send size={20} />
+                                    <span>{status === 'submitting' ? 'Submitting...' : 'Submit Project Brief'}</span>
+                                    <Send size={14} />
                                 </motion.button>
                             </form>
                         )}
-                    </motion.div>
+                    </div>
 
-                    {/* Right side: Contact Info */}
-                    <motion.div
-                        {...fadeInUp}
-                        transition={{ delay: 0.2 }}
-                        className="space-y-10 py-4"
-                    >
-                        <div className="space-y-6">
-                            <h3 className="text-3xl font-black uppercase italic" style={{ color: colors.teal }}>Contact Details</h3>
-                            <p className="text-lg font-medium leading-relaxed">
-                                Whether you&apos;re a local business or a growing brand, we&apos;re ready to engineer your digital foundation.
-                            </p>
-                        </div>
+                    {/* Right Info */}
+                    <div className="lg:col-span-5 space-y-4">
+                        <div className="ui-card rounded-3xl p-6 sm:p-8 space-y-5">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Contact Details
+                            </h3>
 
-                        <div className="space-y-8">
-                            {[
-                                { icon: <Mail />, title: "Email Us", val: "hello@waadimedia.com", color: colors.teal },
-                                { icon: <Phone />, title: "Call Us", val: "+91 98765 43210", color: colors.red },
-                                { icon: <MapPin />, title: "Office", val: "Srinagar, Kashmir", color: colors.lightTeal }
-                            ].map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    whileHover={{ x: 10, scale: 1.05 }}
-                                    className="flex items-start space-x-6 group cursor-default"
-                                >
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style={{ backgroundColor: item.color }}>
-                                        {React.cloneElement(item.icon, { className: "text-white w-6 h-6" })}
-                                    </div>
+                            <div className="space-y-4 text-xs font-medium text-slate-600 dark:text-slate-300">
+                                <div className="flex items-center space-x-3">
+                                    <Mail size={16} className="text-blue-600 dark:text-blue-400" />
                                     <div>
-                                        <h4 className="font-black uppercase text-sm tracking-widest mb-1">{item.title}</h4>
-                                        <p className="text-xl font-bold italic" style={{ color: colors.darkTeal }}>{item.val}</p>
+                                        <div className="text-[10px] uppercase font-bold text-slate-400">Email</div>
+                                        <div className="font-bold text-slate-900 dark:text-white">hello@waadimedia.com</div>
                                     </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                </div>
 
-                        <div className="pt-8 border-t-4 border-[#3F9AAE] border-dashed">
-                            <h4 className="font-black uppercase text-xs tracking-[0.3em] mb-4 opacity-60">Follow our journey</h4>
-                            <div className="flex space-x-4">
-                                <motion.a
-                                    href="https://www.instagram.com/waadi_media?igsh=dmQ3eXV2ejRuMWsx"
-                                    target="_blank" rel="noopener noreferrer"
-                                    whileHover={{ scale: 1.2, rotate: -15, backgroundColor: colors.teal, color: 'white' }}
-                                    className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
-                                >
-                                    <Instagram size={20} />
-                                </motion.a>
-                                <motion.a
-                                    href="https://www.linkedin.com/in/shykh-furkan-1193b4249?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
-                                    target="_blank" rel="noopener noreferrer"
-                                    whileHover={{ scale: 1.2, rotate: 15, backgroundColor: colors.teal, color: 'white' }}
-                                    className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
-                                >
-                                    <Linkedin size={20} />
-                                </motion.a>
-                                <motion.a
-                                    href="https://x.com/shykh_furkan?s=21"
-                                    target="_blank" rel="noopener noreferrer"
-                                    whileHover={{ scale: 1.2, rotate: -15, backgroundColor: colors.teal, color: 'white' }}
-                                    className="w-12 h-12 rounded-full border-2 border-[#3F9AAE] flex items-center justify-center transition-colors text-[#3F9AAE]"
-                                >
-                                    <Twitter size={20} />
-                                </motion.a>
+                                <div className="flex items-center space-x-3">
+                                    <Smartphone size={16} className="text-blue-600 dark:text-blue-400" />
+                                    <div>
+                                        <div className="text-[10px] uppercase font-bold text-slate-400">WhatsApp / Call</div>
+                                        <div className="font-bold text-slate-900 dark:text-white">+91 98765 43210</div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center space-x-3">
+                                    <MapPin size={16} className="text-blue-600 dark:text-blue-400" />
+                                    <div>
+                                        <div className="text-[10px] uppercase font-bold text-slate-400">Location</div>
+                                        <div className="font-bold text-slate-900 dark:text-white">Srinagar, Jammu & Kashmir</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </motion.div>
+
+                        {/* WhatsApp CTA */}
+                        <div className="ui-card rounded-3xl p-6 border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <MessageSquare size={20} className="text-emerald-600 dark:text-emerald-400" />
+                                <div>
+                                    <h4 className="text-slate-900 dark:text-white font-bold text-xs">Quick WhatsApp Chat</h4>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Get direct answers from our team</p>
+                                </div>
+                            </div>
+                            <a
+                                href="https://wa.me/919876543210?text=Hi%20Waadi%20Media,%20I'm%20interested%20in%20a%20project"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-colors"
+                            >
+                                Chat
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>

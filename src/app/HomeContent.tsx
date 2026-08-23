@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Code,
     Settings,
@@ -7,324 +7,418 @@ import {
     Share2,
     Compass,
     BarChart3,
-    ChevronRight,
+    ChevronDown,
     Sparkles,
-    Heart,
-    Star,
-    Globe,
+    ArrowRight,
+    CheckCircle2,
     Zap,
-    Palette,
-    User,
-    Briefcase,
+    Plus,
+    Minus,
+    Layers,
+    Cpu,
     Smartphone,
-    Mail,
-    Send,
-    Phone,
-    MapPin,
-    Instagram,
-    Linkedin,
-    Twitter,
-    ArrowRight
+    Search,
+    GraduationCap,
+    Trophy,
+    Globe,
+    ExternalLink,
+    Activity,
+    Calendar,
+    Medal
 } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ContactSection from '@/components/ContactSection';
+import { BrandLogos } from '@/components/BrandLogos';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const HomePageContent = () => {
-    // Colors based on your palette
-    const colors = {
-        teal: '#3F9AAE',
-        lightTeal: '#79C9C5',
-        beige: '#FFE2AF',
-        red: '#F96E5B',
-        darkTeal: '#2D6E7D'
-    };
+    const [openFaq, setOpenFaq] = useState<number | null>(0);
 
     const services = [
         {
-            title: "Website Design",
-            description: "High-performance websites built to act as operational tools, not just digital brochures.",
-            icon: <Code className="w-8 h-8" />,
-            color: colors.teal
+            id: "web-dev",
+            title: "Web Engineering & Next.js",
+            description: "High-performance websites, Next.js web applications, and e-commerce platforms built for speed (<0.8s) and top Google ranking.",
+            icon: <Code className="w-6 h-6 text-blue-600 dark:text-blue-400" />,
+            badge: "Core Stack",
+            href: "/services/web-development",
+            highlights: ["Fast Load Speeds (<0.8s)", "Custom Next.js & React", "SEO & Payment Integration"]
         },
         {
-            title: "Automations",
-            description: "Internal and external workflows that reduce friction and improve overall business efficiency.",
-            icon: <Settings className="w-8 h-8" />,
-            color: colors.red
+            id: "software",
+            title: "Software & Mobile Apps",
+            description: "Custom POS systems, iOS & Android mobile applications, internal enterprise CRM databases, and offline-first software.",
+            icon: <Cpu className="w-6 h-6 text-blue-600 dark:text-blue-400" />,
+            badge: "High Growth",
+            href: "/services/software-development",
+            highlights: ["iOS & Android Apps", "POS & ERP Systems", "Offline-First Sync"]
         },
         {
-            title: "Content Creation",
-            description: "Strategic videos and photography designed to communicate value, trust, and professionalism.",
-            icon: <Video className="w-8 h-8" />,
-            color: colors.lightTeal
+            id: "social-media",
+            title: "Social Media Growth",
+            description: "Sustained brand authority across Instagram, YouTube, and LinkedIn through structured content calendars and 4K Reels production.",
+            icon: <Share2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />,
+            badge: "Popular",
+            href: "/services/social-media-marketing",
+            highlights: ["Monthly Content Calendars", "4K Reels & Shorts Shoots", "Audience Engagement"]
         },
         {
-            title: "Social Media",
-            description: "Sustained brand authority through structured calendars and platform-specific strategy.",
-            icon: <Share2 className="w-8 h-8" />,
-            color: colors.teal
+            id: "automations",
+            title: "Automations & AI Workflows",
+            description: "Internal business workflows, WhatsApp API bots, lead routing, and CRM integrations that eliminate manual friction.",
+            icon: <Settings className="w-6 h-6 text-blue-600 dark:text-blue-400" />,
+            badge: "Efficiency",
+            href: "/services/automation-ai",
+            highlights: ["WhatsApp Invoice Bots", "Automated CRM Sync", "Inventory Tracking"]
         },
         {
-            title: "Strategy",
-            description: "Deep alignment of brand messaging, audience definition, and digital growth roadmaps.",
-            icon: <Compass className="w-8 h-8" />,
-            color: colors.red
-        },
-        {
-            title: "Advertising",
-            description: "Data-driven Meta and Google campaigns treated as investments with measurable results.",
-            icon: <BarChart3 className="w-8 h-8" />,
-            color: colors.lightTeal
+            id: "seo-ads",
+            title: "SEO & Performance Ads",
+            description: "Data-driven Meta & Google Search ad campaigns coupled with technical local SEO to rank #1 in Kashmir search results.",
+            icon: <Search className="w-6 h-6 text-blue-600 dark:text-blue-400" />,
+            badge: "ROI Driven",
+            href: "/services/seo-services",
+            highlights: ["Google Maps Pack Ranking", "Meta & Search Ads", "Conversion Rate Optimization"]
         }
     ];
 
-    const fadeInUp = {
-        initial: { opacity: 0, y: 30 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { type: "spring" as const, damping: 12, stiffness: 100 }
-    };
-
-    const cardHover3D: Variants = {
-        initial: { scale: 1, rotateX: 0, rotateY: 0, rotateZ: 0 },
-        hover: (i) => ({
-            scale: 1.05,
-            rotateZ: (i as number) % 2 === 0 ? 2 : -2,
-            y: -10,
-            transition: { type: "spring" as const, stiffness: 300, damping: 15 }
-        })
-    };
-
-    const buttonHover: Variants = {
-        hover: {
-            y: -4,
-            scale: 1.02,
-            transition: { type: "spring" as const, stiffness: 400, damping: 10 }
+    const caseStudies = [
+        {
+            id: "kehribal-fc",
+            title: "Kehribal FC Kashmir",
+            metrics: "100k+ Impressions & Profile Visits",
+            description: "Official Media & Management Partner of Kehribal FC (@kehribal_fc), directing brand building, digital growth, team operations, sponsor PR, and 4K matchday media.",
+            image: "/kehribal-fc-showcase.jpg",
+            tag: "Social Media & Growth",
+            href: "/work/kehribal-fc",
+            liveUrl: "https://www.instagram.com/kehribal_fc"
         },
-        tap: { scale: 0.95 }
-    };
+        {
+            id: "wonder-delight",
+            title: "Wonder Delight Travels",
+            metrics: "Kashmir Travel & Tour Platform",
+            description: "Built a complete travel booking web platform for tourists to plan custom trips, search Kashmir tour packages, book transport, and reserve hotels.",
+            image: "/wonder-delight-mockup.png",
+            tag: "Travel Booking Platform",
+            href: "/work/wonder-delight",
+            liveUrl: "https://wonderdelighttravels.com/"
+        },
+        {
+            id: "kaali-edge",
+            title: "Kaali Edge Consultancy",
+            metrics: "Global Admissions Portal",
+            description: "Engineered an international educational consultancy platform guiding students for MBBS and higher studies abroad in Russia, Georgia, and Central Asia.",
+            image: "/kaali-edge-mockup.png",
+            tag: "Educational Consultancy",
+            href: "/work/kaali-edge",
+            liveUrl: "https://www.kaaliedge.com/"
+        },
+        {
+            id: "smart-hire",
+            title: "Smart Hire AI Platform",
+            metrics: "AI ATS & Assessment Suite",
+            description: "Designed a recruitment platform prototype unifying AI ATS resume screening, interactive MCQ testing, Monaco IDE challenges, and AI evaluations.",
+            image: "/smart-hire-mockup.png",
+            tag: "AI Software Prototype",
+            href: "/work/smart-hire",
+            liveUrl: "https://smarthire-beige.vercel.app/"
+        }
+    ];
+
+    const faqs = [
+        {
+            q: "What services does Waadi Media specialize in?",
+            a: "Waadi Media is a full-service agency specializing in Web Development (Next.js), Mobile App & Software Engineering, Social Media Growth (4K Reels & YouTube), Business Automations (WhatsApp API), and Performance Ads."
+        },
+        {
+            q: "Where is Waadi Media located?",
+            a: "We are headquartered in Srinagar, Jammu & Kashmir, India, serving clients across Srinagar, Gulmarg, Anantnag, Kashmir, and international markets."
+        },
+        {
+            q: "Do you offer full social media management & video production?",
+            a: "Yes! We handle monthly content calendars, on-location 4K camera & drone shoots in Kashmir, short-form Reels editing, caption writing, and audience growth analytics."
+        }
+    ];
 
     return (
-        <div className="min-h-screen font-sans selection:bg-[#79C9C5]/30 text-[#2D6E7D]" style={{ backgroundColor: colors.beige }}>
+        <div className="min-h-screen bg-[#FAFAFD] dark:bg-[#030712] text-slate-900 dark:text-slate-100 transition-colors">
 
-            {/* Hero Section */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center pt-40 px-6 pb-20 overflow-hidden text-center hero-grid-texture">
-                {/* Decorative Circles */}
-                <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#3F9AAE]/10 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#F96E5B]/10 rounded-full blur-3xl"></div>
+            {/* HERO SECTION */}
+            <section className="relative pt-36 pb-16 px-4 sm:px-6 overflow-hidden text-center">
+                
+                {/* Background Glow Overlay in Dark Mode */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none opacity-0 dark:opacity-100"></div>
 
-                <motion.div initial={{ opacity: 1, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
+                <div className="max-w-5xl mx-auto relative z-10 space-y-8">
 
-                    {/* Tagline Badge */}
+                    {/* Pill Badge */}
                     <motion.div
-                        whileHover={{ rotate: -2, scale: 1.05 }}
-                        className="inline-flex items-center space-x-2 px-6 py-2 rounded-full border-2 border-[#F96E5B] bg-white mb-10 shadow-[4px_4px_0px_0px_#F96E5B] cursor-default"
+                        initial={{ opacity: 0, y: -15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border bg-blue-50 dark:bg-blue-950/40 border-blue-200/80 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider shadow-sm cursor-default"
                     >
-                        <Sparkles size={18} className="text-[#F96E5B] fill-current" />
-                        <span className="text-xs font-black uppercase tracking-[0.2em] text-[#F96E5B]">Serious Growth Systems</span>
+                        <Sparkles size={14} className="text-blue-600 dark:text-blue-400" />
+                        <span>KASHMIR&apos;S PREMIER CREATIVE & TECH POWERHOUSE</span>
                     </motion.div>
 
                     {/* Main Headline */}
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8 text-[#3F9AAE] drop-shadow-sm">
-                        Creative + Tech <br />
-                        <span className="text-[#F96E5B]">For Growing Brands</span> <br />
-                        Of Kashmir
-                    </h1>
+                    <motion.h1 
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.02] text-slate-900 dark:text-white"
+                    >
+                        Creative + Engineering <br />
+                        <span className="text-blue-600 dark:text-blue-500">for Ambitious Brands</span> <br />
+                        of Kashmir<span className="text-blue-600 dark:text-blue-500">.</span>
+                    </motion.h1>
 
                     {/* Subheadline */}
-                    <p className="text-xl md:text-2xl font-bold italic opacity-80 max-w-2xl mx-auto leading-relaxed mb-12">
-                        We don't just "post" on social media. <br className="hidden md:block" />
-                        We build <span className="underline decoration-[#F96E5B] decoration-4">digital assets</span> and <span className="underline decoration-[#3F9AAE] decoration-4">systems</span> for businesses ready to scale.
+                    <motion.p 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="text-lg sm:text-2xl font-normal text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed"
+                    >
+                        We build high-performance{' '}
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">websites</span>, automated{' '}
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">workflows</span>, and cinematic{' '}
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">media systems</span> that help local businesses grow.
+                    </motion.p>
+
+                    {/* Action Buttons */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
+                    >
+                        <Link href="/work" passHref>
+                            <motion.div
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
+                                className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold text-sm shadow-md shadow-blue-500/20 flex items-center justify-center space-x-2 cursor-pointer transition-all"
+                            >
+                                <span>See Our Work</span>
+                                <ArrowRight size={16} />
+                            </motion.div>
+                        </Link>
+                    </motion.div>
+
+                    {/* Trusted Brand Logos Component */}
+                    <BrandLogos />
+
+                </div>
+            </section>
+
+
+
+            {/* SERVICES SECTION */}
+            <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+                <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                    <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+                        <Layers size={14} />
+                        <span>Core Capabilities</span>
+                    </div>
+                    <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        Services Engineered For <span className="text-blue-600 dark:text-blue-500">Growth</span>
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+                        Bridging web & software engineering with social media strategy to command market leadership.
                     </p>
+                </div>
 
-                    {/* CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                        <motion.a
-                            href="/services"
-                            variants={buttonHover} whileHover="hover" whileTap="tap"
-                            className="px-8 py-4 bg-[#3F9AAE] text-white rounded-full font-black uppercase tracking-widest text-sm shadow-[0_10px_20px_rgba(63,154,174,0.3)] flex items-center space-x-2"
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {services.map((serv) => (
+                        <div
+                            key={serv.id}
+                            className="ui-card ui-card-hover p-8 rounded-2xl flex flex-col justify-between"
                         >
-                            <span>Explore Services</span>
-                            <ChevronRight size={18} />
-                        </motion.a>
-                        <motion.a
-                            href="/lets-talk"
-                            variants={buttonHover} whileHover="hover" whileTap="tap"
-                            className="px-8 py-4 bg-white text-[#2D6E7D] border-2 border-[#2D6E7D] rounded-full font-black uppercase tracking-widest text-sm shadow-sm hover:bg-slate-50"
-                        >
-                            Book Consultation
-                        </motion.a>
-                    </div>
-
-                </motion.div>
-            </section>
-
-            {/* About Snapshot */}
-            <section className="py-24 px-6 bg-white border-y-8 border-[#2D6E7D]">
-                <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-
-                    <motion.div {...fadeInUp} className="relative">
-                        <div className="absolute inset-0 bg-[#FFE2AF] rounded-[60px] rotate-3 border-4 border-[#2D6E7D]"></div>
-                        <div className="relative bg-[#3F9AAE] p-12 rounded-[60px] border-4 border-[#2D6E7D] text-white shadow-2xl">
-                            <Star size={64} className="mb-6 fill-current text-[#FFE2AF]" />
-                            <h3 className="text-4xl font-black uppercase italic tracking-tighter mb-4 leading-none">
-                                More than <br /> just visuals.
-                            </h3>
-                            <p className="font-medium text-lg opacity-90 leading-relaxed">
-                                Waadi Media bridges the gap between creative branding and hard-nosed business logic. We understand that a pretty website is useless if it doesn’t sell.
-                            </p>
-                        </div>
-                    </motion.div>
-
-                    <motion.div {...fadeInUp} className="space-y-8">
-                        <div>
-                            <h4 className="text-[#F96E5B] font-black uppercase tracking-widest text-sm mb-2">Our Philosophy</h4>
-                            <h2 className="text-5xl font-black uppercase italic tracking-tighter text-[#2D6E7D] mb-6">Built for <br /> ROI.</h2>
-                            <p className="text-xl font-bold italic opacity-70 leading-relaxed mb-6">
-                                "We stop the guessing game. Every design choice, every post, and every line of code is backed by strategy."
-                            </p>
-                            <a href="/method" className="text-[#3F9AAE] font-black uppercase tracking-widest text-sm border-b-4 border-[#3F9AAE] pb-1 hover:text-[#F96E5B] hover:border-[#F96E5B] transition-colors">
-                                Read our method
-                            </a>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            {[
-                                { l: "10+", t: "Projects" },
-                                { l: "4.9", t: "Client Rating" }
-                            ].map((stat, i) => (
-                                <div key={i} className="p-4 rounded-2xl bg-[#FFE2AF]/30 border-2 border-[#FFE2AF] text-center">
-                                    <div className="text-3xl font-black italic text-[#2D6E7D]">{stat.l}</div>
-                                    <div className="text-[10px] uppercase font-bold tracking-widest opacity-60">{stat.t}</div>
+                            <div className="space-y-5">
+                                <div className="flex items-center justify-between">
+                                    <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900/40">
+                                        {serv.icon}
+                                    </div>
+                                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300">
+                                        {serv.badge}
+                                    </span>
                                 </div>
-                            ))}
-                        </div>
-                    </motion.div>
 
-                </div>
-            </section>
-
-            {/* Services Overview */}
-            <section className="py-24 px-6 text-center">
-                <div className="max-w-6xl mx-auto">
-                    <div className="mb-20">
-                        <h2 className="text-5xl md:text-7xl font-black uppercase italic mb-6 text-[#3F9AAE]">Everything You Need <br /> To <span className="text-[#F96E5B]">Grow</span></h2>
-                        <p className="text-xl font-bold text-[#2D6E7D]/60 uppercase tracking-widest max-w-2xl mx-auto">
-                            A full-stack growth partner for modern businesses.
-                        </p>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {services.map((service, i) => (
-                            <Link href="/services" key={i} passHref className="block h-full">
-                                <motion.div
-                                    custom={i}
-                                    variants={cardHover3D}
-                                    initial="initial"
-                                    whileHover="hover"
-                                    className="group bg-white p-8 rounded-[40px] border-4 border-[#2D6E7D] shadow-[8px_8px_0px_0px_#2D6E7D] hover:shadow-[12px_12px_0px_0px_#F96E5B] hover:border-[#F96E5B] transition-all relative overflow-hidden text-left h-full"
-                                >
-                                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                                        {React.cloneElement(service.icon as React.ReactElement<any>, { size: 100, color: service.color })}
-                                    </div>
-
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 shadow-md" style={{ backgroundColor: service.color }}>
-                                        {service.icon}
-                                    </div>
-
-                                    <h3 className="text-2xl font-black uppercase italic mb-3 text-[#2D6E7D]">{service.title}</h3>
-                                    <p className="font-bold text-sm opacity-60 leading-relaxed mb-6">
-                                        {service.description}
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                                        {serv.title}
+                                    </h3>
+                                    <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+                                        {serv.description}
                                     </p>
+                                </div>
 
-                                    <div className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity" style={{ color: service.color }}>
-                                        <span>Learn More</span>
-                                        <ChevronRight size={12} />
-                                    </div>
-                                </motion.div>
+                                <ul className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                                    {serv.highlights.map((h, i) => (
+                                        <li key={i} className="flex items-center space-x-2 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                            <CheckCircle2 size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                                            <span>{h}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <Link href={serv.href} passHref>
+                                <div className="pt-6 mt-4 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400 cursor-pointer">
+                                    <span>Explore Capability</span>
+                                    <ArrowRight size={14} />
+                                </div>
                             </Link>
-                        ))}
-                    </div>
-
-                    <div className="mt-16">
-                        <a href="/services" className="inline-block px-10 py-4 rounded-full border-4 border-[#2D6E7D] font-black uppercase tracking-widest hover:bg-[#2D6E7D] hover:text-white transition-colors">
-                            View All Services
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Work (Teaser) */}
-            <section className="py-24 px-6 bg-[#2D6E7D] text-white overflow-hidden">
-                <div className="max-w-6xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-                        <div>
-                            <h2 className="text-6xl font-black uppercase italic mb-2 tracking-tighter">Recent <span className="text-[#FFE2AF]">Work</span></h2>
-                            <p className="font-bold opacity-60 uppercase tracking-widest text-sm">Real Results. No Fluff.</p>
                         </div>
-                        <a href="/work" className="flex items-center space-x-2 font-black uppercase tracking-widest text-sm hover:text-[#FFE2AF] transition-colors">
-                            <span>View Portfolio</span>
-                            <ArrowRight size={16} />
-                        </a>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-10">
-                        {[
-                            { t: "Kaaliedge", c: "Business Website", d: "End-to-end design for credibility." },
-                            { t: "BiteZ", c: "POS System", d: "Operational tool for restaurants." }
-                        ].map((project, i) => (
-                            <Link href="/work" key={i} className="block">
-                                <motion.div
-                                    whileHover={{ y: -10 }}
-                                    className="group relative h-80 rounded-[50px] bg-white text-[#2D6E7D] p-10 flex flex-col justify-between overflow-hidden border-4 border-transparent hover:border-[#F96E5B] cursor-pointer"
-                                >
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFE2AF] rounded-full blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2 group-hover:bg-[#F96E5B] transition-colors"></div>
-
-                                    <div className="relative z-10">
-                                        <span className="inline-block px-3 py-1 rounded-full border border-[#2D6E7D]/20 text-[10px] font-black uppercase tracking-widest mb-4">{project.c}</span>
-                                        <h3 className="text-5xl font-black uppercase italic tracking-tighter">{project.t}</h3>
-                                    </div>
-
-                                    <div className="relative z-10 flex justify-between items-end">
-                                        <p className="font-bold max-w-xs opacity-70 italic">{project.d}</p>
-                                        <div className="w-12 h-12 rounded-full bg-[#2D6E7D] text-white flex items-center justify-center group-hover:bg-[#F96E5B] transition-colors">
-                                            <ArrowRight size={20} />
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </Link>
-                        ))}
-                    </div>
+                    ))}
                 </div>
             </section>
 
-            {/* Testimonials */}
-            <section className="py-24 px-6">
-                <div className="max-w-4xl mx-auto text-center">
-                    <div className="mb-12">
-                        <Heart size={48} className="mx-auto text-[#F96E5B] fill-current mb-6 animate-pulse" />
-                        <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-[#2D6E7D] mb-8">
-                            "They actually understood <br /> our business."
+            {/* CASE STUDIES SHOWCASE */}
+            <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                    <div>
+                        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-3">
+                            <span>Proven Client Projects</span>
+                        </div>
+                        <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            Featured <span className="text-blue-600 dark:text-blue-500">Case Studies</span>
                         </h2>
                     </div>
 
-                    <div className="bg-white p-10 rounded-[40px] border-4 border-[#2D6E7D] shadow-lg relative">
-                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-[#FFE2AF] px-6 py-2 rounded-full font-black uppercase tracking-widest text-xs border-2 border-[#2D6E7D]">
-                            Client Feedback
+                    <Link href="/work" passHref>
+                        <div className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center space-x-1 cursor-pointer">
+                            <span>View All Projects</span>
+                            <ArrowRight size={14} />
                         </div>
-                        <p className="text-xl font-medium italic opacity-80 leading-relaxed mb-6">
-                            "Most agencies just wanted to sell us posts. Waadi Media built us a system that actually brings in leads. The clarity they brought to our operations was a game changer."
-                        </p>
-                        <div>
-                            <h4 className="font-black uppercase text-[#3F9AAE]">Local Hotel Brand</h4>
-                            <p className="text-xs font-bold opacity-40 uppercase tracking-widest">Srinagar, Kashmir</p>
+                    </Link>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {caseStudies.map((cs) => (
+                        <div
+                            key={cs.id}
+                            className="ui-card rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 group flex flex-col justify-between"
+                        >
+                            <Link href={cs.href} className="block">
+                                <div className="relative h-48 w-full overflow-hidden bg-slate-950">
+                                    <Image
+                                        src={cs.image}
+                                        alt={cs.title}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/90 backdrop-blur-md text-white text-[9px] font-bold uppercase">
+                                        {cs.tag}
+                                    </span>
+                                </div>
+
+                                <div className="p-5 space-y-2">
+                                    <span className="inline-block px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold">
+                                        {cs.metrics}
+                                    </span>
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        {cs.title}
+                                    </h3>
+                                    <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2">
+                                        {cs.description}
+                                    </p>
+                                </div>
+                            </Link>
+
+                            <div className="p-5 pt-0 flex items-center justify-between">
+                                <Link href={cs.href} className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                    View Case Study →
+                                </Link>
+                                {cs.liveUrl && (
+                                    <a
+                                        href={cs.liveUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[10px] text-slate-400 hover:text-blue-500 flex items-center space-x-0.5"
+                                    >
+                                        <span>Live</span>
+                                        <ExternalLink size={10} />
+                                    </a>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    ))}
                 </div>
             </section>
 
-            {/* Shared Contact Section */}
+            {/* AGENCY METHOD TIMELINE */}
+            <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto border-t border-slate-200 dark:border-white/10">
+                <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                    <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        The Waadi <span className="text-blue-600 dark:text-blue-500">Method</span>
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">
+                        A disciplined, 4-phase execution framework for long-term business results.
+                    </p>
+                </div>
+
+                <div className="grid md:grid-cols-4 gap-6">
+                    {[
+                        { num: "01", title: "Study & Audit", desc: "Understanding core business model, target audience, and bottlenecks." },
+                        { num: "02", title: "Strategize", desc: "Designing system architecture, positioning, and deliverables blueprint." },
+                        { num: "03", title: "Build", desc: "Developing Next.js web apps, automations, and media production." },
+                        { num: "04", title: "Iterate", desc: "Continuous data monitoring, ad optimization, and scaling." }
+                    ].map((step, i) => (
+                        <div key={i} className="ui-card p-6 rounded-2xl border border-slate-200 dark:border-white/10 space-y-3">
+                            <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-500">{step.num}</div>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">{step.title}</h3>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{step.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* FAQ ACCORDION */}
+            <section className="py-20 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-200 dark:border-white/10">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        Frequently Asked Questions
+                    </h2>
+                </div>
+
+                <div className="space-y-3">
+                    {faqs.map((faq, index) => {
+                        const isOpen = openFaq === index;
+                        return (
+                            <div
+                                key={index}
+                                className="ui-card rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden"
+                            >
+                                <button
+                                    onClick={() => setOpenFaq(isOpen ? null : index)}
+                                    className="w-full p-5 text-left flex items-center justify-between space-x-4 font-bold text-sm sm:text-base text-slate-900 dark:text-white focus:outline-none"
+                                >
+                                    <span>{faq.q}</span>
+                                    {isOpen ? <Minus size={16} className="text-blue-600 dark:text-blue-400 shrink-0" /> : <Plus size={16} className="text-slate-400 shrink-0" />}
+                                </button>
+
+                                <AnimatePresence>
+                                    {isOpen && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="px-5 pb-5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3"
+                                        >
+                                            {faq.a}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* EMBEDDED CONTACT SECTION */}
             <ContactSection />
 
         </div>

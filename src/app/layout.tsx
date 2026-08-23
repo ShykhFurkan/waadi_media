@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.waadimedia.com'),
@@ -13,6 +12,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'Waadi Media Team' }],
   creator: 'Waadi Media',
   publisher: 'Waadi Media',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_IN',
@@ -36,7 +40,6 @@ export const metadata: Metadata = {
     images: ['/logo.png'],
     creator: '@waadi_media',
   },
-
   robots: {
     index: true,
     follow: true,
@@ -59,8 +62,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased text-slate-800 bg-slate-50">
+    <html lang="en" suppressHydrationWarning className="dark" data-theme="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('waadi_theme');
+                  var theme = stored ? stored : 'dark';
+                  document.documentElement.setAttribute('data-theme', theme);
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <link rel="icon" href="/icon.png" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="antialiased bg-[#FAFAFD] dark:bg-[#030712] text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 selection:text-blue-500 transition-colors duration-200">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -104,9 +134,7 @@ export default function RootLayout({
             }),
           }}
         />
-        <Navbar />
-        {children}
-        <Footer />
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

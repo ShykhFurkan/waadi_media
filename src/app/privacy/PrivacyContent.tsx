@@ -6,10 +6,10 @@ import Link from 'next/link';
 
 const PrivacyContent = () => {
     return (
-        <div className="min-h-screen bg-[#FFE2AF] text-[#2D6E7D] font-sans selection:bg-[#F96E5B]/30">
-            <div className="max-w-4xl mx-auto px-6 py-32">
+        <div className="min-h-screen bg-[#FAFAFD] dark:bg-[#030712] text-slate-900 dark:text-slate-100 pt-36 pb-28 px-4 sm:px-6 transition-colors">
+            <div className="max-w-4xl mx-auto space-y-8">
 
-                <Link href="/" className="inline-flex items-center space-x-2 text-sm font-black uppercase tracking-widest text-[#F96E5B] hover:-translate-x-1 transition-transform mb-12">
+                <Link href="/" className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 hover:underline">
                     <ArrowLeft size={16} />
                     <span>Back to Home</span>
                 </Link>
@@ -17,62 +17,55 @@ const PrivacyContent = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-6"
                 >
-                    <div className="flex items-center space-x-3 mb-6">
-                        <ShieldCheck size={32} className="text-[#3F9AAE]" />
-                        <span className="text-xs font-black uppercase tracking-widest opacity-60">Legal Documentation</span>
+                    <div className="flex items-center space-x-3">
+                        <ShieldCheck size={28} className="text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Legal Documentation</span>
                     </div>
 
-                    <h1 className="text-5xl md:text-6xl font-black uppercase italic tracking-tighter text-[#3F9AAE] mb-12">
-                        Privacy <span className="text-[#F96E5B]">Policy</span>
+                    <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                        Privacy <span className="text-blue-600 dark:text-blue-500">Policy</span>
                     </h1>
 
-                    <div className="bg-white p-10 md:p-14 rounded-[40px] border-4 border-[#3F9AAE] shadow-[12px_12px_0_0_#3F9AAE] space-y-8">
+                    <div className="ui-card p-8 sm:p-10 rounded-3xl space-y-6 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                         <div>
-                            <h2 className="text-2xl font-black uppercase italic mb-4 text-[#2D6E7D]">1. Introduction</h2>
-                            <p className="font-medium leading-relaxed opacity-80">
-                                Waadi Media ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website (waadimedia.com) and tell you about your privacy rights.
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">1. Introduction</h2>
+                            <p>
+                                Waadi Media (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) respects your privacy and is committed to protecting your personal data. This policy outlines how we handle data collected on waadimedia.com and through our digital platforms.
                             </p>
                         </div>
 
                         <div>
-                            <h2 className="text-2xl font-black uppercase italic mb-4 text-[#2D6E7D]">2. Data We Collect</h2>
-                            <p className="font-medium leading-relaxed opacity-80 mb-4">
-                                We may collect, use, store and transfer different kinds of personal data about you which we have grouped together follows:
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">2. Data We Collect</h2>
+                            <p className="mb-2">
+                                We may collect contact and business information provided directly through project brief forms, WhatsApp inquiries, or newsletter signups:
                             </p>
-                            <ul className="list-disc pl-5 space-y-2 font-medium opacity-80">
-                                <li><strong>Identity Data:</strong> includes first name, last name, username or similar identifier.</li>
-                                <li><strong>Contact Data:</strong> includes email address and telephone numbers.</li>
-                                <li><strong>Technical Data:</strong> includes internet protocol (IP) address, browser type and version, time zone setting and location, browser plug-in types and versions, operating system and platform.</li>
+                            <ul className="list-disc pl-5 space-y-1 text-slate-500 dark:text-slate-400 text-xs">
+                                <li><strong>Identity & Contact Data:</strong> Name, business role, email address, WhatsApp/phone number.</li>
+                                <li><strong>Project & Technical Data:</strong> Business name, current website URL, budget ranges, IP address.</li>
                             </ul>
                         </div>
 
                         <div>
-                            <h2 className="text-2xl font-black uppercase italic mb-4 text-[#2D6E7D]">3. How We Use Your Data</h2>
-                            <p className="font-medium leading-relaxed opacity-80">
-                                We will only use your personal data when the law allows us to. Most commonly, we will use your personal data to perform the contract we are about to enter into or have entered into with you, and where it is necessary for our legitimate interests.
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">3. How We Use Data</h2>
+                            <p>
+                                Personal information is strictly used to evaluate project requests, provide customized quotes, deliver software services, and maintain client communication. We never sell or share client data with third parties.
                             </p>
                         </div>
 
                         <div>
-                            <h2 className="text-2xl font-black uppercase italic mb-4 text-[#2D6E7D]">4. Data Security</h2>
-                            <p className="font-medium leading-relaxed opacity-80">
-                                We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h2 className="text-2xl font-black uppercase italic mb-4 text-[#2D6E7D]">5. Contact Us</h2>
-                            <p className="font-medium leading-relaxed opacity-80">
-                                If you have any questions about this privacy policy or our privacy practices, please contact us at: <br />
-                                <strong className="text-[#F96E5B]">hello@waadimedia.com</strong>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">4. Contact Information</h2>
+                            <p>
+                                For privacy inquiries, contact our team at: <br />
+                                <span className="text-blue-600 dark:text-blue-400 font-bold">hello@waadimedia.com</span>
                             </p>
                         </div>
                     </div>
 
-                    <div className="mt-12 text-center">
-                        <p className="text-xs font-bold uppercase tracking-widest opacity-40">Last Updated: December 2025</p>
+                    <div className="text-center text-xs font-semibold text-slate-400">
+                        Last Updated: 2026 • Waadi Media Srinagar, Kashmir
                     </div>
 
                 </motion.div>
