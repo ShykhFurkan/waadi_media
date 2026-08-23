@@ -14,9 +14,10 @@ import {
   Check,
   Radio,
   Sparkles,
-  Award
+  Award,
+  Trophy
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, Match } from '@/lib/supabase';
 import { LiveBadge } from './LiveBadge';
 
 export interface AdState {
@@ -36,6 +37,19 @@ export interface OverlayState {
   showGoalOverlay: boolean;
   overlayText: string;
   overlayPosition: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+}
+
+export interface ScoreboardState {
+  homeTeamName?: string;
+  homeTeamShort?: string;
+  homeScore?: number;
+  awayTeamName?: string;
+  awayTeamShort?: string;
+  awayScore?: number;
+  matchClock?: string;
+  statusDetail?: string;
+  tournamentName?: string;
+  venue?: string;
 }
 
 interface SportsVideoPlayerProps {
@@ -69,13 +83,39 @@ export function SportsVideoPlayer({
   const [showControls, setShowControls] = useState(true);
   const [hasWebRTCStream, setHasWebRTCStream] = useState(false);
 
-  // Advertisement & Graphic Overlay State from Broadcast Console
+  // Advertisement, Overlay, and Scoreboard State from Broadcast Console / Supabase
   const [adState, setAdState] = useState<AdState | null>(null);
   const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
+  const [scoreboardState, setScoreboardState] = useState<ScoreboardState | null>(null);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // WebRTC Stream Receiver & Realtime Ad/Overlay Listener for Viewers
+  // Initial Match Fetch for Scoreboard if matchId is provided
+  useEffect(() => {
+    if (!matchId) return;
+    supabase
+      .from('matches')
+      .select('*, tournaments(*, sports(*)), home_team:home_team_id(*), away_team:away_team_id(*)')
+      .eq('id', matchId)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setScoreboardState({
+            homeTeamName: data.home_team?.name,
+            homeTeamShort: data.home_team?.short_name || 'HOME',
+            homeScore: data.home_score,
+            awayTeamName: data.away_team?.name,
+            awayTeamShort: data.away_team?.short_name || 'AWAY',
+            awayScore: data.away_score,
+            matchClock: data.status_detail || '00:00 (1st Half)',
+            tournamentName: data.tournaments?.name,
+            venue: data.venue,
+          });
+        }
+      });
+  }, [matchId]);
+
+  // WebRTC Stream Receiver & Realtime Ad/Overlay/Scoreboard Listener for Viewers
   useEffect(() => {
     if (!matchId || !isLive) return;
 
@@ -130,6 +170,15 @@ export function SportsVideoPlayer({
       }
       if (data.overlayState) {
         setOverlayState(data.overlayState);
+      }
+      if (data.scoreboardState) {
+        setScoreboardState((prev) => ({ ...prev, ...data.scoreboardState }));
+      }
+
+      if (data.type === 'camera_switched') {
+        if (videoRef.current) {
+          videoRef.current.play().catch(() => {});
+        }
       }
 
       if (data.viewerId !== viewerId) return;
@@ -309,6 +358,28 @@ export function SportsVideoPlayer({
           </div>
         )}
 
+        {/* --- PRO BROADCAST SCOREBOARD OVERLAY BANNER --- */}
+        {scoreboardState && (
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center bg-[#07130E]/95 border border-[#22302B] rounded-xl overflow-hidden shadow-2xl backdrop-blur-md font-display pointer-events-none text-xs sm:text-sm">
+            <div className="bg-[#132A1F] px-2.5 py-1.5 border-r border-[#22302B] flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="text-[9px] sm:text-[10px] font-mono text-[#E8A33D] font-bold uppercase tracking-wider hidden sm:inline">
+                {scoreboardState.tournamentName || 'WAADI TV'}
+              </span>
+            </div>
+            <div className="px-3 py-1.5 flex items-center gap-2 text-white font-bold">
+              <span>{scoreboardState.homeTeamShort || 'HOME'}</span>
+              <span className="bg-[#0F2A1E] px-2 py-0.5 rounded text-[#E8A33D] font-mono font-bold">
+                {scoreboardState.homeScore ?? 0} - {scoreboardState.awayScore ?? 0}
+              </span>
+              <span>{scoreboardState.awayTeamShort || 'AWAY'}</span>
+            </div>
+            <div className="bg-[#07130E] px-2.5 py-1.5 border-l border-[#22302B] text-[10px] sm:text-xs font-mono text-[#E8A33D] font-semibold">
+              {scoreboardState.matchClock || '00:00 (1st Half)'}
+            </div>
+          </div>
+        )}
+
         {/* --- ADVERTISEMENT OVERLAY SYSTEM --- */}
 
         {/* Fullscreen Ad Overlay */}
@@ -387,7 +458,7 @@ export function SportsVideoPlayer({
           >
             <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#E8A33D] via-[#F2C878] to-[#E8A33D] text-[#0F2A1E] font-display text-lg sm:text-xl font-black uppercase tracking-widest shadow-2xl border-2 border-white flex items-center gap-2">
               <Sparkles size={24} />
-              <span>{overlayState.overlayText || 'GOAL!'}</span>
+              <span>{overlayState.overlayText || '⚽ GOAL!'}</span>
             </div>
           </div>
         )}

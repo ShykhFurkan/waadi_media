@@ -283,6 +283,19 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       bc?.postMessage(payload);
     };
 
+    const getCurrentScoreboardState = () => ({
+      homeTeamName: match?.home_team?.name || '',
+      homeTeamShort: match?.home_team?.short_name || 'HOME',
+      homeScore: match?.home_score ?? 0,
+      awayTeamName: match?.away_team?.name || '',
+      awayTeamShort: match?.away_team?.short_name || 'AWAY',
+      awayScore: match?.away_score ?? 0,
+      matchClock: getFormattedMatchClock(),
+      statusDetail: match?.status_detail || getFormattedMatchClock(),
+      tournamentName: match?.tournaments?.name || '',
+      venue: match?.venue || '',
+    });
+
     const getCurrentAdState = () => {
       const currentAd = adMode !== 'off' && ads.length > 0 ? (ads[selectedAdIndex] || ads[0]) : null;
       return {
@@ -345,6 +358,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
             viewerId,
             adState: getCurrentAdState(),
             overlayState: getCurrentOverlayState(),
+            scoreboardState: getCurrentScoreboardState(),
           });
         } catch (e) {
           console.error('Error creating viewer offer:', e);
@@ -380,9 +394,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       supabase.removeChannel(channel);
       bc?.close();
     };
-  }, [matchId, activeCam, adMode, selectedAdIndex, ads, adDisplayStyle, showGoalOverlay, overlayText, overlayPosition]);
+  }, [matchId, activeCam, adMode, selectedAdIndex, ads, adDisplayStyle, showGoalOverlay, overlayText, overlayPosition, match, matchSeconds, extraTimeMinutes, periodName]);
 
-  // Sync Ads and Overlays to Viewers in Real-Time
+  // Sync Ads, Overlays, and Scoreboard to Viewers in Real-Time
   useEffect(() => {
     if (!matchId) return;
     const channelName = `live_stream_${matchId}`;
@@ -402,12 +416,24 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         overlayText,
         overlayPosition,
       },
+      scoreboardState: {
+        homeTeamName: match?.home_team?.name || '',
+        homeTeamShort: match?.home_team?.short_name || 'HOME',
+        homeScore: match?.home_score ?? 0,
+        awayTeamName: match?.away_team?.name || '',
+        awayTeamShort: match?.away_team?.short_name || 'AWAY',
+        awayScore: match?.away_score ?? 0,
+        matchClock: getFormattedMatchClock(),
+        statusDetail: match?.status_detail || getFormattedMatchClock(),
+        tournamentName: match?.tournaments?.name || '',
+        venue: match?.venue || '',
+      },
       activeCam,
     };
 
     channel.send({ type: 'broadcast', event: 'stream', payload }).catch(() => {});
     bc?.postMessage(payload);
-  }, [adMode, selectedAdIndex, ads, adDisplayStyle, showGoalOverlay, overlayText, overlayPosition, activeCam, matchId]);
+  }, [adMode, selectedAdIndex, ads, adDisplayStyle, showGoalOverlay, overlayText, overlayPosition, activeCam, matchId, match, matchSeconds, extraTimeMinutes, periodName]);
 
   const selectCamera = (cam: 'main' | 'guest1' | 'guest2') => {
     setActiveCam(cam);
