@@ -114,6 +114,8 @@ export function SportsVideoPlayer({
           });
         }
       });
+  }, [matchId]);
+
   const livekitRoomRef = useRef<Room | null>(null);
 
   // Connect Viewer to LiveKit Cloud Room as subscriber
