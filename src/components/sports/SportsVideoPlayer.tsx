@@ -141,31 +141,35 @@ export function SportsVideoPlayer({
           });
           livekitRoomRef.current = room;
 
-          const attachTrackToVideo = (mediaTrack: MediaStreamTrack) => {
+          const attachTrackToVideo = (track: Track | RemoteVideoTrack) => {
             const videoEl = videoRef.current;
-            if (videoEl && mediaTrack) {
-              videoEl.muted = true;
-              videoEl.srcObject = new MediaStream([mediaTrack]);
-              videoEl
-                .play()
-                .then(() => {
-                  setHasWebRTCStream(true);
-                })
-                .catch(() => {
-                  videoEl.muted = true;
+            if (videoEl && track) {
+              try {
+                track.attach(videoEl);
+                videoEl.muted = true;
+                videoEl
+                  .play()
+                  .then(() => {
+                    setHasWebRTCStream(true);
+                  })
+                  .catch(() => {
+                    videoEl.muted = true;
+                    videoEl.play().catch(() => {});
+                    setHasWebRTCStream(true);
+                  });
+              } catch (e) {
+                if (track.mediaStreamTrack) {
+                  videoEl.srcObject = new MediaStream([track.mediaStreamTrack]);
                   videoEl.play().catch(() => {});
                   setHasWebRTCStream(true);
-                });
+                }
+              }
             }
           };
 
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-            if (track.kind === Track.Kind.Video && track.mediaStreamTrack) {
-              if (participant.identity.includes('studio_console') || publication.trackName === 'studio_on_air_feed') {
-                attachTrackToVideo(track.mediaStreamTrack);
-              } else if (!videoRef.current?.srcObject) {
-                attachTrackToVideo(track.mediaStreamTrack);
-              }
+            if (track.kind === Track.Kind.Video) {
+              attachTrackToVideo(track as RemoteVideoTrack);
             }
           });
 
@@ -173,27 +177,18 @@ export function SportsVideoPlayer({
           await room.connect(wsUrl, data.token);
 
           // Check if studio stream is already published in room
-          let studioFound = false;
           room.remoteParticipants.forEach((participant) => {
-            if (participant.identity.includes('studio_console')) {
-              participant.videoTrackPublications.forEach((pub) => {
-                if (pub.track && pub.track.kind === Track.Kind.Video && pub.track.mediaStreamTrack) {
-                  attachTrackToVideo(pub.track.mediaStreamTrack);
-                  studioFound = true;
+            participant.trackPublications.forEach((pub) => {
+              if (pub.kind === Track.Kind.Video) {
+                if (!pub.isSubscribed) {
+                  pub.setSubscribed(true);
                 }
-              });
-            }
-          });
-
-          if (!studioFound) {
-            room.remoteParticipants.forEach((participant) => {
-              participant.videoTrackPublications.forEach((pub) => {
-                if (pub.track && pub.track.kind === Track.Kind.Video && pub.track.mediaStreamTrack) {
-                  attachTrackToVideo(pub.track.mediaStreamTrack);
+                if (pub.track) {
+                  attachTrackToVideo(pub.track as RemoteVideoTrack);
                 }
-              });
+              }
             });
-          }
+          });
         }
       } catch (e) {
         console.warn('LiveKit viewer subscriber connection notice:', e);
@@ -348,10 +343,10 @@ export function SportsVideoPlayer({
     let hls: Hls | null = null;
     if (Hls.isSupported()) {
       hls = new Hls({
-        lowLatencyMode: true, // Target 2-5 seconds end-to-end latency
+        lowLatencyMode: true,
         backBufferLength: 90,
-        liveSyncDurationCount: 3,
-        liveMaxLatencyDurationCount: 5,
+        liveSyncDurationCount: 5, // 5-second target broadcast delay
+        liveMaxLatencyDurationCount: 7,
         liveDurationInfinity: true,
         highBufferWatchdogPeriod: 1,
         enableWorker: true,
@@ -373,28 +368,13 @@ export function SportsVideoPlayer({
     };
   }, [streamUrl]);
 
-  // Smooth 5-Second Broadcast Playback Buffer Engine for Viewers (§6)
+  // Ensure Active Playback on WebRTC Stream Arrival (§6)
   useEffect(() => {
     if (!hasWebRTCStream || !videoRef.current) return;
-
-    const TARGET_BUFFER_DELAY_SEC = 5.0; // 5-second target broadcast delay gap
-
-    const bufferManager = setInterval(() => {
-      const vid = videoRef.current;
-      if (vid && vid.buffered.length > 0) {
-        const liveEdge = vid.buffered.end(vid.buffered.length - 1);
-        const currentDelay = liveEdge - vid.currentTime;
-
-        // If buffer drift exceeds 7.5 seconds or drops under 1.5 seconds, align smoothly to 5s target
-        if (currentDelay > 7.5) {
-          vid.currentTime = liveEdge - TARGET_BUFFER_DELAY_SEC;
-        } else if (currentDelay < 1.5 && liveEdge > TARGET_BUFFER_DELAY_SEC) {
-          vid.currentTime = Math.max(0, liveEdge - TARGET_BUFFER_DELAY_SEC);
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(bufferManager);
+    const vid = videoRef.current;
+    if (vid.paused) {
+      vid.play().catch(() => {});
+    }
   }, [hasWebRTCStream]);
 
   useEffect(() => {

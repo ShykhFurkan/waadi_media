@@ -208,6 +208,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       const durationMs = (currentAd.durationSeconds || 8) * 1000;
       timer = setTimeout(() => {
         setAdMode('off');
+        selectCamera('main');
       }, durationMs);
     } else if (adMode === 'loop_playlist' && ads.length > 0) {
       timer = setInterval(() => {
@@ -301,11 +302,12 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       }
     }
 
-    const targetStream = canvasStreamRef.current || (activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current);
+    const cameraStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+    const targetStream = cameraStream || canvasStreamRef.current;
     if (!targetStream) return;
 
     const rawVideoTrack = targetStream.getVideoTracks()[0];
-    if (!rawVideoTrack) return;
+    if (!rawVideoTrack || rawVideoTrack.readyState === 'ended') return;
 
     try {
       if (studioLocalTrackRef.current) {
@@ -343,6 +345,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       }
       setMainCamConnected(true);
       publishStudioTrackToLiveKit();
+      setTimeout(() => {
+        publishStudioTrackToLiveKit();
+      }, 1000);
     } catch (err) {
       console.warn('Main camera permission denied or not found:', err);
       setMainCamConnected(false);
@@ -434,8 +439,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
   const studioCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasStreamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const frameBufferRef = useRef<Array<{ bitmap: ImageBitmap; timestamp: number }>>([]);
 
-  // Studio Continuous 60 FPS Canvas Compositor for Zero-Latency Camera Switching
+  // Studio 60 FPS Canvas Compositor with 5-Second Broadcast Frame Delay Buffer (§6)
   useEffect(() => {
     let isSubscribed = true;
 
@@ -446,15 +452,52 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
         const ctx = canvas.getContext('2d');
         if (ctx) {
           const activeVideo = activeCam === 'guest1' ? guestVideoRef1.current : mainVideoRef.current;
+          const now = Date.now();
+
           if (activeVideo && activeVideo.readyState >= 2) {
-            ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+            try {
+              createImageBitmap(activeVideo).then((bmp) => {
+                if (isSubscribed) {
+                  frameBufferRef.current.push({ bitmap: bmp, timestamp: Date.now() });
+                } else {
+                  bmp.close();
+                }
+              }).catch(() => {});
+            } catch (e) {}
+          }
+
+          // Bound buffer memory to max ~360 frames (~6s @ 60fps)
+          while (frameBufferRef.current.length > 360) {
+            const item = frameBufferRef.current.shift();
+            item?.bitmap.close();
+          }
+
+          const targetDelayMs = 5000; // 5.0 seconds target broadcast delay gap
+          const targetTime = now - targetDelayMs;
+
+          let frameToDraw: ImageBitmap | null = null;
+          while (frameBufferRef.current.length > 0 && frameBufferRef.current[0].timestamp <= targetTime) {
+            const item = frameBufferRef.current.shift()!;
+            if (frameBufferRef.current.length > 0 && frameBufferRef.current[0].timestamp <= targetTime) {
+              item.bitmap.close();
+            } else {
+              frameToDraw = item.bitmap;
+            }
+          }
+
+          if (frameToDraw) {
+            ctx.drawImage(frameToDraw, 0, 0, canvas.width, canvas.height);
+            frameToDraw.close();
           } else {
             ctx.fillStyle = '#07130E';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#E8A33D';
-            ctx.font = 'bold 32px sans-serif';
+            ctx.font = 'bold 28px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('WAADI SPORTS 1080p NETWORK - LIVE', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('WAADI SPORTS · 5S BROADCAST DELAY BUFFER ACTIVE', canvas.width / 2, canvas.height / 2 - 10);
+            ctx.fillStyle = '#8A9A91';
+            ctx.font = '16px monospace';
+            ctx.fillText('Buffering live camera feed (5.0s offset)...', canvas.width / 2, canvas.height / 2 + 25);
           }
         }
       }
@@ -466,6 +509,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     return () => {
       isSubscribed = false;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      frameBufferRef.current.forEach((item) => item.bitmap.close());
+      frameBufferRef.current = [];
     };
   }, [activeCam]);
 
@@ -1749,7 +1794,10 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     <div className="flex gap-1.5 text-xs font-mono">
                       <button
                         onClick={() => {
-                          if (ads.length > 0) setAdMode('loop_playlist');
+                          if (ads.length > 0) {
+                            setAdMode('loop_playlist');
+                            selectCamera('main');
+                          }
                         }}
                         disabled={ads.length === 0}
                         className={`flex-1 p-1.5 rounded border transition-colors flex items-center justify-center gap-1 ${
@@ -1764,7 +1812,10 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                         <span>Loop All</span>
                       </button>
                       <button
-                        onClick={() => setAdMode('off')}
+                        onClick={() => {
+                          setAdMode('off');
+                          selectCamera('main');
+                        }}
                         className={`px-3 p-1.5 rounded border transition-colors font-bold ${
                           adMode === 'off'
                             ? 'bg-[#132A1F] text-[#8A9A91] border-[#22302B]'
@@ -1827,6 +1878,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                                 onClick={() => {
                                   setSelectedAdIndex(idx);
                                   setAdMode('play_once');
+                                  selectCamera('main');
                                 }}
                                 className={`py-1 rounded border transition-colors flex items-center justify-center gap-1 ${
                                   isSelected && adMode === 'play_once'
@@ -1841,6 +1893,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                                 onClick={() => {
                                   setSelectedAdIndex(idx);
                                   setAdMode('loop_single');
+                                  selectCamera('main');
                                 }}
                                 className={`py-1 rounded border transition-colors flex items-center justify-center gap-1 ${
                                   isSelected && adMode === 'loop_single'
