@@ -443,7 +443,7 @@ export function SportsVideoPlayer({
         {/* Render video element if WebRTC stream or URL stream is active */}
         <video
           ref={videoRef}
-          src={streamUrl}
+          {...(streamUrl ? { src: streamUrl } : {})}
           autoPlay
           playsInline
           muted={isMuted}
