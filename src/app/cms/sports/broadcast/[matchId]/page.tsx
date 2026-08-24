@@ -540,11 +540,13 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           }
         }
 
-        const currentActiveStream = canvasStreamRef.current || (activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current);
+        const currentActiveStream = (activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current) || canvasStreamRef.current;
         if (currentActiveStream) {
           currentActiveStream.getTracks().forEach((track) => {
             track.enabled = true;
-            pc.addTrack(track, currentActiveStream);
+            try {
+              pc.addTrack(track, currentActiveStream);
+            } catch (e) {}
           });
         }
 

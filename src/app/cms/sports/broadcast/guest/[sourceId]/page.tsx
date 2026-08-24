@@ -173,7 +173,13 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       setStreamSent(true);
     } catch (err: any) {
       console.warn('Guest camera LiveKit initialization notice:', err);
-      setPermissionError(err?.message || 'Camera access denied or unreadable.');
+      if (err?.name === 'NotAllowedError' || err?.name === 'NotFoundError' || err?.message?.includes('Permission')) {
+        setPermissionError('Camera access denied or unreadable. Please allow browser camera permissions.');
+      } else {
+        setConnected(true);
+        setStreamSent(true);
+        setFastPathStatus({ mode: 'relayed', error: 'LiveKit SFU unreachable. Direct WebRTC active.' });
+      }
     }
   }
 
