@@ -2330,8 +2330,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           </div>
         </div>
       </div>
-      <canvas ref={studioCanvasRef} width={1920} height={1080} className="hidden" />
-      </div>
-    </CMSPinGuard>
+      {/* Offscreen Active Compositor Canvas for 60 FPS Stream Capture */}
+      <canvas ref={studioCanvasRef} width={1280} height={720} className="fixed -top-[9999px] -left-[9999px] w-[1280px] h-[720px] pointer-events-none opacity-0 -z-50" />
+    </div>
+  </CMSPinGuard>
   );
 }

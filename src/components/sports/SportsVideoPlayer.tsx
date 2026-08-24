@@ -161,21 +161,39 @@ export function SportsVideoPlayer({
 
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
             if (track.kind === Track.Kind.Video && track.mediaStreamTrack) {
-              attachTrackToVideo(track.mediaStreamTrack);
+              if (participant.identity.includes('studio_console') || publication.trackName === 'studio_on_air_feed') {
+                attachTrackToVideo(track.mediaStreamTrack);
+              } else if (!videoRef.current?.srcObject) {
+                attachTrackToVideo(track.mediaStreamTrack);
+              }
             }
           });
 
           const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
           await room.connect(wsUrl, data.token);
 
-          // Check if stream is already published in room
+          // Check if studio stream is already published in room
+          let studioFound = false;
           room.remoteParticipants.forEach((participant) => {
-            participant.videoTrackPublications.forEach((pub) => {
-              if (pub.track && pub.track.kind === Track.Kind.Video && pub.track.mediaStreamTrack) {
-                attachTrackToVideo(pub.track.mediaStreamTrack);
-              }
-            });
+            if (participant.identity.includes('studio_console')) {
+              participant.videoTrackPublications.forEach((pub) => {
+                if (pub.track && pub.track.kind === Track.Kind.Video && pub.track.mediaStreamTrack) {
+                  attachTrackToVideo(pub.track.mediaStreamTrack);
+                  studioFound = true;
+                }
+              });
+            }
           });
+
+          if (!studioFound) {
+            room.remoteParticipants.forEach((participant) => {
+              participant.videoTrackPublications.forEach((pub) => {
+                if (pub.track && pub.track.kind === Track.Kind.Video && pub.track.mediaStreamTrack) {
+                  attachTrackToVideo(pub.track.mediaStreamTrack);
+                }
+              });
+            });
+          }
         }
       } catch (e) {
         console.warn('LiveKit viewer subscriber connection notice:', e);
