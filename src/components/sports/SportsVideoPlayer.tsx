@@ -363,21 +363,28 @@ export function SportsVideoPlayer({
     };
   }, [streamUrl]);
 
-  // Ultra-Low Latency Live Edge Pinning (keeps viewer video buffer < 30ms)
+  // Smooth 5-Second Broadcast Playback Buffer Engine for Viewers (§6)
   useEffect(() => {
     if (!hasWebRTCStream || !videoRef.current) return;
 
-    const liveEdgeInterval = setInterval(() => {
+    const TARGET_BUFFER_DELAY_SEC = 5.0; // 5-second target broadcast delay gap
+
+    const bufferManager = setInterval(() => {
       const vid = videoRef.current;
       if (vid && vid.buffered.length > 0) {
-        const liveEnd = vid.buffered.end(vid.buffered.length - 1);
-        if (liveEnd - vid.currentTime > 0.15) {
-          vid.currentTime = liveEnd - 0.02;
+        const liveEdge = vid.buffered.end(vid.buffered.length - 1);
+        const currentDelay = liveEdge - vid.currentTime;
+
+        // If buffer drift exceeds 7.5 seconds or drops under 1.5 seconds, align smoothly to 5s target
+        if (currentDelay > 7.5) {
+          vid.currentTime = liveEdge - TARGET_BUFFER_DELAY_SEC;
+        } else if (currentDelay < 1.5 && liveEdge > TARGET_BUFFER_DELAY_SEC) {
+          vid.currentTime = Math.max(0, liveEdge - TARGET_BUFFER_DELAY_SEC);
         }
       }
-    }, 500);
+    }, 1000);
 
-    return () => clearInterval(liveEdgeInterval);
+    return () => clearInterval(bufferManager);
   }, [hasWebRTCStream]);
 
   useEffect(() => {
