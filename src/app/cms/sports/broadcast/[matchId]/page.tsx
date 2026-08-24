@@ -647,7 +647,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
   const selectCamera = (cam: 'main' | 'guest1' | 'guest2') => {
     setActiveCam(cam);
-    const targetStream = cam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+    const targetStream = (cam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current) || canvasStreamRef.current;
 
     if (cam === 'main') {
       if (!mainCamConnected) {
@@ -665,6 +665,14 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     publishStudioTrackToLiveKit();
 
+    // Broadcast instant camera switch notification to all public viewers
+    const channelName = `live_stream_${matchId}`;
+    const channel = supabase.channel(channelName);
+    const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(channelName) : null;
+    const switchPayload = { type: 'camera_switched', activeCam: cam };
+    channel.send({ type: 'broadcast', event: 'stream', payload: switchPayload }).catch(() => {});
+    bc?.postMessage(switchPayload);
+
     // Instant zero-latency hot-swap of video track across all active viewer peer connections
     if (targetStream) {
       const newVideoTrack = targetStream.getVideoTracks()[0];
@@ -675,6 +683,10 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
           const videoSender = senders.find((s) => s.track?.kind === 'video');
           if (videoSender) {
             videoSender.replaceTrack(newVideoTrack).catch(() => {});
+          } else {
+            try {
+              pc.addTrack(newVideoTrack, targetStream);
+            } catch (e) {}
           }
         });
       }

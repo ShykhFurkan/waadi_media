@@ -259,7 +259,17 @@ export function SportsVideoPlayer({
       if (!data) return;
 
       if (data.adState) {
-        setAdState(data.adState);
+        setAdState((prev) => {
+          if (prev?.active && !data.adState.active) {
+            // Ad closed: immediately resume camera stream without delay
+            setTimeout(() => {
+              if (videoRef.current) {
+                videoRef.current.play().catch(() => {});
+              }
+            }, 10);
+          }
+          return data.adState;
+        });
       }
       if (data.overlayState) {
         setOverlayState(data.overlayState);
