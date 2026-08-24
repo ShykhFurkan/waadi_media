@@ -70,16 +70,44 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       setPermissionError(null);
       setConnectionState('connecting');
 
-      const { data: activeMatch } = await supabase
-        .from('matches')
-        .select('id, status, venue')
-        .or('status.eq.live,status.eq.upcoming')
-        .order('scheduled_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const matchIdFromUrl = urlParams?.get('matchId');
 
-      const targetMatchId = activeMatch?.id || 'live_studio';
-      const venue = activeMatch?.venue;
+      let targetMatchId: string = matchIdFromUrl || '';
+      let venue: string | undefined;
+
+      if (matchIdFromUrl) {
+        const { data: specificMatch } = await supabase
+          .from('matches')
+          .select('id, status, venue, home_team:home_team_id(name), away_team:away_team_id(name), tournaments(name)')
+          .eq('id', matchIdFromUrl)
+          .maybeSingle();
+
+        if (specificMatch) {
+          venue = specificMatch.venue;
+          if (specificMatch.home_team && specificMatch.away_team) {
+            setMatchInfo({
+              matchTitle: `${(specificMatch.home_team as any)?.name} VS ${(specificMatch.away_team as any)?.name}`,
+              tournamentName: (specificMatch.tournaments as any)?.name,
+              venue: specificMatch.venue,
+            });
+          }
+        }
+      }
+
+      if (!targetMatchId) {
+        const { data: activeMatch } = await supabase
+          .from('matches')
+          .select('id, status, venue')
+          .or('status.eq.live,status.eq.upcoming')
+          .order('scheduled_at', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        targetMatchId = activeMatch?.id || 'live_studio';
+        venue = activeMatch?.venue;
+      }
+
       const roomName = `waadi_match_${targetMatchId}`;
       const identity = `guest_${sourceId}`;
 
@@ -98,6 +126,65 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
         videoRef.current.srcObject = userMediaStream;
         videoRef.current.play().catch(() => {});
       }
+
+      // Direct WebRTC P2P Fallback Channel to Studio Console
+      const channelName = `guest_cam_${sourceId}`;
+      const directChannel = supabase.channel(channelName);
+      const devName = getDeviceName();
+
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+        ],
+      });
+
+      userMediaStream.getTracks().forEach((track) => pc.addTrack(track, userMediaStream));
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          directChannel.send({
+            type: 'broadcast',
+            event: 'webrtc',
+            payload: { type: 'candidate', candidate: event.candidate.toJSON ? event.candidate.toJSON() : event.candidate }
+          }).catch(() => {});
+        }
+      };
+
+      const sendWebRTCOffer = async () => {
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          directChannel.send({
+            type: 'broadcast',
+            event: 'webrtc',
+            payload: { type: 'offer', offer: { type: offer.type, sdp: offer.sdp }, deviceInfo: devName }
+          }).catch(() => {});
+        } catch (e) {}
+      };
+
+      directChannel.on('broadcast', { event: 'webrtc' }, async ({ payload }) => {
+        if (!payload) return;
+        if (payload.type === 'request_offer') {
+          sendWebRTCOffer();
+        } else if (payload.type === 'answer' && payload.answer) {
+          if (pc.signalingState === 'have-local-offer') {
+            try {
+              await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
+            } catch (e) {}
+          }
+        } else if (payload.type === 'candidate' && payload.candidate) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          } catch (e) {}
+        }
+      }).subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          directChannel.send({ type: 'broadcast', event: 'webrtc', payload: { type: 'guest_ready', deviceInfo: devName } }).catch(() => {});
+          sendWebRTCOffer();
+        }
+      });
 
       // Initiate Local-Network Fast Path Probe (§2)
       const fastClient = new LocalFastPathClient(targetMatchId, sourceId, (status) => {

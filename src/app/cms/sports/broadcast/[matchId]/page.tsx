@@ -311,8 +311,11 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
     try {
       if (studioLocalTrackRef.current) {
-        // Unpublish without calling .stop() so camera stream remains alive
-        await room.localParticipant.unpublishTrack(studioLocalTrackRef.current);
+        if (studioLocalTrackRef.current.mediaStreamTrack === rawVideoTrack) {
+          return;
+        }
+        // Explicitly pass stopOnUnpublish = false so camera stream remains alive
+        await room.localParticipant.unpublishTrack(studioLocalTrackRef.current, false);
         studioLocalTrackRef.current = null;
       }
 
@@ -739,16 +742,24 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
   };
 
   useEffect(() => {
-    if (activeCam === 'main' && mainStreamRef.current && mainVideoRef.current) {
-      if (mainVideoRef.current.srcObject !== mainStreamRef.current) {
+    if (activeCam === 'main' && mainStreamRef.current) {
+      if (mainVideoRef.current && mainVideoRef.current.srcObject !== mainStreamRef.current) {
         mainVideoRef.current.srcObject = mainStreamRef.current;
+        mainVideoRef.current.play().catch(() => {});
       }
-      mainVideoRef.current.play().catch(() => {});
-    } else if (activeCam === 'guest1' && guest1StreamRef.current && guestVideoRef1.current) {
-      if (guestVideoRef1.current.srcObject !== guest1StreamRef.current) {
+      if (thumbnailMainVideoRef.current && thumbnailMainVideoRef.current.srcObject !== mainStreamRef.current) {
+        thumbnailMainVideoRef.current.srcObject = mainStreamRef.current;
+        thumbnailMainVideoRef.current.play().catch(() => {});
+      }
+    } else if (activeCam === 'guest1' && guest1StreamRef.current) {
+      if (guestVideoRef1.current && guestVideoRef1.current.srcObject !== guest1StreamRef.current) {
         guestVideoRef1.current.srcObject = guest1StreamRef.current;
+        guestVideoRef1.current.play().catch(() => {});
       }
-      guestVideoRef1.current.play().catch(() => {});
+      if (thumbnailGuest1VideoRef.current && thumbnailGuest1VideoRef.current.srcObject !== guest1StreamRef.current) {
+        thumbnailGuest1VideoRef.current.srcObject = guest1StreamRef.current;
+        thumbnailGuest1VideoRef.current.play().catch(() => {});
+      }
     }
   }, [activeCam, guest1Connected, mainCamConnected]);
 
@@ -1034,7 +1045,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
   }
 
   const copyGuestLink = () => {
-    const link = `${window.location.origin}/cms/sports/broadcast/guest/${guestLinkId}`;
+    const link = `${window.location.origin}/cms/sports/broadcast/guest/${guestLinkId}?matchId=${matchId}`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
