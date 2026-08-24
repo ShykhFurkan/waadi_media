@@ -290,7 +290,7 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
   const studioLocalTrackRef = useRef<LocalVideoTrack | null>(null);
 
-  const publishStudioTrackToLiveKit = async () => {
+  const publishStudioTrackToLiveKit = async (overrideCam?: 'main' | 'guest1' | 'guest2') => {
     const room = studioRoomRef.current;
     if (!room || room.state !== 'connected') return;
 
@@ -302,7 +302,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       }
     }
 
-    const cameraStream = activeCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
+    const currentCam = overrideCam || activeCam;
+    const cameraStream = currentCam === 'guest1' ? guest1StreamRef.current : mainStreamRef.current;
     const targetStream = cameraStream || canvasStreamRef.current;
     if (!targetStream) return;
 
@@ -700,18 +701,30 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     if (cam === 'main') {
       if (!mainCamConnected) {
         initMainCamera();
-      } else if (mainStreamRef.current && mainVideoRef.current) {
-        mainVideoRef.current.srcObject = mainStreamRef.current;
-        mainVideoRef.current.play().catch(() => {});
+      } else if (mainStreamRef.current) {
+        if (mainVideoRef.current) {
+          mainVideoRef.current.srcObject = mainStreamRef.current;
+          mainVideoRef.current.play().catch(() => {});
+        }
+        if (thumbnailMainVideoRef.current) {
+          thumbnailMainVideoRef.current.srcObject = mainStreamRef.current;
+          thumbnailMainVideoRef.current.play().catch(() => {});
+        }
       }
     } else if (cam === 'guest1') {
-      if (guest1StreamRef.current && guestVideoRef1.current) {
-        guestVideoRef1.current.srcObject = guest1StreamRef.current;
-        guestVideoRef1.current.play().catch(() => {});
+      if (guest1StreamRef.current) {
+        if (guestVideoRef1.current) {
+          guestVideoRef1.current.srcObject = guest1StreamRef.current;
+          guestVideoRef1.current.play().catch(() => {});
+        }
+        if (thumbnailGuest1VideoRef.current) {
+          thumbnailGuest1VideoRef.current.srcObject = guest1StreamRef.current;
+          thumbnailGuest1VideoRef.current.play().catch(() => {});
+        }
       }
     }
 
-    publishStudioTrackToLiveKit();
+    publishStudioTrackToLiveKit(cam);
 
     // Broadcast instant camera switch notification to all public viewers
     const channelName = `live_stream_${matchId}`;

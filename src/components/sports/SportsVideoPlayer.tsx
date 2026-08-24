@@ -119,6 +119,35 @@ export function SportsVideoPlayer({
 
   const livekitRoomRef = useRef<Room | null>(null);
 
+  const attachTrackToVideo = (track: Track | RemoteVideoTrack) => {
+    const videoEl = videoRef.current;
+    if (videoEl && track) {
+      try {
+        if (track.mediaStreamTrack) {
+          videoEl.srcObject = new MediaStream([track.mediaStreamTrack]);
+        }
+        track.attach(videoEl);
+        videoEl.muted = true;
+        videoEl
+          .play()
+          .then(() => {
+            setHasWebRTCStream(true);
+          })
+          .catch(() => {
+            videoEl.muted = true;
+            videoEl.play().catch(() => {});
+            setHasWebRTCStream(true);
+          });
+      } catch (e) {
+        if (track.mediaStreamTrack) {
+          videoEl.srcObject = new MediaStream([track.mediaStreamTrack]);
+          videoEl.play().catch(() => {});
+          setHasWebRTCStream(true);
+        }
+      }
+    }
+  };
+
   // Connect Viewer to LiveKit Cloud Room as subscriber
   useEffect(() => {
     if (!matchId) return;
@@ -140,32 +169,6 @@ export function SportsVideoPlayer({
             dynacast: true,
           });
           livekitRoomRef.current = room;
-
-          const attachTrackToVideo = (track: Track | RemoteVideoTrack) => {
-            const videoEl = videoRef.current;
-            if (videoEl && track) {
-              try {
-                track.attach(videoEl);
-                videoEl.muted = true;
-                videoEl
-                  .play()
-                  .then(() => {
-                    setHasWebRTCStream(true);
-                  })
-                  .catch(() => {
-                    videoEl.muted = true;
-                    videoEl.play().catch(() => {});
-                    setHasWebRTCStream(true);
-                  });
-              } catch (e) {
-                if (track.mediaStreamTrack) {
-                  videoEl.srcObject = new MediaStream([track.mediaStreamTrack]);
-                  videoEl.play().catch(() => {});
-                  setHasWebRTCStream(true);
-                }
-              }
-            }
-          };
 
           room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
             if (track.kind === Track.Kind.Video) {
@@ -274,6 +277,15 @@ export function SportsVideoPlayer({
       }
 
       if (data.type === 'camera_switched') {
+        if (livekitRoomRef.current) {
+          livekitRoomRef.current.remoteParticipants.forEach((participant) => {
+            participant.trackPublications.forEach((pub) => {
+              if (pub.kind === Track.Kind.Video && pub.track) {
+                attachTrackToVideo(pub.track as RemoteVideoTrack);
+              }
+            });
+          });
+        }
         if (videoRef.current) {
           videoRef.current.play().catch(() => {});
         }
