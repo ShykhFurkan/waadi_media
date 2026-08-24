@@ -39,6 +39,8 @@ import { Room, RoomEvent, VideoPresets, LocalVideoTrack, RemoteVideoTrack, Track
 import { CMSPinGuard } from '@/components/sports/CMSPinGuard';
 import { supabase, Match, Broadcast, MatchEvent, Sponsor } from '@/lib/supabase';
 import { compressImageFile } from '@/lib/imageCompressor';
+import { PUBLISHER_VIDEO_CONFIG, getLiveKitRegionWsUrl } from '@/lib/streamingConfig';
+import { LocalFastPathHost, FastPathStatus } from '@/lib/localFastPath';
 
 type OverlayPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
@@ -74,7 +76,12 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
   const [guest2Connected, setGuest2Connected] = useState(false);
   const [guest1DeviceInfo, setGuest1DeviceInfo] = useState<string>('');
   const [guest1ConnectionState, setGuest1ConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [guest1FastPath, setGuest1FastPath] = useState<FastPathStatus>({ mode: 'probing' });
+  const [guest2FastPath, setGuest2FastPath] = useState<FastPathStatus>({ mode: 'probing' });
   const [activeCam, setActiveCam] = useState<'main' | 'guest1' | 'guest2'>('main');
+  const [egressId, setEgressId] = useState<string | null>(null);
+
+  const fastPathHostRef = useRef<LocalFastPathHost | null>(null);
 
   const guestPcRef = useRef<RTCPeerConnection | null>(null);
   const mainStreamRef = useRef<MediaStream | null>(null);
@@ -136,6 +143,38 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     const randomId = Math.random().toString(36).substring(2, 9);
     setGuestLinkId(randomId);
     initGuestWebRTC(randomId);
+  }, [matchId]);
+
+  // Local-Network Fast Path Host Listener (§2)
+  useEffect(() => {
+    if (!matchId) return;
+
+    const host = new LocalFastPathHost(
+      matchId,
+      (sourceId, stream, latencyMs) => {
+        guest1StreamRef.current = stream;
+        if (guestVideoRef1.current) {
+          guestVideoRef1.current.srcObject = stream;
+          guestVideoRef1.current.play().catch(() => {});
+        }
+        if (thumbnailGuest1VideoRef.current) {
+          thumbnailGuest1VideoRef.current.srcObject = stream;
+          thumbnailGuest1VideoRef.current.play().catch(() => {});
+        }
+        setGuest1Connected(true);
+        setGuest1ConnectionState('connected');
+        setGuest1FastPath({ mode: 'local', latencyMs });
+      },
+      (sourceId, status) => {
+        setGuest1FastPath(status);
+      }
+    );
+    fastPathHostRef.current = host;
+    host.init();
+
+    return () => {
+      host.destroy();
+    };
   }, [matchId]);
 
   // Running Hardware Uptime Timer
@@ -320,15 +359,21 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       try {
         const roomName = `waadi_match_${matchId}`;
         const identity = `studio_console_${Math.random().toString(36).substring(2, 6)}`;
-        const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher`);
+        const venue = match?.venue;
+        const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher${venue ? `&venue=${encodeURIComponent(venue)}` : ''}`);
         const data = await res.json();
 
         if (data.token) {
           const room = new Room({
-            adaptiveStream: true,
-            dynacast: true,
-            videoCaptureDefaults: { resolution: VideoPresets.h1080.resolution },
-            publishDefaults: { videoEncoding: { maxBitrate: 3500000, maxFramerate: 30 } },
+            adaptiveStream: false,
+            dynacast: false,
+            publishDefaults: {
+              simulcast: PUBLISHER_VIDEO_CONFIG.simulcast, // Explicitly false
+              videoEncoding: {
+                maxBitrate: PUBLISHER_VIDEO_CONFIG.maxBitrate, // 2 Mbps cap
+                maxFramerate: PUBLISHER_VIDEO_CONFIG.frameRate, // 30 fps cap
+              },
+            },
           });
           studioRoomRef.current = room;
 
@@ -345,6 +390,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
             }
             setGuest1Connected(true);
             setGuest1ConnectionState('connected');
+            if (guest1FastPath.mode !== 'local') {
+              setGuest1FastPath({ mode: 'relayed' });
+            }
             if (track.mediaStreamTrack) {
               guest1StreamRef.current = new MediaStream([track.mediaStreamTrack]);
             }
@@ -356,7 +404,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
             }
           });
 
-          const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
+          const rawWsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
+          const wsUrl = getLiveKitRegionWsUrl(rawWsUrl, venue);
           await room.connect(wsUrl, data.token);
           publishStudioTrackToLiveKit();
 
@@ -893,10 +942,33 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       // Database sync
       await supabase.from('matches').update({ home_score: 0, away_score: 0, status: 'live', status_detail: initialClock }).eq('id', matchId);
       await supabase.from('match_events').delete().eq('match_id', matchId);
+
+      // Trigger LiveKit Single-Encode Egress Pipeline (§5)
+      try {
+        const egressRes = await fetch('/api/livekit/egress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomName: `waadi_match_${matchId}`,
+            layout: 'single-speaker',
+          }),
+        });
+        const egressData = await egressRes.json();
+        if (egressData.egressId) {
+          setEgressId(egressData.egressId);
+        }
+      } catch (e) {
+        console.warn('LiveKit Egress trigger notice:', e);
+      }
     } else {
       setMatch((prev) => (prev ? { ...prev, status: newMatchStatus } : null));
       setIsTimerRunning(false);
       await supabase.from('matches').update({ status: newMatchStatus }).eq('id', matchId);
+
+      if (egressId) {
+        fetch(`/api/livekit/egress?egressId=${encodeURIComponent(egressId)}`, { method: 'DELETE' }).catch(() => {});
+        setEgressId(null);
+      }
     }
 
     await supabase.from('broadcasts').update({ status: newStatus }).eq('id', broadcast.id);
@@ -1393,11 +1465,16 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     {!mainCamConnected && (
                       <Video size={18} className={activeCam === 'main' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
                     )}
+                    {mainCamConnected && (
+                      <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-emerald-950/90 text-emerald-400 font-mono text-[8px] font-bold border border-emerald-500/30">
+                        LOCAL (0ms)
+                      </span>
+                    )}
                   </div>
                   <div className="text-center">
                     <div className="text-[11px] font-mono font-bold text-white uppercase">MAIN CAM</div>
                     <div className="text-[9px] font-mono text-[#8A9A91]">
-                      {mainCamConnected ? 'Live Camera' : 'Disconnected (Tap)'}
+                      {mainCamConnected ? 'Direct Studio Stream' : 'Disconnected (Tap)'}
                     </div>
                   </div>
                   {activeCam === 'main' && (
@@ -1429,8 +1506,16 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                       <Smartphone size={18} className={activeCam === 'guest1' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
                     )}
                     {guest1Connected && (
-                      <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[#E8A33D] font-mono text-[8px] font-bold">
-                        1080p
+                      <span
+                        className={`absolute top-1 right-1 px-1.5 py-0.5 rounded font-mono text-[8px] font-bold border shadow ${
+                          guest1FastPath.mode === 'local'
+                            ? 'bg-emerald-950/90 text-emerald-400 border-emerald-500/40'
+                            : 'bg-blue-950/90 text-blue-400 border-blue-500/40'
+                        }`}
+                      >
+                        {guest1FastPath.mode === 'local'
+                          ? `LOCAL (${guest1FastPath.latencyMs || 14}ms)`
+                          : 'RELAYED (SFU)'}
                       </span>
                     )}
                   </div>
@@ -1438,8 +1523,8 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     <div className="text-[11px] font-mono font-bold text-white uppercase truncate">GUEST CAM 1</div>
                     <div className="text-[9px] font-mono text-[#8A9A91] truncate">
                       {guest1Connected
-                        ? (guest1DeviceInfo ? `📱 ${guest1DeviceInfo}` : '● Connected (1080p)')
-                        : (guest1DeviceInfo ? `📱 ${guest1DeviceInfo} (Connecting)` : 'Waiting Signal')}
+                        ? (guest1FastPath.mode === 'local' ? '● Local Fast Path' : '● LiveKit SFU')
+                        : 'Waiting Signal'}
                     </div>
                   </div>
                   {activeCam === 'guest1' && (
@@ -1470,10 +1555,25 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
                     {!guest2Connected && (
                       <Smartphone size={18} className={activeCam === 'guest2' ? 'text-[#D62828]' : 'text-[#8A9A91]'} />
                     )}
+                    {guest2Connected && (
+                      <span
+                        className={`absolute top-1 right-1 px-1.5 py-0.5 rounded font-mono text-[8px] font-bold border shadow ${
+                          guest2FastPath.mode === 'local'
+                            ? 'bg-emerald-950/90 text-emerald-400 border-emerald-500/40'
+                            : 'bg-blue-950/90 text-blue-400 border-blue-500/40'
+                        }`}
+                      >
+                        {guest2FastPath.mode === 'local'
+                          ? `LOCAL (${guest2FastPath.latencyMs || 14}ms)`
+                          : 'RELAYED (SFU)'}
+                      </span>
+                    )}
                   </div>
                   <div className="text-center">
                     <div className="text-[11px] font-mono font-bold text-white uppercase">GUEST CAM 2</div>
-                    <div className="text-[9px] font-mono text-[#8A9A91]">Mobile Operator</div>
+                    <div className="text-[9px] font-mono text-[#8A9A91]">
+                      {guest2Connected ? 'Live Feed' : 'Standby'}
+                    </div>
                   </div>
                   {activeCam === 'guest2' && (
                     <span className="px-2 py-0.5 rounded-full bg-[#D62828] text-white text-[9px] font-mono font-bold uppercase flex items-center gap-1">

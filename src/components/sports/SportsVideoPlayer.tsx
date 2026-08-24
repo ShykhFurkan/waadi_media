@@ -18,6 +18,7 @@ import {
   Trophy
 } from 'lucide-react';
 import { Room, RoomEvent, RemoteVideoTrack, Track } from 'livekit-client';
+import Hls from 'hls.js';
 import { supabase, Match } from '@/lib/supabase';
 import { LiveBadge } from './LiveBadge';
 
@@ -310,6 +311,39 @@ export function SportsVideoPlayer({
       bc?.close();
     };
   }, [matchId, isLive]);
+
+  // Low-Latency HLS (LL-HLS) Playback Engine for Public Viewers (§6)
+  useEffect(() => {
+    if (!streamUrl || !videoRef.current) return;
+    const videoEl = videoRef.current;
+
+    let hls: Hls | null = null;
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        lowLatencyMode: true, // Target 2-5 seconds end-to-end latency
+        backBufferLength: 90,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 5,
+        liveDurationInfinity: true,
+        highBufferWatchdogPeriod: 1,
+        enableWorker: true,
+      });
+      hls.loadSource(streamUrl);
+      hls.attachMedia(videoEl);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoEl.play().catch(() => {});
+      });
+    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      videoEl.src = streamUrl;
+      videoEl.play().catch(() => {});
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [streamUrl]);
 
   // Ultra-Low Latency Live Edge Pinning (keeps viewer video buffer < 30ms)
   useEffect(() => {

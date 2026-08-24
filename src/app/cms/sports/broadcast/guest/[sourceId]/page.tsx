@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useEffect, useRef, useState, use } from 'react';
-import { Room, RoomEvent, VideoPresets, Track, LocalVideoTrack } from 'livekit-client';
+import { Room, RoomEvent, Track, LocalVideoTrack } from 'livekit-client';
 import { supabase } from '@/lib/supabase';
-import { Smartphone, Radio, CheckCircle, Wifi, AlertTriangle, Tv, Video, ShieldCheck } from 'lucide-react';
+import { PUBLISHER_VIDEO_CONFIG, getLiveKitRegionWsUrl } from '@/lib/streamingConfig';
+import { LocalFastPathClient, FastPathStatus } from '@/lib/localFastPath';
+import { Smartphone, Radio, CheckCircle, Wifi, AlertTriangle, ShieldCheck, Zap } from 'lucide-react';
 
 export default function GuestCameraPage({ params }: { params: Promise<{ sourceId: string }> }) {
   const resolvedParams = use(params);
@@ -11,19 +13,20 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const roomRef = useRef<Room | null>(null);
+  const fastPathClientRef = useRef<LocalFastPathClient | null>(null);
 
   const [connected, setConnected] = useState(false);
   const [streamSent, setStreamSent] = useState(false);
   const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [fastPathStatus, setFastPathStatus] = useState<FastPathStatus>({ mode: 'probing' });
   const [permissionError, setPermissionError] = useState<string | null>(null);
-  const [matchInfo, setMatchInfo] = useState<{ matchTitle: string; tournamentName?: string } | null>(null);
+  const [matchInfo, setMatchInfo] = useState<{ matchTitle: string; tournamentName?: string; venue?: string } | null>(null);
   const [deviceName, setDeviceName] = useState<string>('');
 
   useEffect(() => {
     setDeviceName(getDeviceName());
     initLiveKitGuestCamera();
 
-    // Listen for match info updates from broadcast console via Supabase Realtime
     const channelName = `guest_info_${sourceId}`;
     const channel = supabase.channel(channelName);
     channel
@@ -34,6 +37,9 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
 
     return () => {
       supabase.removeChannel(channel);
+      if (fastPathClientRef.current) {
+        fastPathClientRef.current.destroy();
+      }
       if (roomRef.current) {
         roomRef.current.disconnect();
       }
@@ -64,40 +70,66 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       setPermissionError(null);
       setConnectionState('connecting');
 
-      // Fetch active match ID to connect to the exact studio broadcast room
       const { data: activeMatch } = await supabase
         .from('matches')
-        .select('id, status')
+        .select('id, status, venue')
         .or('status.eq.live,status.eq.upcoming')
         .order('scheduled_at', { ascending: true })
         .limit(1)
         .maybeSingle();
 
       const targetMatchId = activeMatch?.id || 'live_studio';
+      const venue = activeMatch?.venue;
       const roomName = `waadi_match_${targetMatchId}`;
       const identity = `guest_${sourceId}`;
 
-      // Fetch Access Token from API
-      const res = await fetch(`/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher`);
+      // Acquire media stream with fixed 720p @ 30fps constraints
+      const userMediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 },
+          facingMode: 'environment',
+        },
+        audio: true,
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = userMediaStream;
+        videoRef.current.play().catch(() => {});
+      }
+
+      // Initiate Local-Network Fast Path Probe (§2)
+      const fastClient = new LocalFastPathClient(targetMatchId, sourceId, (status) => {
+        setFastPathStatus(status);
+      });
+      fastPathClientRef.current = fastClient;
+
+      // Start local probe asynchronously (resolves within 2.5s or falls back)
+      fastClient.startProbe(userMediaStream).then((res) => {
+        setFastPathStatus(res);
+      });
+
+      // Fetch Access Token from API (§3)
+      const res = await fetch(
+        `/api/livekit/token?room=${encodeURIComponent(roomName)}&identity=${encodeURIComponent(identity)}&role=publisher${venue ? `&venue=${encodeURIComponent(venue)}` : ''}`
+      );
       const data = await res.json();
 
       if (!res.ok || !data.token) {
         throw new Error(data.error || 'Failed to fetch LiveKit token');
       }
 
+      // Programmatic Publisher Encode Settings (§4)
       const room = new Room({
-        adaptiveStream: true,
-        dynacast: true,
-        videoCaptureDefaults: {
-          resolution: VideoPresets.h720.resolution,
-          facingMode: 'environment',
-        },
+        adaptiveStream: false,
+        dynacast: false,
         publishDefaults: {
+          simulcast: PUBLISHER_VIDEO_CONFIG.simulcast, // Explicitly false
           videoEncoding: {
-            maxBitrate: 1500000, // 1.5 Mbps for ultra-fast, smooth transmission
-            maxFramerate: 30,
+            maxBitrate: PUBLISHER_VIDEO_CONFIG.maxBitrate, // 2 Mbps cap
+            maxFramerate: PUBLISHER_VIDEO_CONFIG.frameRate, // 30 fps cap
           },
-          simulcast: false,
         },
       });
       roomRef.current = room;
@@ -113,36 +145,35 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
         setStreamSent(false);
       });
 
-      const wsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
+      const rawWsUrl = data.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL;
+      const wsUrl = getLiveKitRegionWsUrl(rawWsUrl, venue);
+
       await room.connect(wsUrl, data.token);
 
-      // Enable local camera and microphone
-      await room.localParticipant.enableCameraAndMicrophone();
-      setStreamSent(true);
+      // Publish exactly one video track + audio track with fixed encode caps
+      const rawVideoTrack = userMediaStream.getVideoTracks()[0];
+      const rawAudioTrack = userMediaStream.getAudioTracks()[0];
 
-      // Attach local video track to preview video element
-      const videoPublication = Array.from(room.localParticipant.videoTrackPublications.values())[0];
-      if (videoPublication && videoPublication.track) {
-        const videoElement = videoRef.current;
-        if (videoElement) {
-          (videoPublication.track as LocalVideoTrack).attach(videoElement);
-          videoElement.play().catch(() => {});
-        }
+      if (rawVideoTrack) {
+        const localVideoTrack = new LocalVideoTrack(rawVideoTrack);
+        await room.localParticipant.publishTrack(localVideoTrack, {
+          name: `guest_cam_${sourceId}`,
+          simulcast: false,
+          videoEncoding: {
+            maxBitrate: PUBLISHER_VIDEO_CONFIG.maxBitrate,
+            maxFramerate: PUBLISHER_VIDEO_CONFIG.frameRate,
+          },
+        });
       }
+
+      if (rawAudioTrack) {
+        await room.localParticipant.publishTrack(rawAudioTrack);
+      }
+
+      setStreamSent(true);
     } catch (err: any) {
-      console.warn('LiveKit guest camera connection error, attempting WebRTC fallback:', err);
-      // Fallback local camera display
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play().catch(() => {});
-          setConnected(true);
-          setStreamSent(true);
-        }
-      } catch (fallbackErr: any) {
-        setPermissionError('Camera access denied or unreadable. Please allow browser camera permissions.');
-      }
+      console.warn('Guest camera LiveKit initialization notice:', err);
+      setPermissionError(err?.message || 'Camera access denied or unreadable.');
     }
   }
 
@@ -153,11 +184,11 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
         <div className="flex items-center justify-center gap-2">
           <Smartphone size={20} className="text-[#E8A33D]" />
           <h1 className="font-display text-lg text-white font-bold tracking-wide uppercase">
-            WAADI MOBILE GUEST CAM
+            WAADI GUEST CAMERA
           </h1>
         </div>
         <p className="text-[11px] font-mono text-[#8A9A91]">
-          LIVEKIT CLOUD SFU · HD 720p @ 2.5 Mbps
+          LIVEKIT SFU · HD 720p @ 30fps (2 Mbps Cap)
         </p>
 
         {deviceName && (
@@ -206,17 +237,31 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
           </div>
         )}
 
-        {/* Status Badge Overlay */}
-        <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
+        {/* Status Badge Overlay (§2 & §7) */}
+        <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
           {streamSent ? (
             <div className="px-3 py-1 rounded-full bg-[#10B981] text-[#0F2A1E] font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
               <span className="w-2 h-2 rounded-full bg-[#0F2A1E] animate-ping" />
-              <span>LIVEKIT CLOUD STREAM ACTIVE</span>
+              <span>LIVEKIT PUBLISHER ACTIVE</span>
             </div>
           ) : (
             <div className="px-3 py-1 rounded-full bg-[#E8A33D] text-[#0F2A1E] font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
               <Radio size={12} className="animate-spin" />
-              <span>CONNECTING TO SFU...</span>
+              <span>CONNECTING TO ROOM...</span>
+            </div>
+          )}
+
+          {/* Local Fast Path Indicator */}
+          {fastPathStatus.mode === 'local' && (
+            <div className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] flex items-center gap-1">
+              <Zap size={10} className="text-emerald-400 fill-emerald-400" />
+              <span>LOCAL FAST-PATH ({fastPathStatus.latencyMs}ms)</span>
+            </div>
+          )}
+          {fastPathStatus.mode === 'relayed' && (
+            <div className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-400 font-mono text-[10px] flex items-center gap-1">
+              <Wifi size={10} />
+              <span>RELAYED (SFU ROUTE)</span>
             </div>
           )}
         </div>
@@ -224,7 +269,7 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
         {/* Bottom Specs Overlay */}
         <div className="absolute bottom-3 left-3 right-3 z-20 bg-black/70 backdrop-blur-md border border-[#22302B] rounded-xl p-2.5 flex items-center justify-between text-[11px] font-mono text-[#8A9A91]">
           <span>SOURCE ID: {sourceId}</span>
-          <span className="text-[#E8A33D] font-bold">720p @ 30 FPS</span>
+          <span className="text-[#E8A33D] font-bold">720p30 · 2 Mbps</span>
         </div>
       </div>
 
@@ -232,10 +277,10 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       <div className="rounded-xl border border-[#1F332A] bg-[#0D1E16] p-4 text-center space-y-2 shadow-md">
         <div className="flex items-center justify-center gap-2 text-xs font-mono text-[#10B981]">
           <ShieldCheck size={16} />
-          <span>CONNECTED TO STUDIO SWITCHER</span>
+          <span>CONNECTED TO STUDIO CONSOLE</span>
         </div>
         <p className="text-[11px] font-mono text-[#8A9A91]">
-          Keep this browser tab open on your smartphone. Your camera feed is streamed directly to LiveKit Cloud for zero-lag studio compositing.
+          Your camera feed is published directly to LiveKit SFU with automated local fast-path fallback for zero-lag studio compositing.
         </p>
       </div>
     </div>

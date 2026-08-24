@@ -6,6 +6,7 @@ export async function GET(req: NextRequest) {
   const room = searchParams.get('room');
   const identity = searchParams.get('identity') || `user_${Math.random().toString(36).substring(2, 7)}`;
   const role = searchParams.get('role') || 'publisher'; // 'publisher' | 'subscriber'
+  const venue = searchParams.get('venue') || undefined;
 
   if (!room) {
     return NextResponse.json({ error: 'Missing room parameter' }, { status: 400 });
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const token = await at.toJwt();
 
-    return NextResponse.json({ token, wsUrl, identity, room });
+    return NextResponse.json({ token, wsUrl, identity, room, venue });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to generate token' }, { status: 500 });
   }
