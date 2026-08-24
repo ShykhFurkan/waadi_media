@@ -535,9 +535,11 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     const getCurrentScoreboardState = () => ({
       homeTeamName: match?.home_team?.name || '',
       homeTeamShort: match?.home_team?.short_name || 'HOME',
+      homeTeamLogo: match?.home_team?.logo_url || '',
       homeScore: match?.home_score ?? 0,
       awayTeamName: match?.away_team?.name || '',
       awayTeamShort: match?.away_team?.short_name || 'AWAY',
+      awayTeamLogo: match?.away_team?.logo_url || '',
       awayScore: match?.away_score ?? 0,
       matchClock: getFormattedMatchClock(),
       statusDetail: match?.status_detail || getFormattedMatchClock(),
@@ -678,9 +680,11 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
       scoreboardState: {
         homeTeamName: match?.home_team?.name || '',
         homeTeamShort: match?.home_team?.short_name || 'HOME',
+        homeTeamLogo: match?.home_team?.logo_url || '',
         homeScore: match?.home_score ?? 0,
         awayTeamName: match?.away_team?.name || '',
         awayTeamShort: match?.away_team?.short_name || 'AWAY',
+        awayTeamLogo: match?.away_team?.logo_url || '',
         awayScore: match?.away_score ?? 0,
         matchClock: getFormattedMatchClock(),
         statusDetail: match?.status_detail || getFormattedMatchClock(),

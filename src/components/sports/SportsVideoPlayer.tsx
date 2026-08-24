@@ -44,9 +44,11 @@ export interface OverlayState {
 export interface ScoreboardState {
   homeTeamName?: string;
   homeTeamShort?: string;
+  homeTeamLogo?: string;
   homeScore?: number;
   awayTeamName?: string;
   awayTeamShort?: string;
+  awayTeamLogo?: string;
   awayScore?: number;
   matchClock?: string;
   statusDetail?: string;
@@ -105,9 +107,11 @@ export function SportsVideoPlayer({
           setScoreboardState({
             homeTeamName: data.home_team?.name,
             homeTeamShort: data.home_team?.short_name || 'HOME',
+            homeTeamLogo: data.home_team?.logo_url || '',
             homeScore: data.home_score,
             awayTeamName: data.away_team?.name,
             awayTeamShort: data.away_team?.short_name || 'AWAY',
+            awayTeamLogo: data.away_team?.logo_url || '',
             awayScore: data.away_score,
             matchClock: data.status_detail || '00:00 (1st Half)',
             tournamentName: data.tournaments?.name,
@@ -347,6 +351,25 @@ export function SportsVideoPlayer({
     };
   }, [matchId, isLive]);
 
+  const getScoreBugPositionClass = (pos?: string) => {
+    switch (pos) {
+      case 'top-left':
+        return 'top-4 left-4';
+      case 'top-center':
+        return 'top-4 left-1/2 -translate-x-1/2';
+      case 'top-right':
+        return 'top-4 right-4';
+      case 'bottom-left':
+        return 'bottom-12 left-4';
+      case 'bottom-center':
+        return 'bottom-12 left-1/2 -translate-x-1/2';
+      case 'bottom-right':
+        return 'bottom-12 right-4';
+      default:
+        return 'top-4 left-4';
+    }
+  };
+
   // Low-Latency HLS (LL-HLS) Playback Engine for Public Viewers (§6)
   useEffect(() => {
     if (!streamUrl || !videoRef.current) return;
@@ -512,22 +535,26 @@ export function SportsVideoPlayer({
 
         {/* --- PRO BROADCAST SCOREBOARD OVERLAY BANNER --- */}
         {scoreboardState && (
-          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 flex items-center bg-[#07130E]/95 border border-[#22302B] rounded-xl overflow-hidden shadow-2xl backdrop-blur-md font-display pointer-events-none text-xs sm:text-sm">
-            <div className="bg-[#132A1F] px-2.5 py-1.5 border-r border-[#22302B] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <span className="text-[9px] sm:text-[10px] font-mono text-[#E8A33D] font-bold uppercase tracking-wider hidden sm:inline">
-                {scoreboardState.tournamentName || 'WAADI TV'}
+          <div className={`absolute z-20 transition-all duration-300 pointer-events-none ${getScoreBugPositionClass(overlayState?.overlayPosition)}`}>
+            <div className="bg-[#0F2A1E]/95 text-[#F7F5F0] border border-[#22302B] px-3.5 py-1.5 rounded-lg font-display text-xs flex items-center gap-3 shadow-2xl backdrop-blur-md">
+              <div className="flex items-center gap-2">
+                {scoreboardState.homeTeamLogo && (
+                  <img src={scoreboardState.homeTeamLogo} alt="" className="w-5 h-5 object-contain" />
+                )}
+                <span className="font-bold">{scoreboardState.homeTeamShort || 'HOME'}</span>
+                <span className="text-[#E8A33D] font-mono text-sm font-black">{scoreboardState.homeScore ?? 0}</span>
+              </div>
+              <span className="text-[#8A9A91] text-xs font-mono">-</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[#E8A33D] font-mono text-sm font-black">{scoreboardState.awayScore ?? 0}</span>
+                <span className="font-bold">{scoreboardState.awayTeamShort || 'AWAY'}</span>
+                {scoreboardState.awayTeamLogo && (
+                  <img src={scoreboardState.awayTeamLogo} alt="" className="w-5 h-5 object-contain" />
+                )}
+              </div>
+              <span className="text-[#E8A33D] font-mono text-[10px] bg-[#142820] px-2 py-0.5 rounded border border-[#22302B] font-bold">
+                {scoreboardState.matchClock || scoreboardState.statusDetail || '00:00 (1st Half)'}
               </span>
-            </div>
-            <div className="px-3 py-1.5 flex items-center gap-2 text-white font-bold">
-              <span>{scoreboardState.homeTeamShort || 'HOME'}</span>
-              <span className="bg-[#0F2A1E] px-2 py-0.5 rounded text-[#E8A33D] font-mono font-bold">
-                {scoreboardState.homeScore ?? 0} - {scoreboardState.awayScore ?? 0}
-              </span>
-              <span>{scoreboardState.awayTeamShort || 'AWAY'}</span>
-            </div>
-            <div className="bg-[#07130E] px-2.5 py-1.5 border-l border-[#22302B] text-[10px] sm:text-xs font-mono text-[#E8A33D] font-semibold">
-              {scoreboardState.matchClock || '00:00 (1st Half)'}
             </div>
           </div>
         )}
