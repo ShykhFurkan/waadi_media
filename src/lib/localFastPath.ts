@@ -126,7 +126,13 @@ export class LocalFastPathHost {
         }
       }
       const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
+      if ((pc.signalingState as string) === 'have-remote-offer') {
+        try {
+          await pc.setLocalDescription(answer);
+        } catch (err) {
+          console.warn('[LocalFastPath] Ignored setLocalDescription in wrong state:', err);
+        }
+      }
 
       this.channel.send({
         type: 'broadcast',
@@ -242,7 +248,9 @@ export class LocalFastPathClient {
           if (status === 'SUBSCRIBED') {
             try {
               const offer = await pc.createOffer();
-              await pc.setLocalDescription(offer);
+              if ((pc.signalingState as string) === 'stable' || (pc.signalingState as string) === 'have-local-offer') {
+                await pc.setLocalDescription(offer);
+              }
 
               // Send offer with gathered host candidates
               this.channel.send({

@@ -153,15 +153,21 @@ export default function GuestCameraPage({ params }: { params: Promise<{ sourceId
       };
 
       const sendWebRTCOffer = async () => {
-        try {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          directChannel.send({
-            type: 'broadcast',
-            event: 'webrtc',
-            payload: { type: 'offer', offer: { type: offer.type, sdp: offer.sdp }, deviceInfo: devName }
-          }).catch(() => {});
-        } catch (e) {}
+        if (pc.signalingState === 'stable') {
+          try {
+            const offer = await pc.createOffer();
+            if (pc.signalingState === 'stable') {
+              await pc.setLocalDescription(offer);
+              directChannel.send({
+                type: 'broadcast',
+                event: 'webrtc',
+                payload: { type: 'offer', offer: { type: offer.type, sdp: offer.sdp }, deviceInfo: devName }
+              }).catch(() => {});
+            }
+          } catch (err) {
+            console.warn('[GuestPage] Ignored setLocalDescription in wrong state:', err);
+          }
+        }
       };
 
       directChannel.on('broadcast', { event: 'webrtc' }, async ({ payload }) => {

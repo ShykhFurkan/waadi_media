@@ -16,7 +16,6 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if session has already verified the PIN
     const sessionAuth = sessionStorage.getItem('cms_pin_verified');
     if (sessionAuth === 'true') {
       setIsVerified(true);
@@ -60,9 +59,9 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#091510] text-[#F7F5F0] flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-[#071426] text-white flex items-center justify-center font-mono">
         <div className="flex items-center gap-3">
-          <Shield className="animate-pulse text-[#E8A33D]" size={24} />
+          <Shield className="animate-pulse text-[#0757E8]" size={24} />
           <span>VERIFYING SECURITY CREDENTIALS...</span>
         </div>
       </div>
@@ -74,21 +73,21 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#07130E]/95 backdrop-blur-xl flex items-center justify-center p-4 selection:bg-[#E8A33D] selection:text-[#0F2A1E]">
-      <div className="w-full max-w-md bg-[#0D2218] border-2 border-[#22302B] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-[#071426]/95 backdrop-blur-xl flex items-center justify-center p-4 selection:bg-[#0757E8] selection:text-white font-sans">
+      <div className="w-full max-w-md bg-[#0B1728] border-2 border-[#1E293B] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
         {/* Top Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#E8A33D] via-emerald-500 to-[#E8A33D]" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0757E8] via-[#1769FF] to-[#0757E8]" />
 
-        {/* Security Shield Icon Header */}
+        {/* Security Shield Header */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-2xl bg-[#132A1F] border border-[#22302B] flex items-center justify-center mx-auto text-[#E8A33D] shadow-inner">
+          <div className="w-16 h-16 rounded-2xl bg-[#0757E8]/10 border border-[#0757E8]/30 flex items-center justify-center mx-auto text-[#1769FF] shadow-inner">
             <Lock size={32} className="animate-pulse" />
           </div>
-          <h2 className="font-display text-lg text-white uppercase tracking-wider font-bold">
-            CMS CONSOLE ACCESS
+          <h2 className="font-display font-extrabold text-xl text-white tracking-tight">
+            FOOTBALL CMS ACCESS
           </h2>
-          <p className="text-xs font-mono text-[#8A9A91]">
-            Enter 4-Digit Security PIN to unlock sports console
+          <p className="text-xs font-mono text-white/70">
+            Enter 4-Digit Security PIN to unlock management console
           </p>
         </div>
 
@@ -102,10 +101,10 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
                   key={index}
                   className={`w-12 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-mono font-bold transition-all ${
                     error
-                      ? 'border-red-500 bg-red-950/30 text-red-400 animate-shake'
+                      ? 'border-[#EF233C] bg-[#EF233C]/20 text-[#EF233C]'
                       : isFilled
-                      ? 'border-[#E8A33D] bg-[#142820] text-[#E8A33D] shadow-lg shadow-[#E8A33D]/10'
-                      : 'border-[#22302B] bg-[#07130E] text-[#8A9A91]'
+                      ? 'border-[#0757E8] bg-[#0757E8]/20 text-[#1769FF] shadow-lg shadow-[#0757E8]/20'
+                      : 'border-[#1E293B] bg-[#071426] text-white/40'
                   }`}
                 >
                   {isFilled ? '●' : ''}
@@ -114,7 +113,7 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
             })}
           </div>
 
-          {/* Hidden input for direct typing */}
+          {/* Hidden input */}
           <input
             type="password"
             inputMode="numeric"
@@ -141,20 +140,20 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
 
           {/* Error Alert */}
           {error && (
-            <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-500/50 text-red-400 text-xs font-mono flex items-center justify-center gap-2 animate-bounce">
+            <div className="p-2.5 rounded-lg bg-[#EF233C]/20 border border-[#EF233C]/40 text-[#EF233C] text-xs font-mono flex items-center justify-center gap-2">
               <AlertCircle size={15} />
               <span>Incorrect Security PIN! Access Denied.</span>
             </div>
           )}
 
-          {/* On-Screen Numeric Keypad */}
+          {/* Numeric Keypad */}
           <div className="grid grid-cols-3 gap-2.5 pt-2 font-mono">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
               <button
                 key={num}
                 type="button"
                 onClick={() => handleKeyPress(num)}
-                className="h-12 rounded-xl bg-[#07130E] border border-[#22302B] text-white font-bold text-lg hover:border-[#E8A33D] hover:bg-[#142820] active:scale-95 transition-all flex items-center justify-center"
+                className="h-12 rounded-xl bg-[#071426] border border-[#1E293B] text-white font-bold text-lg hover:border-[#0757E8] hover:bg-[#0757E8]/20 active:scale-95 transition-all flex items-center justify-center"
               >
                 {num}
               </button>
@@ -162,20 +161,20 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
             <button
               type="button"
               onClick={handleBackspace}
-              className="h-12 rounded-xl bg-[#07130E] border border-[#22302B] text-[#8A9A91] hover:text-red-400 hover:border-red-900/50 active:scale-95 transition-all text-xs font-bold uppercase flex items-center justify-center"
+              className="h-12 rounded-xl bg-[#071426] border border-[#1E293B] text-white/60 hover:text-[#EF233C] hover:border-[#EF233C]/50 active:scale-95 transition-all text-xs font-bold uppercase flex items-center justify-center"
             >
               Clear
             </button>
             <button
               type="button"
               onClick={() => handleKeyPress('0')}
-              className="h-12 rounded-xl bg-[#07130E] border border-[#22302B] text-white font-bold text-lg hover:border-[#E8A33D] hover:bg-[#142820] active:scale-95 transition-all flex items-center justify-center"
+              className="h-12 rounded-xl bg-[#071426] border border-[#1E293B] text-white font-bold text-lg hover:border-[#0757E8] hover:bg-[#0757E8]/20 active:scale-95 transition-all flex items-center justify-center"
             >
               0
             </button>
             <button
               type="submit"
-              className="h-12 rounded-xl bg-[#E8A33D] text-[#0F2A1E] font-bold text-xs uppercase hover:bg-[#F2C878] active:scale-95 transition-all flex items-center justify-center gap-1 shadow"
+              className="h-12 rounded-xl bg-[#0757E8] text-white font-bold text-xs uppercase hover:bg-[#004ED0] active:scale-95 transition-all flex items-center justify-center gap-1 shadow-md"
             >
               <span>Unlock</span>
               <ArrowRight size={14} />
@@ -183,10 +182,10 @@ export function CMSPinGuard({ children }: CMSPinGuardProps) {
           </div>
         </form>
 
-        {/* Security Note Footer */}
-        <div className="pt-2 text-center border-t border-[#1F332A]">
-          <span className="text-[10px] font-mono text-[#8A9A91]">
-            🔒 Authorized Broadcast Operators Only
+        {/* Footer Note */}
+        <div className="pt-2 text-center border-t border-[#1E293B]">
+          <span className="text-[10px] font-mono text-white/50">
+            🔒 Authorized Football Control Room Operators Only
           </span>
         </div>
       </div>

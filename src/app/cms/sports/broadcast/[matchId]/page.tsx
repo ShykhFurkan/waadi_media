@@ -143,6 +143,18 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
     const randomId = Math.random().toString(36).substring(2, 9);
     setGuestLinkId(randomId);
     initGuestWebRTC(randomId);
+
+    if (matchId) {
+      localStorage.setItem('waadi_sports_broadcast_' + matchId, 'true');
+      const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(`waadi_sports_broadcast_${matchId}`) : null;
+      const interval = setInterval(() => {
+        bc?.postMessage({ type: 'stream_active', matchId });
+      }, 3000);
+      return () => {
+        clearInterval(interval);
+        bc?.close();
+      };
+    }
   }, [matchId]);
 
   // Local-Network Fast Path Host Listener (§2)
@@ -612,7 +624,9 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
         try {
           const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
+          if ((pc.signalingState as string) === 'stable' || (pc.signalingState as string) === 'have-local-offer') {
+            await pc.setLocalDescription(offer);
+          }
           sendViewerSignal({
             type: 'offer',
             offer: { type: offer.type, sdp: offer.sdp },
@@ -853,22 +867,28 @@ export default function BroadcastConsolePage({ params }: { params: Promise<{ mat
 
       if (data.type === 'offer' && data.offer) {
         try {
-          if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
+          if ((pc.signalingState as string) === 'stable' || (pc.signalingState as string) === 'have-local-offer') {
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
             const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            const answerJSON = { type: answer.type, sdp: answer.sdp };
-            sendSignal({ type: 'answer', answer: answerJSON });
+            if ((pc.signalingState as string) === 'have-remote-offer') {
+              try {
+                await pc.setLocalDescription(answer);
+                const answerJSON = { type: answer.type, sdp: answer.sdp };
+                sendSignal({ type: 'answer', answer: answerJSON });
+              } catch (err) {
+                console.warn('[BroadcastConsole] Ignored setLocalDescription in wrong state:', err);
+              }
+            }
             setGuest1Connected(true);
             setGuest1ConnectionState('connected');
 
             for (const cand of pendingCandidates) {
-              await pc.addIceCandidate(new RTCIceCandidate(cand));
+              try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
             }
             pendingCandidates = [];
           }
-        } catch (e) {
-          console.error('Error handling offer on console:', e);
+        } catch (e: any) {
+          console.warn('[BroadcastConsole] Recovered from offer setRemoteDescription error:', e?.message || e);
         }
       } else if (data.type === 'answer' && data.answer) {
         try {

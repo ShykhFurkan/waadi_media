@@ -129,15 +129,15 @@ export const CreateMatchModal: React.FC<CreateMatchModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden text-slate-900">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <h3 className="font-display text-base text-[#0F2A1E]">SCHEDULE MATCH</h3>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600">
+      <div className="bg-white rounded-2xl border border-[#E5EAF2] shadow-2xl max-w-lg w-full overflow-hidden text-[#111827]">
+        <div className="px-6 py-4 border-b border-[#004ED0] flex items-center justify-between bg-[#0757E8] text-white">
+          <h3 className="font-display font-extrabold text-base">SCHEDULE FOOTBALL MATCH</h3>
+          <button onClick={onClose} className="p-1 text-white/80 hover:text-white">
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm font-sans">
           {error && <div className="p-3 rounded bg-red-50 text-red-600 text-xs font-mono">{error}</div>}
 
           <div>
@@ -282,18 +282,18 @@ export const CreateMatchModal: React.FC<CreateMatchModalProps> = ({
             </select>
           </div>
 
-          <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
+          <div className="pt-4 border-t border-[#E5EAF2] flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="px-4 py-2 rounded-xl border border-[#E5EAF2] text-xs font-semibold text-[#64748B] hover:bg-[#F1F4F8]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || filteredTeams.length === 0}
-              className="px-5 py-2 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332]"
+              className="px-5 py-2 rounded-xl bg-[#0757E8] text-white font-display font-bold text-xs hover:bg-[#004ED0] shadow-sm"
             >
               {loading ? 'Scheduling...' : 'Schedule Match'}
             </button>

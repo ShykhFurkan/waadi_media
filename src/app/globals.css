@@ -14,6 +14,24 @@
     --slate-400: #8A9A91;
     --slate-800: #22302B;
 
+    /* Sports Platform Design Tokens */
+    --sports-primary: #0757E8;
+    --sports-primary-bright: #1769FF;
+    --sports-primary-deep: #003BB5;
+    --sports-primary-hover: #004ED0;
+    --sports-primary-light: #EAF2FF;
+    --sports-black: #05070B;
+    --sports-deep-navy: #071426;
+    --sports-dark-surface: #0B1728;
+    --sports-dark-text: #111827;
+    --sports-page-bg: #F7F9FC;
+    --sports-card-bg: #FFFFFF;
+    --sports-border: #E5EAF2;
+    --sports-muted-bg: #F1F4F8;
+    --sports-live-red: #EF233C;
+    --sports-success: #16A34A;
+    --sports-warning: #F59E0B;
+
     --font-display: 'Archivo Black', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -21,8 +39,8 @@
 
   body {
     font-family: var(--font-body);
-    background-color: var(--valley-900);
-    color: var(--snow-100);
+    background-color: var(--sports-page-bg);
+    color: var(--sports-dark-text);
     overflow-x: hidden;
   }
 }

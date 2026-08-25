@@ -5,6 +5,29 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOi
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export const FOOTBALL_SPORT_UUID = 'b449e97b-5baa-4aeb-abb7-38229d265e97';
+let cachedFootballSportId: string | null = null;
+
+export async function getFootballSportId(): Promise<string> {
+  if (cachedFootballSportId) return cachedFootballSportId;
+  try {
+    const { data } = await supabase
+      .from('sports')
+      .select('id')
+      .or('slug.eq.football,name.ilike.football')
+      .limit(1)
+      .maybeSingle();
+
+    if (data?.id) {
+      cachedFootballSportId = data.id;
+      return data.id;
+    }
+  } catch (e) {
+    console.warn('[Supabase] Exception resolving football sport_id:', e);
+  }
+  return FOOTBALL_SPORT_UUID;
+}
+
 export interface Sport {
   id: string;
   name: string;
@@ -105,11 +128,27 @@ export interface Broadcast {
 // Database Helper Functions
 
 export async function createTournament(tournament: Partial<Tournament>) {
-  return await supabase.from('tournaments').insert(tournament).select().single();
+  const sportId = (!tournament.sport_id || tournament.sport_id === 'football')
+    ? await getFootballSportId()
+    : tournament.sport_id;
+
+  return await supabase
+    .from('tournaments')
+    .insert({ ...tournament, sport_id: sportId })
+    .select()
+    .single();
 }
 
 export async function createTeam(team: Partial<Team>) {
-  return await supabase.from('teams').insert(team).select().single();
+  const sportId = (!team.sport_id || team.sport_id === 'football')
+    ? await getFootballSportId()
+    : team.sport_id;
+
+  return await supabase
+    .from('teams')
+    .insert({ ...team, sport_id: sportId })
+    .select()
+    .single();
 }
 
 export async function createPlayer(player: Partial<Player>) {
@@ -121,7 +160,15 @@ export async function createSponsor(sponsor: Partial<Sponsor>) {
 }
 
 export async function createMatch(match: Partial<Match>) {
-  return await supabase.from('matches').insert(match).select().single();
+  const sportId = (!match.sport_id || match.sport_id === 'football')
+    ? await getFootballSportId()
+    : match.sport_id;
+
+  return await supabase
+    .from('matches')
+    .insert({ ...match, sport_id: sportId })
+    .select()
+    .single();
 }
 
 export async function updateMatchStatus(matchId: string, status: 'upcoming' | 'live' | 'completed', statusDetail?: string) {

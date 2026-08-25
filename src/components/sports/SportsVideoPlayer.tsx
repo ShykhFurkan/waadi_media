@@ -219,7 +219,7 @@ export function SportsVideoPlayer({
     const channel = supabase.channel(channelName);
     const bc = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(channelName) : null;
 
-    const pc = new RTCPeerConnection({
+    let pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
@@ -299,19 +299,52 @@ export function SportsVideoPlayer({
 
       if (data.type === 'offer' && data.offer) {
         try {
-          if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
+          // If connection already has a remote description, reset pc for clean renegotiation
+          if (pc.remoteDescription) {
+            try { pc.close(); } catch (e) {}
+            pc = new RTCPeerConnection({
+              iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+              ],
+            });
+            pc.ontrack = (event) => {
+              if (event.streams && event.streams[0]) {
+                const stream = event.streams[0];
+                if (videoRef.current) {
+                  videoRef.current.srcObject = stream;
+                  videoRef.current.play().catch(() => {});
+                  setHasWebRTCStream(true);
+                }
+              }
+            };
+            pc.onicecandidate = (event) => {
+              if (event.candidate) {
+                const candJSON = event.candidate.toJSON ? event.candidate.toJSON() : event.candidate;
+                sendSignal({ type: 'candidate', candidate: candJSON });
+              }
+            };
+          }
+
+          if ((pc.signalingState as string) === 'stable' || (pc.signalingState as string) === 'have-local-offer') {
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
             const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            sendSignal({ type: 'answer', answer: { type: answer.type, sdp: answer.sdp } });
+            if ((pc.signalingState as string) === 'have-remote-offer') {
+              try {
+                await pc.setLocalDescription(answer);
+                sendSignal({ type: 'answer', answer: { type: answer.type, sdp: answer.sdp } });
+              } catch (err) {
+                console.warn('[SportsVideoPlayer] Ignored setLocalDescription in wrong state:', err);
+              }
+            }
 
             for (const cand of pendingCandidates) {
-              await pc.addIceCandidate(new RTCIceCandidate(cand));
+              try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
             }
             pendingCandidates = [];
           }
-        } catch (e) {
-          console.error('Error handling offer on viewer:', e);
+        } catch (e: any) {
+          console.warn('[SportsVideoPlayer] Recovered from WebRTC offer SDP mismatch:', e?.message || e);
         }
       } else if (data.type === 'candidate' && data.candidate) {
         try {

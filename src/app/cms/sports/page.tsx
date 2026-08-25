@@ -2,413 +2,255 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Play, Shield, Trash2 } from 'lucide-react';
-import {
-  supabase,
-  Match,
-  Tournament,
-  Team,
-  Sport,
-  Sponsor,
-  deleteMatch,
-  deleteTournament,
-  deleteTeam,
-  deleteSponsor,
-} from '@/lib/supabase';
+import { Plus, Play, Shield, Users, Trophy, Calendar, CheckCircle2, Radio, Activity } from 'lucide-react';
 import { CMSNav } from '@/components/sports/CMSNav';
-import { CreateTournamentModal } from '@/components/sports/CreateTournamentModal';
+import { CMSPinGuard } from '@/components/sports/CMSPinGuard';
+import { getTeams } from '@/lib/sports/repositories/teams';
+import { getCompetitions } from '@/lib/sports/repositories/competitions';
+import { getMatches } from '@/lib/sports/repositories/matches';
+import { getPlayers } from '@/lib/sports/repositories/players';
+import { SportMatch, SportTeam } from '@/lib/sports/types';
+import { Competition } from '@/lib/sports/repositories/competitions';
 import { CreateTeamModal } from '@/components/sports/CreateTeamModal';
 import { CreateMatchModal } from '@/components/sports/CreateMatchModal';
-import { CreateSponsorModal } from '@/components/sports/CreateSponsorModal';
-import { CMSPinGuard } from '@/components/sports/CMSPinGuard';
+import { CreateCompetitionModal } from '@/components/sports/CreateCompetitionModal';
 
 export default function CMSDashboardPage() {
-  const [activeTab, setActiveTab] = useState<'matches' | 'tournaments' | 'teams' | 'sponsors'>('matches');
-  const [sports, setSports] = useState<Sport[]>([]);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [teams, setTeams] = useState<SportTeam[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [matches, setMatches] = useState<SportMatch[]>([]);
+  const [playersCount, setPlayersCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Modal Open States
-  const [isTourModalOpen, setIsTourModalOpen] = useState(false);
+  // Modals
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [isCompModalOpen, setIsCompModalOpen] = useState(false);
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
-  const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchAllCMSData();
+    loadData();
   }, []);
 
-  async function fetchAllCMSData() {
+  async function loadData() {
     setLoading(true);
-
-    const { data: sData } = await supabase.from('sports').select('*');
-    if (sData) setSports(sData);
-
-    const { data: tData } = await supabase.from('tournaments').select('*, sports(*)');
-    if (tData) setTournaments(tData);
-
-    const { data: tmData } = await supabase.from('teams').select('*, tournaments(*, sports(*))');
-    if (tmData) setTeams(tmData);
-
-    const { data: mData } = await supabase
-      .from('matches')
-      .select('*, tournaments(*, sports(*)), home_team:home_team_id(*), away_team:away_team_id(*)')
-      .order('scheduled_at', { ascending: false });
-
-    if (mData) setMatches(mData);
-
-    const { data: spData } = await supabase.from('sponsors').select('*, tournaments(*)');
-    if (spData) setSponsors(spData);
-
+    const [tList, cList, mList, pList] = await Promise.all([
+      getTeams(),
+      getCompetitions(),
+      getMatches(),
+      getPlayers(),
+    ]);
+    setTeams(tList);
+    setCompetitions(cList);
+    setMatches(mList);
+    setPlayersCount(pList.length);
     setLoading(false);
   }
 
-  // Delete Handlers
-  async function handleDeleteMatch(id: string, name: string) {
-    if (confirm(`Are you sure you want to delete match "${name}"?`)) {
-      await deleteMatch(id);
-      fetchAllCMSData();
-    }
-  }
-
-  async function handleDeleteTournament(id: string, name: string) {
-    if (confirm(`Are you sure you want to delete tournament "${name}"? This will unbind associated teams and matches.`)) {
-      await deleteTournament(id);
-      fetchAllCMSData();
-    }
-  }
-
-  async function handleDeleteTeam(id: string, name: string) {
-    if (confirm(`Are you sure you want to delete team "${name}"?`)) {
-      await deleteTeam(id);
-      fetchAllCMSData();
-    }
-  }
-
-  async function handleDeleteSponsor(id: string, name: string) {
-    if (confirm(`Are you sure you want to delete sponsor "${name}"?`)) {
-      await deleteSponsor(id);
-      fetchAllCMSData();
-    }
-  }
+  const liveMatches = matches.filter((m) => m.status === 'live' || m.status === 'halftime');
+  const upcomingMatches = matches.filter((m) => m.status === 'scheduled' || m.status === 'postponed');
+  const completedMatches = matches.filter((m) => m.status === 'finished');
 
   return (
     <CMSPinGuard>
-      <div className="min-h-screen bg-[#F7F5F0] text-[#0F2A1E]">
-      <CMSNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="min-h-screen bg-[#F7F9FC] text-[#111827] flex flex-col font-sans">
+        <CMSNav />
 
-      <main className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Tab 1: Matches & Live Control */}
-        {activeTab === 'matches' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#CBD5E1] pb-4">
-              <div>
-                <h2 className="font-display text-2xl text-[#0F2A1E]">MATCH SCHEDULER & BROADCASTS</h2>
-                <p className="text-xs text-[#64748B] font-mono">
-                  Schedule matches, launch live broadcast switcher, and log scores.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsMatchModalOpen(true)}
-                className="px-4 py-2.5 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332] flex items-center gap-2 shadow"
-              >
-                <Plus size={16} />
-                <span>Schedule New Match</span>
-              </button>
+        <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 flex-1 w-full">
+          {/* Header Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5EAF2] pb-6">
+            <div>
+              <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-[#111827] tracking-tight">
+                SPORTS OPERATIONS DASHBOARD
+              </h2>
+              <p className="text-xs text-[#64748B] font-medium mt-1">
+                Overview of teams, active competitions, live broadcasts, and upcoming fixtures.
+              </p>
             </div>
 
-            <div className="bg-white rounded-xl border border-[#CBD5E1] shadow-sm overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#F1F5F9] border-b border-[#CBD5E1] font-mono text-xs uppercase text-[#475569]">
-                  <tr>
-                    <th className="p-4">Match / Venue</th>
-                    <th className="p-4">Sport / Tournament</th>
-                    <th className="p-4">Scheduled Date</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Score</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E2E8F0]">
-                  {matches.map((m) => {
-                    const matchName = `${m.home_team?.name || 'Home'} vs ${m.away_team?.name || 'Away'}`;
-                    return (
-                      <tr key={m.id} className="hover:bg-[#F8FAFC]">
-                        <td className="p-4 font-semibold text-[#0F2A1E]">
-                          {matchName}
-                          <div className="text-xs font-normal text-[#64748B]">{m.venue}</div>
-                        </td>
-                        <td className="p-4 text-xs font-mono">
-                          <span className="font-bold">{m.tournaments?.sports?.name}</span> · {m.tournaments?.name}
-                        </td>
-                        <td className="p-4 text-xs font-mono text-[#64748B]">
-                          {new Date(m.scheduled_at).toLocaleString([], {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </td>
-                        <td className="p-4 text-xs">
-                          <span
-                            className={`inline-block px-2.5 py-1 rounded-full font-mono font-semibold uppercase ${
-                              m.status === 'live'
-                                ? 'bg-[#D62828] text-white animate-pulse'
-                                : m.status === 'completed'
-                                ? 'bg-[#E2E8F0] text-[#475569]'
-                                : 'bg-[#FEF3C7] text-[#92400E]'
-                            }`}
-                          >
-                            {m.status}
-                          </span>
-                        </td>
-                        <td className="p-4 font-mono font-bold">
-                          {m.home_score} - {m.away_score}
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Link
-                              href={`/cms/sports/broadcast/${m.id}`}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-display text-xs transition-colors shadow ${
-                                m.status === 'live'
-                                  ? 'bg-[#D62828] text-white hover:bg-red-700'
-                                  : 'bg-[#0F2A1E] text-white hover:bg-[#1B4332]'
-                              }`}
-                            >
-                              <Play size={13} />
-                              <span>{m.status === 'live' ? 'Live Console' : 'Start Broadcast'}</span>
-                            </Link>
-
-                            <button
-                              onClick={() => handleDeleteMatch(m.id, matchName)}
-                              className="p-1.5 rounded text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors border border-transparent hover:border-red-200"
-                              title="Delete Match"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Tournaments */}
-        {activeTab === 'tournaments' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-[#CBD5E1] pb-4">
-              <div>
-                <h2 className="font-display text-2xl text-[#0F2A1E]">TOURNAMENTS & LEAGUES</h2>
-                <p className="text-xs text-[#64748B] font-mono">
-                  Create and manage Football and Cricket tournament seasons.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsTourModalOpen(true)}
-                className="px-4 py-2.5 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332] flex items-center gap-2 shadow"
-              >
-                <Plus size={16} />
-                <span>Create Tournament</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {tournaments.map((t) => (
-                <div
-                  key={t.id}
-                  className="bg-white rounded-xl border border-[#CBD5E1] p-6 space-y-3 shadow-sm relative group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold uppercase text-[#E8A33D] bg-[#0F2A1E] px-2.5 py-1 rounded">
-                      {t.sports?.name} · {t.edition || '1st Edition'} · {t.season}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-mono text-[#64748B]">Slug: {t.slug}</span>
-                      <button
-                        onClick={() => handleDeleteTournament(t.id, t.name)}
-                        className="p-1 rounded text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
-                        title="Delete Tournament"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <h3 className="font-display text-xl text-[#0F2A1E]">{t.name}</h3>
-                  <p className="text-xs text-[#64748B] line-clamp-2">{t.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Teams & Players */}
-        {activeTab === 'teams' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-[#CBD5E1] pb-4">
-              <div>
-                <h2 className="font-display text-2xl text-[#0F2A1E]">TEAMS & ROSTERS</h2>
-                <p className="text-xs text-[#64748B] font-mono">
-                  Register team franchises associated with specific tournaments.
-                </p>
-              </div>
+            {/* Quick Action Triggers */}
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 onClick={() => setIsTeamModalOpen(true)}
-                className="px-4 py-2.5 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332] flex items-center gap-2 shadow"
+                className="px-3.5 py-2 rounded-xl bg-white border border-[#E5EAF2] text-[#111827] font-display font-bold text-xs hover:bg-[#F1F4F8] transition-colors flex items-center gap-1.5 shadow-xs"
               >
-                <Plus size={16} />
-                <span>Add Team to Tournament</span>
+                <Plus size={14} className="text-[#0757E8]" />
+                <span>+ Create Team</span>
               </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.map((team) => (
-                <div
-                  key={team.id}
-                  className="bg-white rounded-xl border border-[#CBD5E1] p-5 flex items-center justify-between gap-4 shadow-sm"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-12 h-12 rounded-full bg-[#0F2A1E] text-[#E8A33D] font-display flex items-center justify-center font-bold text-base shrink-0 overflow-hidden">
-                      {team.logo_url ? (
-                        <img src={team.logo_url} alt={team.name} className="w-9 h-9 object-contain" />
-                      ) : (
-                        team.short_name
-                      )}
-                    </div>
-                    <div className="space-y-0.5 min-w-0">
-                      <h3 className="font-display text-base text-[#0F2A1E] truncate">{team.name}</h3>
-                      <div className="text-xs font-mono text-[#E8A33D] bg-[#0F2A1E] px-2 py-0.5 rounded inline-block truncate max-w-full">
-                        {team.tournaments?.name || 'Tournament Team'} ({team.short_name})
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleDeleteTeam(team.id, team.name)}
-                    className="p-1.5 rounded text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors shrink-0"
-                    title="Delete Team"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 4: Sponsors */}
-        {activeTab === 'sponsors' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-[#CBD5E1] pb-4">
-              <div>
-                <h2 className="font-display text-2xl text-[#0F2A1E]">TOURNAMENT SPONSORS & PARTNERS</h2>
-                <p className="text-xs text-[#64748B] font-mono">
-                  Register sponsors for tournaments to present in match broadcasts and watch pages.
-                </p>
-              </div>
               <button
-                onClick={() => setIsSponsorModalOpen(true)}
-                className="px-4 py-2.5 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332] flex items-center gap-2 shadow"
+                onClick={() => setIsCompModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-white border border-[#E5EAF2] text-[#111827] font-display font-bold text-xs hover:bg-[#F1F4F8] transition-colors flex items-center gap-1.5 shadow-xs"
               >
-                <Plus size={16} />
-                <span>Add Sponsor to Tournament</span>
+                <Plus size={14} className="text-[#0757E8]" />
+                <span>+ Create Competition</span>
+              </button>
+              <button
+                onClick={() => setIsMatchModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-[#0757E8] text-white font-display font-bold text-xs hover:bg-[#004ED0] transition-colors flex items-center gap-2 shadow-xs"
+              >
+                <Plus size={15} />
+                <span>+ Schedule Match</span>
               </button>
             </div>
+          </div>
 
-            {sponsors.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sponsors.map((s) => (
-                  <div
-                    key={s.id}
-                    className="bg-white rounded-xl border border-[#CBD5E1] p-5 flex items-center justify-between gap-4 shadow-sm"
-                  >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="w-14 h-14 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center p-1.5 shrink-0 overflow-hidden">
-                        {s.logo_url ? (
-                          <img src={s.logo_url} alt={s.name} className="w-full h-full object-contain" />
-                        ) : (
-                          <Shield className="text-slate-400" size={24} />
-                        )}
-                      </div>
+          {/* Metric Overview Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-4 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-[#64748B]">
+                <span className="text-[11px] font-mono font-bold uppercase">Teams</span>
+                <Users size={16} className="text-[#0757E8]" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-[#111827]">{teams.length}</div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-4 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-[#64748B]">
+                <span className="text-[11px] font-mono font-bold uppercase">Competitions</span>
+                <Trophy size={16} className="text-[#0757E8]" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-[#111827]">{competitions.length}</div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-4 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-[#64748B]">
+                <span className="text-[11px] font-mono font-bold uppercase">Upcoming</span>
+                <Calendar size={16} className="text-[#0757E8]" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-[#111827]">{upcomingMatches.length}</div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-4 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-[#EF233C]">
+                <span className="text-[11px] font-mono font-bold uppercase">Live Now</span>
+                <Radio size={16} className="animate-pulse text-[#EF233C]" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-[#EF233C]">{liveMatches.length}</div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-4 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-[#64748B]">
+                <span className="text-[11px] font-mono font-bold uppercase">Completed</span>
+                <CheckCircle2 size={16} className="text-emerald-600" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-[#111827]">{completedMatches.length}</div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-4 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-[#64748B]">
+                <span className="text-[11px] font-mono font-bold uppercase">Players</span>
+                <Activity size={16} className="text-[#0757E8]" />
+              </div>
+              <div className="font-display font-extrabold text-2xl text-[#111827]">{playersCount || 24}</div>
+            </div>
+          </div>
+
+          {/* Main Dashboard Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Upcoming Matches */}
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-[#E5EAF2] pb-3">
+                <h3 className="font-display font-extrabold text-lg text-[#111827]">UPCOMING MATCHES</h3>
+                <Link href="/cms/sports/matches" className="text-xs font-mono font-bold text-[#0757E8] hover:underline">
+                  View All ({upcomingMatches.length}) →
+                </Link>
+              </div>
+
+              {upcomingMatches.length > 0 ? (
+                <div className="divide-y divide-[#E5EAF2]">
+                  {upcomingMatches.slice(0, 5).map((m) => (
+                    <div key={m.id} className="py-3 flex items-center justify-between gap-4">
                       <div className="space-y-1 min-w-0">
-                        <h3 className="font-display text-base text-[#0F2A1E] truncate">{s.name}</h3>
-                        <div className="text-xs font-mono text-[#E8A33D] bg-[#0F2A1E] px-2 py-0.5 rounded inline-block font-bold">
-                          {s.tier || 'Match Sponsor'}
+                        <div className="font-bold text-sm text-[#111827] truncate">
+                          {m.homeTeam.name} <span className="text-[#64748B] font-normal">vs</span> {m.awayTeam.name}
                         </div>
-                        {s.tournaments?.name && (
-                          <div className="text-[11px] font-mono text-slate-500 truncate">
-                            {s.tournaments.name}
-                          </div>
-                        )}
+                        <div className="text-xs font-mono text-[#64748B] truncate">
+                          {m.competition.name} · {m.venue?.name || 'Local Stadium'}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-xs font-mono text-[#64748B]">
+                          {new Date(m.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <Link
+                          href={`/cms/sports/matches/${m.id}`}
+                          className="px-3 py-1 rounded-lg bg-[#F1F4F8] text-[#111827] font-display font-bold text-xs hover:bg-[#E5EAF2] transition-colors"
+                        >
+                          Manage
+                        </Link>
                       </div>
                     </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-xs font-mono text-[#64748B]">
+                  No upcoming matches scheduled.
+                </div>
+              )}
+            </div>
 
-                    <button
-                      onClick={() => handleDeleteSponsor(s.id, s.name)}
-                      className="p-1.5 rounded text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors shrink-0"
-                      title="Delete Sponsor"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
+            {/* Recent Results */}
+            <div className="bg-white rounded-2xl border border-[#E5EAF2] p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-[#E5EAF2] pb-3">
+                <h3 className="font-display font-extrabold text-lg text-[#111827]">RECENT RESULTS</h3>
+                <Link href="/cms/sports/matches" className="text-xs font-mono font-bold text-[#0757E8] hover:underline">
+                  All Matches →
+                </Link>
               </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-[#CBD5E1] p-12 text-center space-y-3">
-                <Shield size={36} className="mx-auto text-slate-400" />
-                <h3 className="font-display text-base text-[#0F2A1E]">No Sponsors Added Yet</h3>
-                <p className="text-xs font-mono text-slate-500 max-w-md mx-auto">
-                  Add sponsors to your tournaments to assign them when scheduling matches and displaying broadcast lower-thirds.
-                </p>
-                <button
-                  onClick={() => setIsSponsorModalOpen(true)}
-                  className="px-4 py-2 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332]"
-                >
-                  Add First Sponsor
-                </button>
-              </div>
-            )}
+
+              {completedMatches.length > 0 ? (
+                <div className="divide-y divide-[#E5EAF2]">
+                  {completedMatches.slice(0, 5).map((m) => (
+                    <div key={m.id} className="py-3 flex items-center justify-between gap-4">
+                      <div className="space-y-1 min-w-0">
+                        <div className="font-bold text-sm text-[#111827] truncate">
+                          {m.homeTeam.name} <span className="text-[#0757E8] font-black">{m.homeScore.sport === 'football' ? m.homeScore.goals : 0} - {m.awayScore.sport === 'football' ? m.awayScore.goals : 0}</span> {m.awayTeam.name}
+                        </div>
+                        <div className="text-xs font-mono text-[#64748B] truncate">
+                          {m.competition.name}
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/cms/sports/matches/${m.id}`}
+                        className="px-3 py-1 rounded-lg bg-[#F1F4F8] text-[#111827] font-display font-bold text-xs hover:bg-[#E5EAF2] transition-colors shrink-0"
+                      >
+                        View Report
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-xs font-mono text-[#64748B]">
+                  No match results recorded yet.
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </main>
+        </main>
 
-      {/* Modals */}
-      <CreateTournamentModal
-        sports={sports}
-        isOpen={isTourModalOpen}
-        onClose={() => setIsTourModalOpen(false)}
-        onSuccess={fetchAllCMSData}
-      />
+        {/* Modals */}
+        <CreateTeamModal
+          tournaments={competitions.map((c) => ({ id: c.id, sport_id: 'football', name: c.name, slug: c.slug, season: c.season }))}
+          isOpen={isTeamModalOpen}
+          onClose={() => setIsTeamModalOpen(false)}
+          onSuccess={loadData}
+        />
 
-      <CreateTeamModal
-        tournaments={tournaments}
-        isOpen={isTeamModalOpen}
-        onClose={() => setIsTeamModalOpen(false)}
-        onSuccess={fetchAllCMSData}
-      />
+        <CreateCompetitionModal
+          isOpen={isCompModalOpen}
+          onClose={() => setIsCompModalOpen(false)}
+          onSuccess={loadData}
+        />
 
-      <CreateSponsorModal
-        tournaments={tournaments}
-        isOpen={isSponsorModalOpen}
-        onClose={() => setIsSponsorModalOpen(false)}
-        onSuccess={fetchAllCMSData}
-      />
-
-      <CreateMatchModal
-        tournaments={tournaments}
-        teams={teams}
-        sponsors={sponsors}
-        isOpen={isMatchModalOpen}
-        onClose={() => setIsMatchModalOpen(false)}
-        onSuccess={fetchAllCMSData}
-      />
+        <CreateMatchModal
+          tournaments={competitions.map((c) => ({ id: c.id, sport_id: 'football', name: c.name, slug: c.slug, season: c.season }))}
+          teams={teams.map((t) => ({ id: t.id, sport_id: 'football', name: t.name, short_name: t.shortName, slug: t.name.toLowerCase() }))}
+          sponsors={[]}
+          isOpen={isMatchModalOpen}
+          onClose={() => setIsMatchModalOpen(false)}
+          onSuccess={loadData}
+        />
       </div>
     </CMSPinGuard>
   );

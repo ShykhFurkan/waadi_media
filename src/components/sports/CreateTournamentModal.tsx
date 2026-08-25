@@ -46,7 +46,6 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
           .from('sports')
           .upsert(
             [
-              { name: 'Cricket', slug: 'cricket', icon: '🏏' },
               { name: 'Football', slug: 'football', icon: '⚽' },
             ],
             { onConflict: 'slug' }
@@ -124,24 +123,24 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden text-slate-900">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <h3 className="font-display text-base text-[#0F2A1E]">CREATE NEW TOURNAMENT</h3>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600">
+        <div className="px-6 py-4 border-b border-[#004ED0] flex items-center justify-between bg-[#0757E8] text-white">
+          <h3 className="font-display font-extrabold text-base">CREATE FOOTBALL TOURNAMENT</h3>
+          <button onClick={onClose} className="p-1 text-white/80 hover:text-white">
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm">
-          {error && <div className="p-3 rounded bg-red-50 text-red-600 text-xs font-mono">{error}</div>}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm font-sans">
+          {error && <div className="p-3 rounded-lg bg-red-50 text-red-600 text-xs font-mono">{error}</div>}
 
           <div>
-            <label className="block text-xs font-mono uppercase font-bold text-slate-600 mb-1">
+            <label className="block text-xs font-mono uppercase font-bold text-[#64748B] mb-1">
               Select Sport
             </label>
             <select
               value={sportId}
               onChange={(e) => setSportId(e.target.value)}
-              className="w-full rounded border border-slate-300 p-2.5 bg-white font-medium text-slate-900"
+              className="w-full rounded-xl border border-[#E5EAF2] p-2.5 bg-white font-medium text-[#111827]"
             >
               {sportsList.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -152,22 +151,22 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase font-bold text-slate-600 mb-1">
+            <label className="block text-xs font-mono uppercase font-bold text-[#64748B] mb-1">
               Tournament Name
             </label>
             <input
               type="text"
-              placeholder="e.g. Valley Champions League"
+              placeholder="e.g. UFL Premier League"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded border border-slate-300 p-2.5 bg-white font-medium"
+              className="w-full rounded-xl border border-[#E5EAF2] p-2.5 bg-white font-medium text-[#111827]"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-slate-600 mb-1">
+              <label className="block text-xs font-mono uppercase font-bold text-[#64748B] mb-1">
                 Edition
               </label>
               <input
@@ -175,12 +174,12 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
                 placeholder="e.g. 1st Edition"
                 value={edition}
                 onChange={(e) => setEdition(e.target.value)}
-                className="w-full rounded border border-slate-300 p-2.5 bg-white font-medium"
+                className="w-full rounded-xl border border-[#E5EAF2] p-2.5 bg-white font-medium text-[#111827]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-slate-600 mb-1">
+              <label className="block text-xs font-mono uppercase font-bold text-[#64748B] mb-1">
                 Season / Year
               </label>
               <input
@@ -188,19 +187,19 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
                 placeholder="2026"
                 value={season}
                 onChange={(e) => setSeason(e.target.value)}
-                className="w-full rounded border border-slate-300 p-2.5 bg-white font-medium"
+                className="w-full rounded-xl border border-[#E5EAF2] p-2.5 bg-white font-medium text-[#111827]"
               />
             </div>
           </div>
 
           {/* Logo Image Upload */}
           <div>
-            <label className="block text-xs font-mono uppercase font-bold text-slate-600 mb-1">
+            <label className="block text-xs font-mono uppercase font-bold text-[#64748B] mb-1">
               Tournament Logo (PNG/JPG/WebP)
             </label>
-            <label className="flex items-center justify-center gap-2 p-2.5 rounded border border-dashed border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
-              <Upload size={16} className="text-slate-500" />
-              <span className="text-xs font-mono text-slate-600">
+            <label className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-dashed border-[#E5EAF2] bg-[#F7F9FC] cursor-pointer hover:bg-[#F1F4F8] transition-colors">
+              <Upload size={16} className="text-[#64748B]" />
+              <span className="text-xs font-mono text-[#64748B]">
                 {compressing ? 'Compressing...' : logoUrl ? '✓ Logo Uploaded' : 'Upload Image'}
               </span>
               <input
@@ -214,16 +213,16 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
 
           {/* Logo Preview */}
           {logoUrl && (
-            <div className="flex items-center gap-3 p-2 border border-slate-200 rounded bg-slate-50">
-              <img src={logoUrl} alt="Logo Preview" className="w-10 h-10 object-contain rounded bg-white p-1 border border-slate-200" />
-              <div className="text-xs text-slate-600 font-mono">
+            <div className="flex items-center gap-3 p-2 border border-[#E5EAF2] rounded-xl bg-[#F7F9FC]">
+              <img src={logoUrl} alt="Logo Preview" className="w-10 h-10 object-contain rounded-lg bg-white p-1 border border-[#E5EAF2]" />
+              <div className="text-xs text-[#64748B] font-mono">
                 ✓ Image compressed & ready to save
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-mono uppercase font-bold text-slate-600 mb-1">
+            <label className="block text-xs font-mono uppercase font-bold text-[#64748B] mb-1">
               Description
             </label>
             <textarea
@@ -231,22 +230,22 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
               placeholder="Brief details about tournament format, prize pool, or teams..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded border border-slate-300 p-2.5 bg-white font-medium"
+              className="w-full rounded-xl border border-[#E5EAF2] p-2.5 bg-white font-medium text-[#111827]"
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
+          <div className="pt-4 border-t border-[#E5EAF2] flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="px-4 py-2 rounded-xl border border-[#E5EAF2] text-xs font-semibold text-[#64748B] hover:bg-[#F1F4F8]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || compressing}
-              className="px-5 py-2 rounded bg-[#0F2A1E] text-white font-display text-xs hover:bg-[#1B4332]"
+              className="px-5 py-2 rounded-xl bg-[#0757E8] text-white font-display font-bold text-xs hover:bg-[#004ED0] shadow-sm"
             >
               {loading ? 'Creating...' : 'Create Tournament'}
             </button>
