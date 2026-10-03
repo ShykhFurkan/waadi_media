@@ -147,7 +147,7 @@ function CalculatorInner() {
               key={qs.label}
               type="button"
               onClick={() => handleQuickStart(qs.ids)}
-              className="px-4 py-2 rounded-full border border-line bg-snow hover:border-blue hover:text-blue text-sm font-medium text-ink transition-colors cursor-pointer select-none"
+              className="px-4 py-2 rounded-full border border-line bg-snow hover:border-blue hover:text-blue text-sm font-medium text-ink transition-colors cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-2"
             >
               {qs.label}
             </button>
@@ -186,7 +186,7 @@ function CalculatorInner() {
                         <label
                           key={item.id}
                           className={cn(
-                            'flex items-start justify-between gap-4 p-3.5 rounded-xl border transition-all cursor-pointer select-none',
+                            'flex items-start justify-between gap-4 p-3.5 rounded-xl border transition-all cursor-pointer select-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue',
                             isChecked
                               ? 'border-blue bg-blue-tint/40 text-ink'
                               : 'border-line/70 hover:border-mist/50 bg-white text-graphite'
@@ -197,7 +197,7 @@ function CalculatorInner() {
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => handleToggleItem(item.id)}
-                              className="mt-1 w-4 h-4 rounded text-blue border-line focus:ring-blue accent-blue cursor-pointer"
+                              className="mt-1 w-4 h-4 rounded text-blue border-line focus:ring-blue accent-blue cursor-pointer focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-2"
                             />
                             <div>
                               <span className="font-medium text-sm text-ink block">

@@ -54,8 +54,16 @@ export const metadata: Metadata = {
   creator: siteConfig.founder.name,
   publisher: siteConfig.name,
   icons: {
-    icon: '/favicon.ico',
-    apple: '/icon.png',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'icon', url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
   },
   openGraph: {
     title: 'Waadi Media - Web Design and Digital Agency in Kashmir',

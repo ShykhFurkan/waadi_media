@@ -24,7 +24,7 @@ export function Marquee({
         className
       )}
     >
-      <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
+      <div className="flex w-max animate-marquee motion-reduce:animate-none group-hover:[animation-play-state:paused]">
         <div className="flex shrink-0 items-center">{content}</div>
         <div className="flex shrink-0 items-center" aria-hidden="true">
           {content}

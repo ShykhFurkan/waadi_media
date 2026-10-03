@@ -134,13 +134,19 @@ export default function WorkPage() {
 
                     {/* Screenshot Container */}
                     <div className="relative aspect-[16/10] bg-snow overflow-hidden">
-                      <Image
-                        src={`/work/${project.slug}/cover.png`}
-                        alt={`${project.name} website preview`}
-                        fill
-                        className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                        sizes="(max-width: 1024px) 100vw, 55vw"
-                      />
+                      {project.slug ? (
+                        <Image
+                          src={project.coverImage || `/work/${project.slug}/cover.png`}
+                          alt={`${project.name} website preview`}
+                          fill
+                          className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                          sizes="(max-width: 1024px) 100vw, 55vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
+                          Preview coming soon
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </div>

@@ -59,7 +59,7 @@ const PrivacyContent = () => {
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">4. Contact Information</h2>
                             <p>
                                 For privacy inquiries, contact our team at: <br />
-                                <span className="text-blue-600 dark:text-blue-400 font-bold">hello@waadimedia.com</span>
+                                <span className="text-blue-600 dark:text-blue-400 font-bold">contact@waadimedia.com</span>
                             </p>
                         </div>
                     </div>

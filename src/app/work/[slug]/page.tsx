@@ -143,14 +143,20 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
             </div>
 
             <div className="relative aspect-[16/10] bg-snow overflow-hidden">
-              <Image
-                src={`/work/${project.slug}/cover.png`}
-                alt={`${project.name} live website screenshot`}
-                fill
-                priority
-                className="object-cover object-top"
-                sizes="(max-width: 1024px) 100vw, 1000px"
-              />
+              {project.slug ? (
+                <Image
+                  src={project.coverImage || `/work/${project.slug}/cover.png`}
+                  alt={`${project.name} live website screenshot`}
+                  fill
+                  priority
+                  className="object-cover object-top"
+                  sizes="(max-width: 1024px) 100vw, 1000px"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
+                  Preview coming soon
+                </div>
+              )}
             </div>
           </div>
         </div>

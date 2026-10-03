@@ -82,9 +82,13 @@ export function Header() {
             className="relative"
             onMouseEnter={() => setServicesOpen(true)}
             onMouseLeave={() => setServicesOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setServicesOpen(false);
+            }}
           >
             <button
               type="button"
+              aria-haspopup="true"
               aria-expanded={servicesOpen}
               onClick={() => setServicesOpen(!servicesOpen)}
               className={cn(
@@ -116,9 +120,10 @@ export function Header() {
                     </span>
                     <Link
                       href="/services"
+                      onClick={() => setServicesOpen(false)}
                       className="text-xs text-blue hover:text-blue-deep font-medium"
                     >
-                      Overview ↗
+                      Overview
                     </Link>
                   </div>
                   <ul className="space-y-1">
@@ -126,6 +131,7 @@ export function Header() {
                       <li key={service.slug}>
                         <Link
                           href={`/services/${service.slug}`}
+                          onClick={() => setServicesOpen(false)}
                           className="block px-3 py-2 rounded-xl hover:bg-snow transition-colors"
                         >
                           <span className="block text-sm font-medium text-ink">

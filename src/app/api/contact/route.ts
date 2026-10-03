@@ -83,13 +83,6 @@ export async function POST(request: Request) {
 
     if (!resendApiKey) {
       if (process.env.NODE_ENV !== 'production') {
-        // Safe logging in development without leaking sensitive secrets
-        console.log('[Dev Contact Submission]', {
-          services: data.services,
-          budget: data.budget,
-          sourcePage: data.sourcePage || '/contact',
-          hasEmail: Boolean(data.email),
-        });
         return NextResponse.json({ ok: true });
       } else {
         // In production, never log personal data; return clear user-facing error

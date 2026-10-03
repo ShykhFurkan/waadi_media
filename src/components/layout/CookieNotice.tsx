@@ -22,7 +22,10 @@ function getServerSnapshot() {
   return null;
 }
 
+const emptySubscribe = () => () => {};
+
 export function CookieNotice({ gaId }: CookieNoticeProps) {
+  const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const handleAccept = () => {
@@ -33,8 +36,9 @@ export function CookieNotice({ gaId }: CookieNoticeProps) {
     setAnalyticsConsent('denied');
   };
 
-  // If consent has already been chosen, or during SSR, don't show the banner
-  const showBanner = typeof window !== 'undefined' && consent === null;
+  if (!isHydrated) {
+    return null;
+  }
 
   return (
     <>
@@ -42,7 +46,7 @@ export function CookieNotice({ gaId }: CookieNoticeProps) {
       {consent === 'granted' && gaId && <GoogleAnalytics gaId={gaId} />}
 
       {/* Show notice only if user hasn't made a choice yet */}
-      {showBanner && (
+      {consent === null && (
         <div
           role="region"
           aria-label="Cookie consent"

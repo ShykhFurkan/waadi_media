@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   contactFormSchema,
@@ -50,7 +50,6 @@ export function ContactForm({
     control,
     setValue,
     getValues,
-    watch,
     reset,
     formState: { errors },
   } = useForm<ContactFormData>({
@@ -68,7 +67,7 @@ export function ContactForm({
     },
   });
 
-  const selectedServices = watch('services') || [];
+  const selectedServices = useWatch({ control, name: 'services' }) || [];
 
   // Query parameter prefill: ?service=, ?package=, ?items=
   useEffect(() => {

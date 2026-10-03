@@ -34,8 +34,13 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
   const postUrl = `${siteConfig.url}/blog/${post.metadata.slug}`;
 
+  const pageTitle =
+    post.metadata.title.length + 14 <= 60
+      ? `${post.metadata.title} - Waadi Media`
+      : post.metadata.title;
+
   return {
-    title: `${post.metadata.title} - Waadi Media`,
+    title: pageTitle,
     description: post.metadata.description,
     alternates: {
       canonical: `/blog/${post.metadata.slug}`,

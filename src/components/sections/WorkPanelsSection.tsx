@@ -62,13 +62,19 @@ export function WorkPanelsSection() {
 
                       {/* Mockup Image container with 1.03x hover zoom per Section 6.8 */}
                       <div className="relative aspect-[16/10] w-full overflow-hidden bg-snow">
-                        <Image
-                          src={project.coverImage}
-                          alt={`${project.name} website preview`}
-                          fill
-                          sizes="(max-width: 1024px) 100vw, 58vw"
-                          className="object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-                        />
+                        {project.coverImage ? (
+                          <Image
+                            src={project.coverImage}
+                            alt={`${project.name} website preview`}
+                            fill
+                            sizes="(max-width: 1024px) 100vw, 58vw"
+                            className="object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
+                            Preview coming soon
+                          </div>
+                        )}
                       </div>
                     </div>
                   </ImageWipe>
