@@ -1,262 +1,180 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: var(--font-serif), 'Cormorant Garamond', Georgia, serif;
-  --font-display: var(--font-display), 'Playfair Display', Georgia, serif;
+  --font-display: var(--font-display), 'Newsreader', Georgia, serif;
+  --font-sans: var(--font-sans), 'Outfit', system-ui, -apple-system, sans-serif;
+
+  --color-snow: #F5F8FC;
+  --color-paper: #FFFFFF;
+  --color-ink: #000000;
+  --color-graphite: #2F343D;
+  --color-mist: #667085;
+  --color-line: #E1E7F0;
+  --color-blue: #0057FF;
+  --color-blue-deep: #0039B3;
+  --color-blue-tint: #EAF1FF;
+  
+  --color-ridgeline-1: #E6EEFF;
+  --color-ridgeline-2: #C9DAFF;
+  --color-ridgeline-3: #9DBAFF;
+  --color-ridgeline-4: #5C8DFF;
+  --color-ridgeline-5: #0057FF;
+
+  --color-success: #0F7B4F;
+  --color-error: #C62828;
+  --color-whatsapp: #25D366;
 }
 
-@layer base {
-  :root {
-    --font-sans: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-serif: var(--font-serif), 'Cormorant Garamond', Georgia, serif;
-    --font-display: var(--font-display), 'Playfair Display', Georgia, serif;
-    --waadi-blue: #2563EB;
-    --waadi-blue-hover: #1D4ED8;
-    --waadi-blue-light: #EFF6FF;
-    --waadi-blue-border: #BFDBFE;
-    --waadi-navy: #0B1120;
-    --waadi-slate: #334155;
-    --waadi-muted: #64748B;
-    --waadi-bg-light: #F8FAFC;
-    --waadi-card-bg: #FFFFFF;
-  }
+:root {
+  --snow: #F5F8FC;
+  --paper: #FFFFFF;
+  --ink: #000000;
+  --graphite: #2F343D;
+  --mist: #667085;
+  --line: #E1E7F0;
+  --blue: #0057FF;
+  --blue-deep: #0039B3;
+  --blue-tint: #EAF1FF;
+  
+  --ridgeline-1: #E6EEFF;
+  --ridgeline-2: #C9DAFF;
+  --ridgeline-3: #9DBAFF;
+  --ridgeline-4: #5C8DFF;
+  --ridgeline-5: #0057FF;
 
-  html {
-    scroll-behavior: smooth;
-    font-family: var(--font-sans);
-    overflow-x: hidden;
-    max-width: 100vw;
-  }
+  --success: #0F7B4F;
+  --error: #C62828;
+  --whatsapp: #25D366;
 
-  body {
-    background-color: var(--waadi-bg-light);
-    color: var(--waadi-navy);
-    overflow-x: hidden;
-    max-width: 100vw;
-    font-family: var(--font-sans);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  button, a, input, select, textarea {
-    touch-action: manipulation;
-  }
-
-  /* Prevent iOS Safari 16px auto-zoom bug on mobile while keeping desktop styles intact */
-  @media (max-width: 640px) {
-    input:not([type="checkbox"]):not([type="radio"]),
-    select,
-    textarea {
-      font-size: 16px !important;
-    }
-  }
+  --ease-signature: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Mobile-Friendly Utility Classes */
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Light mode only */
+html {
+  background-color: var(--snow);
+  color: var(--graphite);
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+body {
+  background-color: var(--snow);
+  color: var(--graphite);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.65;
+  overflow-x: hidden;
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
+/* Typography Utility Classes matching Section 6.3 */
 .font-display {
   font-family: var(--font-display);
-}
-
-.font-serif {
-  font-family: var(--font-serif);
 }
 
 .font-sans {
   font-family: var(--font-sans);
 }
 
-/* Luxury Editorial Typography */
-.editorial-title {
+.text-display {
   font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7.2vw, 6.25rem);
+  line-height: 1.0;
   letter-spacing: -0.025em;
+  font-weight: 400;
+  color: var(--ink);
 }
 
-.editorial-italic {
-  font-family: var(--font-serif);
-  font-style: italic;
+.text-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5.2vw, 4.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.text-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.6vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.text-h3 {
+  font-family: var(--font-sans);
+  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  line-height: 1.25;
   letter-spacing: -0.01em;
+  font-weight: 500;
+  color: var(--ink);
 }
 
-/* Apple Liquid Display Glass Utilities (Ultra-Blurry Frosted Liquid Glass) */
-.apple-liquid-glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.35) 0%,
-    rgba(255, 255, 255, 0.18) 50%,
-    rgba(255, 255, 255, 0.28) 100%
-  ) !important;
-  backdrop-filter: blur(36px) saturate(200%) brightness(108%) contrast(96%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(200%) brightness(108%) contrast(96%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 
-    0 20px 40px -15px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.25),
-    inset 0 0 24px 0 rgba(255, 255, 255, 0.18) !important;
+.text-lead {
+  font-family: var(--font-sans);
+  font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+  line-height: 1.55;
+  font-weight: 300;
+  color: var(--graphite);
 }
 
-.apple-liquid-glass-scrolled {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.24) 50%,
-    rgba(255, 255, 255, 0.35) 100%
-  ) !important;
-  backdrop-filter: blur(40px) saturate(210%) brightness(110%) contrast(98%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(210%) brightness(110%) contrast(98%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.7) !important;
-  box-shadow: 
-    0 24px 48px -15px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.35),
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1),
-    inset 0 -1.5px 2px 0 rgba(255, 255, 255, 0.3),
-    inset 0 0 28px 0 rgba(255, 255, 255, 0.22) !important;
+.text-body {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-weight: 400;
+  max-width: 70ch;
 }
 
-.apple-liquid-track {
-  background: rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 
-    inset 0 1px 2px 0 rgba(0, 0, 0, 0.04),
-    inset 0 0 10px 0 rgba(255, 255, 255, 0.15) !important;
+.text-price {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 400;
+  color: var(--ink);
 }
 
-.apple-liquid-active {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.85) !important;
-  box-shadow: 
-    0 4px 14px -2px rgba(0, 0, 0, 0.08),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 1) !important;
+.tabular-numbers {
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Luxury Textured Background Patterns */
-.textured-bg {
-  background-color: #F8FAFC;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.04) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.04) 0px, transparent 50%),
-    radial-gradient(#CBD5E1 1.2px, transparent 1.2px);
-  background-size: 100% 100%, 100% 100%, 24px 24px;
+/* Accessibility focus ring: 2px --blue with 3px offset */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }
 
-.textured-bg-dark {
-  background-color: #080C16;
-  background-image: 
-    radial-gradient(at 50% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 60%),
-    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
-    radial-gradient(rgba(59, 130, 246, 0.22) 1.2px, transparent 1.2px);
-  background-size: 100% 100%, 100% 100%, 28px 28px;
+/* Base interactive resets */
+button, a {
+  touch-action: manipulation;
 }
 
-/* Luxury Glassmorphism & Specular Bevel Utilities */
-.glass-card {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
-    0 10px 30px -10px rgba(15, 23, 42, 0.05),
-    0 1px 3px 0 rgba(15, 23, 42, 0.02);
+/* Tap target min size */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }
 
-.glass-card-dark {
-  background: rgba(11, 17, 32, 0.88);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.08),
-    0 20px 40px -15px rgba(0, 0, 0, 0.6);
+/* Shadows allowed only for floating items per Section 6.6 */
+.shadow-floating {
+  box-shadow: 0 10px 30px rgba(0, 30, 90, 0.08);
 }
 
-.glass-card-hover {
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+/* Prevent layout shift */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-
-.glass-card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 
-    inset 0 1px 1px 0 rgba(255, 255, 255, 1),
-    0 25px 45px -10px rgba(37, 99, 235, 0.16),
-    0 12px 20px -6px rgba(37, 99, 235, 0.08);
-  border-color: rgba(147, 197, 253, 0.9);
-}
-
-.luxury-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(191, 219, 254, 0.85);
-  background: rgba(239, 246, 255, 0.88);
-  backdrop-filter: blur(14px);
-  padding: 0.4rem 1.1rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #1D4ED8;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
-}
-
-.luxury-badge-dark {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  background: rgba(30, 58, 138, 0.28);
-  backdrop-filter: blur(14px);
-  padding: 0.4rem 1.1rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #93C5FD;
-}
-
-.blue-gradient-text {
-  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #38BDF8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.blue-gradient-bg {
-  background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
-}
-
-.blue-glow {
-  box-shadow: 0 0 50px -5px rgba(37, 99, 235, 0.35);
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(0.98); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 3s infinite ease-in-out;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

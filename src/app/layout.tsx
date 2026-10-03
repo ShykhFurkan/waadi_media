@@ -1,150 +1,75 @@
-import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Cormorant_Garamond, Playfair_Display } from "next/font/google";
-import Script from "next/script";
-import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { JsonLd } from "@/components/JsonLd";
+import type { Metadata, Viewport } from 'next';
+import { Newsreader, Outfit } from 'next/font/google';
+import './globals.css';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { FloatingActions } from '@/components/layout/FloatingActions';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getProfessionalServiceSchema, getWebSiteSchema } from '@/lib/seo';
+import { siteConfig } from '@/config/site';
 
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
-  themeColor: "#020617",
+  themeColor: '#F5F8FC',
 };
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-sans",
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-display',
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
 });
 
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["500", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
-  variable: "--font-display",
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+  weight: ['300', '400', '500', '600'],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://waadimedia.com"),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Waadi Media | Web Development, AI & Digital Agency in Jammu & Kashmir, India",
-    template: "%s | Waadi Media",
+    default: 'Waadi Media - Web Design and Digital Agency in Kashmir',
+    template: '%s - Waadi Media',
   },
   description:
-    "Waadi Media is Jammu & Kashmir's premier freelance digital engineering and creative agency based in Anantnag and Srinagar. Led by Furkan Mushtaq, delivering high-performance Next.js web applications, custom AI automation pipelines, and high-impact social media brand management across India and globally.",
+    "Websites, SEO, branding, ads and software for Kashmir's businesses. Clear prices, fast delivery, built in Anantnag. Book a free call.",
   keywords: [
-    "Web development company in Kashmir",
-    "Website design Anantnag",
-    "Web developer Srinagar",
-    "Digital marketing agency Jammu and Kashmir",
-    "AI automation pipelines India",
-    "Kashmir tourism website design",
-    "Next.js web agency India",
-    "Furkan Mushtaq software engineer",
-    "Social media management Kashmir",
-    "E-commerce website development Kashmir",
+    'web design agency in Kashmir',
+    'web design agency in Srinagar',
+    'web design agency in Anantnag',
+    'website development Kashmir',
+    'digital marketing agency Kashmir',
+    'SEO services Kashmir',
+    'ecommerce website development Kashmir',
+    'brand identity Kashmir',
+    'Google Ads Kashmir',
+    'social media marketing Srinagar',
   ],
-  authors: [{ name: "Furkan Mushtaq", url: "https://waadimedia.com/about" }],
-  creator: "Furkan Mushtaq",
-  publisher: "Waadi Media",
+  authors: [{ name: siteConfig.founder.name }],
+  creator: siteConfig.founder.name,
+  publisher: siteConfig.name,
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-icon.png",
+    icon: '/favicon.ico',
+    apple: '/icon.png',
   },
-  manifest: "/site.webmanifest",
   openGraph: {
-    title: "Waadi Media | Web Development, AI & Digital Agency in Jammu & Kashmir, India",
+    title: 'Waadi Media - Web Design and Digital Agency in Kashmir',
     description:
-      "Premier digital engineering studio in Kashmir. Next.js websites, custom AI pipelines, and strategic brand growth for businesses in Srinagar, Anantnag, and across India.",
-    url: "https://waadimedia.com",
-    siteName: "Waadi Media",
-    images: [
-      {
-        url: "/kashmir_hero_bg.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Waadi Media - Web Development & AI Agency in Jammu and Kashmir, India",
-      },
-    ],
-    locale: "en_IN",
-    type: "website",
+      "Websites, SEO, branding, ads and software for Kashmir's businesses. Clear prices, fast delivery, built in Anantnag. Book a free call.",
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    locale: 'en_IN',
+    type: 'website',
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Waadi Media | Web Development, AI & Digital Agency in Jammu & Kashmir",
+    card: 'summary_large_image',
+    title: 'Waadi Media - Web Design and Digital Agency in Kashmir',
     description:
-      "Premier digital engineering studio in Kashmir. Next.js websites, custom AI pipelines, and brand growth.",
-    images: ["/kashmir_hero_bg.jpg"],
-  },
-};
-
-const professionalServiceSchema = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  name: "Waadi Media",
-  image: "https://waadimedia.com/logo.png",
-  url: "https://waadimedia.com",
-  telephone: "+91-7780940317",
-  email: "contact@waadimedia.com",
-  priceRange: "₹₹",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Main Town, KP Road",
-    addressLocality: "Anantnag",
-    addressRegion: "Jammu and Kashmir",
-    postalCode: "192101",
-    addressCountry: "IN",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: "33.7311",
-    longitude: "75.1487",
-  },
-  areaServed: [
-    { "@type": "City", name: "Anantnag" },
-    { "@type": "City", name: "Srinagar" },
-    { "@type": "AdministrativeArea", name: "Jammu and Kashmir" },
-    { "@type": "Country", name: "India" },
-    { "@type": "Country", name: "Worldwide" },
-  ],
-  sameAs: [
-    "https://www.instagram.com/waadimedia",
-    "https://www.linkedin.com/company/waadimedia",
-    "https://www.facebook.com/waadimedia",
-  ],
-  founder: {
-    "@type": "Person",
-    name: "Furkan Mushtaq",
-    jobTitle: "Founder & Lead Software Engineer",
-    alumniOf: "Computer Science & Technology",
-  },
-};
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Waadi Media",
-  url: "https://waadimedia.com",
-  logo: "https://waadimedia.com/logo.png",
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+91-7780940317",
-    contactType: "customer service",
-    email: "contact@waadimedia.com",
-    areaServed: ["IN", "Worldwide"],
-    availableLanguage: ["English", "Urdu", "Kashmiri", "Hindi"],
+      "Websites, SEO, branding, ads and software for Kashmir's businesses. Clear prices, fast delivery, built in Anantnag.",
   },
 };
 
@@ -154,30 +79,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} ${cormorantGaramond.variable} ${playfairDisplay.variable}`}>
+    <html lang="en" className={`${newsreader.variable} ${outfit.variable}`}>
       <head>
-        {/* Google Analytics GA4 */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-PLACEHOLDER"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-PLACEHOLDER');
-          `}
-        </Script>
-
-        {/* Site-wide Schemas */}
-        <JsonLd data={professionalServiceSchema} />
-        <JsonLd data={organizationSchema} />
+        <JsonLd data={getProfessionalServiceSchema()} />
+        <JsonLd data={getWebSiteSchema()} />
       </head>
-      <body className="flex min-h-screen flex-col font-sans antialiased bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
-        <Navbar />
-        <main className="flex-1">{children}</main>
+      <body className="min-h-screen bg-snow text-graphite font-sans antialiased flex flex-col selection:bg-blue selection:text-white">
+        {/* Skip to main content for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue focus:text-white focus:rounded-full"
+        >
+          Skip to content
+        </a>
+        
+        <Header />
+        <main id="main-content" className="flex-1 w-full pb-16 md:pb-0">
+          {children}
+        </main>
         <Footer />
+        <FloatingActions />
       </body>
     </html>
   );
