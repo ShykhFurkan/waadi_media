@@ -1,9 +1,12 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
 import { Ridgeline } from '@/components/illustrations/Ridgeline';
 import { servicesData } from '@/data/services';
 import { siteConfig } from '@/config/site';
+import { trackEvent } from '@/lib/analytics';
 
 export function Footer() {
   const companyLinks = [
@@ -91,12 +94,24 @@ export function Footer() {
             <div className="space-y-1.5">
               <a
                 href={`tel:${siteConfig.contact.tel}`}
+                onClick={() =>
+                  trackEvent({
+                    name: 'click_call',
+                    params: { location: 'footer', phone: siteConfig.contact.tel },
+                  })
+                }
                 className="block text-sm font-medium text-ink hover:text-blue transition-colors"
               >
                 {siteConfig.contact.phone}
               </a>
               <a
                 href={`mailto:${siteConfig.contact.email}`}
+                onClick={() =>
+                  trackEvent({
+                    name: 'click_email',
+                    params: { location: 'footer', email: siteConfig.contact.email },
+                  })
+                }
                 className="block text-sm font-medium text-ink hover:text-blue transition-colors"
               >
                 {siteConfig.contact.email}

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { projectsData, getProjectBySlug } from '@/data/projects';
 import { Button } from '@/components/ui/Button';
+import { OutboundLink } from '@/components/ui/OutboundLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getCreativeWorkSchema, getBreadcrumbSchema } from '@/lib/seo';
 
@@ -26,13 +27,13 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
   return {
     title: `${project.name} Case Study - Waadi Media`,
-    description: project.summary,
+    description: project.metaDescription || project.summary,
     alternates: {
       canonical: `/work/${project.slug}`,
     },
     openGraph: {
       title: `${project.name} Case Study - Waadi Media`,
-      description: project.summary,
+      description: project.metaDescription || project.summary,
       url: `/work/${project.slug}`,
     },
   };
@@ -121,14 +122,13 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
               ))}
             </div>
 
-            <a
+            <OutboundLink
               href={project.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              label={project.name}
               className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue text-white text-sm font-medium hover:bg-blue-deep transition-colors shrink-0"
             >
               Visit live site
-            </a>
+            </OutboundLink>
           </div>
 
           {/* Cover mockup in CSS browser window frame */}

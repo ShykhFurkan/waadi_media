@@ -6,15 +6,16 @@ export function getProfessionalServiceSchema() {
     '@type': 'ProfessionalService',
     name: siteConfig.name,
     image: `${siteConfig.url}/logo.png`,
+    logo: `${siteConfig.url}/logo.png`,
     url: siteConfig.url,
-    telephone: siteConfig.contact.tel,
+    telephone: '+917780940317',
     email: siteConfig.contact.email,
     priceRange: '₹₹',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: siteConfig.location.city,
-      addressRegion: siteConfig.location.state,
-      addressCountry: 'IN',
+      addressLocality: 'Anantnag',
+      addressRegion: 'Jammu and Kashmir',
+      addressCountry: 'India',
     },
     areaServed: [
       { '@type': 'AdministrativeArea', name: 'Jammu and Kashmir' },
@@ -22,10 +23,9 @@ export function getProfessionalServiceSchema() {
     ],
     founder: {
       '@type': 'Person',
-      name: siteConfig.founder.name,
-      jobTitle: siteConfig.founder.role,
+      name: 'Furkan Mushtaq',
     },
-    foundingDate: `${siteConfig.foundedYear}`,
+    foundingDate: '2026',
   };
 }
 

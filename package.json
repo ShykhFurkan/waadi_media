@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/pricing.test.ts"
+    "test": "node --test tests/pricing.test.ts",
+    "seo:check": "node scripts/seo-check.mjs"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",

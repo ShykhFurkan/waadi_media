@@ -4,6 +4,7 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingActions } from '@/components/layout/FloatingActions';
+import { CookieNotice } from '@/components/layout/CookieNotice';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getProfessionalServiceSchema, getWebSiteSchema } from '@/lib/seo';
 import { siteConfig } from '@/config/site';
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
     default: 'Waadi Media - Web Design and Digital Agency in Kashmir',
-    template: '%s - Waadi Media',
+    template: '%s',
   },
   description:
     "Websites, SEO, branding, ads and software for Kashmir's businesses. Clear prices, fast delivery, built in Anantnag. Book a free call.",
@@ -71,6 +72,9 @@ export const metadata: Metadata = {
     description:
       "Websites, SEO, branding, ads and software for Kashmir's businesses. Clear prices, fast delivery, built in Anantnag.",
   },
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export default function RootLayout({
@@ -99,6 +103,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <FloatingActions />
+        <CookieNotice gaId={process.env.NEXT_PUBLIC_GA_ID} />
       </body>
     </html>
   );

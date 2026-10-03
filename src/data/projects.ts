@@ -4,6 +4,7 @@ export type Project = {
   sector: string;
   liveUrl: string;
   summary: string;
+  metaDescription?: string;
   services: string[];
   overview: string;
   challenge: string;
@@ -71,6 +72,8 @@ export const projectsData: Project[] = [
     liveUrl: 'https://smarthire-beige.vercel.app/',
     summary:
       'An AI hiring platform that takes candidates and recruiters through four hiring stages in one place, designed to make hiring fairer. Built as an engineering final-year project.',
+    metaDescription:
+      'An AI hiring platform that takes candidates and recruiters through four hiring stages in one place, designed to make hiring fairer.',
     services: ['Custom software', 'AI integration', 'Full-stack development'],
     overview:
       'SmartHire brings the whole hiring process into a single application for candidates and recruiters, from first screening to final interview.',

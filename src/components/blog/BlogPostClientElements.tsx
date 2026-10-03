@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Check, MessageCircle, Copy } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
-export function ReadingProgressBar() {
+export function ReadingProgressBar({ slug = '', title = '' }: { slug?: string; title?: string }) {
   const [progress, setProgress] = useState(0);
+  const firedRef = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,12 +18,20 @@ export function ReadingProgressBar() {
       const currentScroll = window.scrollY;
       const percent = Math.min(100, Math.max(0, (currentScroll / totalHeight) * 100));
       setProgress(percent);
+
+      if (percent >= 75 && !firedRef.current) {
+        firedRef.current = true;
+        trackEvent({
+          name: 'blog_read_75',
+          params: { slug, title },
+        });
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [slug, title]);
 
   return (
     <div
@@ -45,36 +55,36 @@ export function ShareButtons({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback
+      // Fallback
     }
   };
 
-  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(`${title} - ${url}`)}`;
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
+    `Read "${title}" by Waadi Media: ${url}`
+  )}`;
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-mist font-medium">Share:</span>
-
+    <div className="flex items-center gap-2">
       <button
+        onClick={handleCopyLink}
         type="button"
-        onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-paper text-xs font-medium text-graphite hover:border-blue hover:text-blue transition-colors cursor-pointer"
-        title="Copy link to article"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line text-xs font-medium text-graphite hover:border-blue hover:text-blue transition-colors"
+        title="Copy link to clipboard"
       >
         {copied ? (
           <>
             <Check className="w-3.5 h-3.5 text-success" />
-            <span className="text-success">Link copied</span>
+            <span>Copied</span>
           </>
         ) : (
           <>
-            <Copy className="w-3.5 h-3.5" />
+            <Copy className="w-3.5 h-3.5 text-mist" />
             <span>Copy link</span>
           </>
         )}
@@ -84,11 +94,12 @@ export function ShareButtons({
         href={whatsappShareUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-paper text-xs font-medium text-graphite hover:border-whatsapp hover:text-whatsapp transition-colors"
+        onClick={() => trackEvent({ name: 'click_whatsapp', params: { location: 'blog_share' } })}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line text-xs font-medium text-graphite hover:border-whatsapp hover:text-whatsapp transition-colors"
         title="Share on WhatsApp"
       >
         <MessageCircle className="w-3.5 h-3.5 text-whatsapp" />
-        <span>WhatsApp</span>
+        <span>Share</span>
       </a>
     </div>
   );

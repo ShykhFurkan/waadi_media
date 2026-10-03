@@ -143,7 +143,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <article className="w-full min-h-screen bg-snow text-graphite py-16 md:py-24">
-      <ReadingProgressBar />
+      <ReadingProgressBar slug={post.metadata.slug} title={post.metadata.title} />
       <JsonLd data={articleSchema} />
       <JsonLd data={breadcrumbsSchema} />
 

@@ -6,6 +6,7 @@ import { projectsData } from '@/data/projects';
 import { formatStartingPrice } from '@/data/pricing';
 import { Accordion } from '@/components/ui/Accordion';
 import { Button } from '@/components/ui/Button';
+import { OutboundLink } from '@/components/ui/OutboundLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getFaqPageSchema, getBreadcrumbSchema } from '@/lib/seo';
 import { MessageCircle } from 'lucide-react';
@@ -250,14 +251,13 @@ export default function KashmirLocalPage() {
                   >
                     View case study
                   </Link>
-                  <a
+                  <OutboundLink
                     href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    label={project.name}
                     className="text-xs text-graphite hover:text-ink transition-colors"
                   >
                     Visit site
-                  </a>
+                  </OutboundLink>
                 </div>
               </div>
             ))}

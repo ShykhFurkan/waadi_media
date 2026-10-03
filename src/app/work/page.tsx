@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { projectsData } from '@/data/projects';
 import { Button } from '@/components/ui/Button';
+import { OutboundLink } from '@/components/ui/OutboundLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getBreadcrumbSchema } from '@/lib/seo';
 import { cn } from '@/lib/utils';
@@ -100,14 +101,13 @@ export default function WorkPage() {
                     >
                       View case study
                     </Button>
-                    <a
+                    <OutboundLink
                       href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      label={project.name}
                       className="text-sm font-medium text-graphite hover:text-blue transition-colors underline underline-offset-4"
                     >
                       Visit site
-                    </a>
+                    </OutboundLink>
                   </div>
                 </div>
 

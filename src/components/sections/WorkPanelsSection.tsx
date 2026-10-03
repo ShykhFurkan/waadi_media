@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -5,6 +7,7 @@ import { projectsData } from '@/data/projects';
 import { ImageWipe } from '@/components/ui/MotionHelpers';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { trackEvent } from '@/lib/analytics';
 
 export function WorkPanelsSection() {
   return (
@@ -118,9 +121,15 @@ export function WorkPanelsSection() {
                       href={project.liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() =>
+                        trackEvent({
+                          name: 'outbound_click',
+                          params: { url: project.liveUrl, label: project.name },
+                        })
+                      }
                       className="text-sm font-medium text-graphite hover:text-ink transition-colors"
                     >
-                      Visit site ↗
+                      Visit site
                     </a>
                   </div>
                 </div>

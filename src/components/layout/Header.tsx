@@ -11,6 +11,7 @@ import { servicesData } from '@/data/services';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { easeCustom } from '@/components/ui/MotionHelpers';
+import { trackEvent } from '@/lib/analytics';
 
 export function Header() {
   const pathname = usePathname();
@@ -160,7 +161,17 @@ export function Header() {
         {/* Right: Desktop CTA button & Mobile hamburger */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:block">
-            <Button href="/book-a-call" variant="primary" magnetic>
+            <Button
+              href="/book-a-call"
+              variant="primary"
+              magnetic
+              onClick={() =>
+                trackEvent({
+                  name: 'cta_click',
+                  params: { label: 'Book a free call', location: 'header_desktop' },
+                })
+              }
+            >
               Book a free call
             </Button>
           </div>
@@ -233,12 +244,28 @@ export function Header() {
 
             {/* Bottom Actions for Mobile */}
             <div className="border-t border-line pt-6 mt-8 space-y-3">
-              <Button href="/book-a-call" variant="primary" className="w-full">
+              <Button
+                href="/book-a-call"
+                variant="primary"
+                className="w-full"
+                onClick={() =>
+                  trackEvent({
+                    name: 'cta_click',
+                    params: { label: 'Book a free call', location: 'header_mobile_menu' },
+                  })
+                }
+              >
                 Book a free call
               </Button>
               <div className="grid grid-cols-2 gap-3">
                 <a
                   href={`tel:${siteConfig.contact.tel}`}
+                  onClick={() =>
+                    trackEvent({
+                      name: 'click_call',
+                      params: { location: 'header_mobile_menu', phone: siteConfig.contact.tel },
+                    })
+                  }
                   className="h-12 rounded-full border border-line flex items-center justify-center gap-2 text-sm font-medium text-ink bg-snow hover:bg-paper transition-colors"
                 >
                   <Phone className="w-4 h-4 stroke-[1.5] text-blue" />
@@ -248,6 +275,12 @@ export function Header() {
                   href={siteConfig.contact.whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    trackEvent({
+                      name: 'click_whatsapp',
+                      params: { location: 'header_mobile_menu' },
+                    })
+                  }
                   className="h-12 rounded-full border border-line flex items-center justify-center gap-2 text-sm font-medium text-white bg-[#25D366] hover:opacity-95 transition-opacity"
                 >
                   <MessageSquare className="w-4 h-4 stroke-[1.5]" />

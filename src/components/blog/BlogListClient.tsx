@@ -32,9 +32,9 @@ export function BlogListClient({
   if (posts.length === 0) {
     return (
       <div className="p-12 sm:p-16 bg-paper border border-line rounded-3xl text-center space-y-4 max-w-xl mx-auto shadow-floating">
-        <h2 className="text-h2 text-ink">Articles coming soon.</h2>
+        <h2 className="text-h2 text-ink">New articles are on the way.</h2>
         <p className="text-lead text-mist">
-          We&apos;re currently writing practical, plain-language guides on websites, search, and marketing for Kashmir&apos;s businesses. Check back soon or subscribe to our updates.
+          We&apos;re currently preparing practical, plain-language guides on websites, search, and marketing for Kashmir&apos;s businesses. Check back soon.
         </p>
         <div className="pt-2">
           <Link

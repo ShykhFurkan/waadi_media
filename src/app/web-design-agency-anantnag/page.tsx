@@ -6,6 +6,7 @@ import { projectsData } from '@/data/projects';
 import { formatStartingPrice } from '@/data/pricing';
 import { Accordion } from '@/components/ui/Accordion';
 import { Button } from '@/components/ui/Button';
+import { OutboundLink } from '@/components/ui/OutboundLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getFaqPageSchema, getBreadcrumbSchema } from '@/lib/seo';
 import { MessageCircle } from 'lucide-react';
@@ -257,14 +258,13 @@ export default function AnantnagLocalPage() {
               >
                 Read full case study
               </Link>
-              <a
+              <OutboundLink
                 href={featuredCaseStudy.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                label={featuredCaseStudy.name}
                 className="text-sm text-graphite hover:text-ink transition-colors"
               >
-                Visit live website &rarr;
-              </a>
+                Visit live website
+              </OutboundLink>
             </div>
           </div>
         </div>
