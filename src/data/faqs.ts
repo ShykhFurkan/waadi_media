@@ -17,7 +17,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'timeline',
     question: 'How long does it take?',
     answer:
-      'Typical times: landing page 3 to 5 days, business website 2 to 3 weeks, online store 3 to 5 weeks. [CONFIRM]',
+      'Typical times: landing page 3 to 5 days, business website 2 to 3 weeks, online store 3 to 5 weeks.',
     category: 'process',
   },
   {
@@ -31,7 +31,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'payments',
     question: 'How do payments work?',
     answer:
-      'For one-time projects, 50% to start and 50% on delivery. Monthly services are billed at the start of each month. [CONFIRM]',
+      'For one-time projects, 50% to start and 50% on delivery. Monthly services are billed at the start of each month.',
     category: 'pricing',
   },
   {
@@ -45,7 +45,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'ownership',
     question: 'Who owns the website?',
     answer:
-      'You do. Once the project is paid for, the domain, content and design files are yours. [CONFIRM]',
+      'You do. Once the project is paid for, the domain, content and design files are yours.',
     category: 'general',
   },
   {
@@ -66,7 +66,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'gst',
     question: 'Are prices inclusive of GST?',
     answer:
-      'Starting prices quoted are net service fees. Any applicable GST or statutory taxes are stated clearly before project sign-off. [CONFIRM]',
+      'Starting prices quoted are net service fees. Any applicable GST or statutory taxes are stated clearly before project sign-off.',
     category: 'pricing',
   },
 ];

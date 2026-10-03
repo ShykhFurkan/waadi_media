@@ -124,3 +124,40 @@ export function getCreativeWorkSchema(project: {
 export function getLocalBusinessSchema() {
   return getProfessionalServiceSchema();
 }
+
+export function getArticleSchema(post: {
+  title: string;
+  slug: string;
+  description: string;
+  date: string;
+  updated?: string;
+  author: string;
+  category: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    image: `${siteConfig.url}/blog/${post.slug}/opengraph-image`,
+    datePublished: post.date,
+    dateModified: post.updated || post.date,
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteConfig.url}/logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${siteConfig.url}/blog/${post.slug}`,
+    },
+  };
+}

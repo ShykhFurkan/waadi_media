@@ -2,77 +2,287 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getAllPosts, getPostBySlug } from '@/lib/mdx';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/mdx';
+import { siteConfig } from '@/config/site';
+import { Button } from '@/components/ui/Button';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getArticleSchema, getBreadcrumbSchema } from '@/lib/seo';
+import { ReadingProgressBar, ShareButtons } from '@/components/blog/BlogPostClientElements';
+import { Clock, Calendar, ArrowLeft } from 'lucide-react';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+  const isProduction = process.env.NODE_ENV === 'production';
+  const posts = getAllPosts(!isProduction);
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const isProduction = process.env.NODE_ENV === 'production';
+  const post = getPostBySlug(slug, !isProduction);
 
-  if (!post) {
+  if (!post || (isProduction && post.metadata.draft)) {
     return {
       title: 'Article Not Found - Waadi Media',
     };
   }
 
+  const postUrl = `${siteConfig.url}/blog/${post.metadata.slug}`;
+
   return {
     title: `${post.metadata.title} - Waadi Media`,
     description: post.metadata.description,
+    alternates: {
+      canonical: `/blog/${post.metadata.slug}`,
+    },
+    openGraph: {
+      title: `${post.metadata.title} - Waadi Media`,
+      description: post.metadata.description,
+      url: postUrl,
+      type: 'article',
+      publishedTime: post.metadata.date,
+      modifiedTime: post.metadata.updated || post.metadata.date,
+      authors: [post.metadata.author],
+      tags: [post.metadata.category, post.metadata.keyword],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.metadata.title,
+      description: post.metadata.description,
+    },
   };
 }
 
+const mdxComponents = {
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    const text = typeof props.children === 'string' ? props.children : '';
+    const id = text
+      ? text
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+      : undefined;
+    return (
+      <h2
+        id={id}
+        className="text-h2 text-ink mt-12 mb-4 scroll-mt-24 first:mt-6"
+        {...props}
+      />
+    );
+  },
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    const text = typeof props.children === 'string' ? props.children : '';
+    const id = text
+      ? text
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+      : undefined;
+    return (
+      <h3
+        id={id}
+        className="text-h3 text-ink mt-8 mb-3 scroll-mt-24"
+        {...props}
+      />
+    );
+  },
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+    <p className="text-body text-graphite mb-6 leading-relaxed" {...props} />
+  ),
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+    <ul className="list-disc pl-6 space-y-2 mb-6 text-body text-graphite" {...props} />
+  ),
+  ol: (props: React.OlHTMLAttributes<HTMLOListElement>) => (
+    <ol className="list-decimal pl-6 space-y-2 mb-6 text-body text-graphite" {...props} />
+  ),
+  li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
+    <li className="leading-relaxed" {...props} />
+  ),
+  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a
+      className="text-blue hover:text-blue-deep underline font-medium transition-colors"
+      {...props}
+    />
+  ),
+  blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
+    <blockquote
+      className="border-l-2 border-blue pl-4 py-1 italic text-graphite my-6 bg-snow/50 rounded-r-lg"
+      {...props}
+    />
+  ),
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong className="font-semibold text-ink" {...props} />
+  ),
+};
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const isProduction = process.env.NODE_ENV === 'production';
+  const post = getPostBySlug(slug, !isProduction);
 
-  if (!post) {
+  if (!post || (isProduction && post.metadata.draft)) {
     notFound();
   }
 
+  const postUrl = `${siteConfig.url}/blog/${post.metadata.slug}`;
+  const relatedPosts = getRelatedPosts(slug, post.metadata.category, 2);
+
+  const articleSchema = getArticleSchema(post.metadata);
+  const breadcrumbsSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Blog', url: '/blog' },
+    { name: post.metadata.title, url: `/blog/${post.metadata.slug}` },
+  ]);
+
+  const showTableOfContents = post.metadata.wordCount > 1000 && post.headings.length > 0;
+
   return (
-    <div className="w-full min-h-screen bg-snow text-graphite p-8 max-w-3xl mx-auto">
-      <Link href="/blog" className="text-sm text-blue hover:text-blue-deep mb-8 inline-block">
-        ← Back to all notes
-      </Link>
+    <article className="w-full min-h-screen bg-snow text-graphite py-16 md:py-24">
+      <ReadingProgressBar />
+      <JsonLd data={articleSchema} />
+      <JsonLd data={breadcrumbsSchema} />
 
-      <div className="flex items-center gap-3 text-xs text-mist mb-3">
-        <span className="px-2.5 py-0.5 bg-blue-tint text-blue rounded-md font-medium">
-          {post.metadata.category}
-        </span>
-        <span>{post.metadata.date}</span>
-        <span>•</span>
-        <span>{post.metadata.readingTime}</span>
-        {post.metadata.draft && (
-          <span className="text-error font-medium">(Draft for review)</span>
+      <div className="max-w-[800px] mx-auto px-5 sm:px-8">
+        {/* Back Link */}
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-xs font-medium text-mist hover:text-blue transition-colors mb-10"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Notes from the valley</span>
+        </Link>
+
+        {/* Post Header */}
+        <header className="space-y-6 pb-10 border-b border-line mb-10">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-mist">
+            <span className="px-3 py-1 rounded-full bg-blue-tint text-blue font-medium">
+              {post.metadata.category}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" />
+              {post.metadata.date}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              {post.metadata.readingTime}
+            </span>
+            {post.metadata.draft && (
+              <span className="px-2.5 py-0.5 rounded-full bg-error/10 text-error font-medium">
+                Draft for review
+              </span>
+            )}
+          </div>
+
+          <h1 className="text-h1 text-ink">
+            {post.metadata.title}
+          </h1>
+
+          <p className="text-lead text-mist">
+            {post.metadata.description}
+          </p>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-line text-sm">
+            <div className="text-xs text-graphite">
+              Written by <strong className="text-ink font-semibold">{post.metadata.author}</strong>
+            </div>
+
+            <ShareButtons title={post.metadata.title} url={postUrl} />
+          </div>
+        </header>
+
+        {/* Table of Contents for posts over 1,000 words */}
+        {showTableOfContents && (
+          <nav
+            aria-label="Table of contents"
+            className="p-6 bg-paper border border-line rounded-2xl mb-12 space-y-3"
+          >
+            <span className="text-xs uppercase tracking-wider text-mist font-semibold block">
+              In this guide
+            </span>
+            <ul className="space-y-2 text-sm">
+              {post.headings
+                .filter((h) => h.level === 2)
+                .map((heading) => (
+                  <li key={heading.id}>
+                    <a
+                      href={`#${heading.id}`}
+                      className="text-graphite hover:text-blue transition-colors flex items-center gap-2"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue shrink-0" />
+                      <span>{heading.text}</span>
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </nav>
         )}
-      </div>
 
-      <h1 className="text-h1 text-ink mb-6">{post.metadata.title}</h1>
-      <p className="text-lead text-mist mb-8">{post.metadata.description}</p>
+        {/* Article Body Rendered via MDX */}
+        <div className="prose-content">
+          <MDXRemote source={post.content} components={mdxComponents} />
+        </div>
 
-      <div className="prose prose-lg max-w-none text-graphite leading-relaxed border-t border-line pt-8 space-y-6">
-        <div className="whitespace-pre-wrap font-sans text-body">
-          {post.content}
+        {/* End of Post Share and Call to Action */}
+        <div className="mt-16 pt-8 border-t border-line space-y-12">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-mist">Found this helpful?</span>
+            <ShareButtons title={post.metadata.title} url={postUrl} />
+          </div>
+
+          {/* End-of-post box verbatim: "Want help with this? Book a free call." */}
+          <div className="p-8 sm:p-10 bg-paper border border-line rounded-3xl text-center space-y-4 shadow-floating">
+            <h2 className="text-h2 text-ink">
+              Want help with this?
+            </h2>
+            <p className="text-lead text-mist max-w-md mx-auto">
+              Tell us about your business and we will suggest the right next step.
+            </p>
+            <div className="pt-2">
+              <Button href="/book-a-call" variant="primary">
+                Book a free call
+              </Button>
+            </div>
+          </div>
+
+          {/* Related Posts */}
+          {relatedPosts.length > 0 && (
+            <div className="space-y-6 pt-6">
+              <h3 className="text-xl font-sans font-semibold text-ink">
+                Related notes
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {relatedPosts.map((related) => (
+                  <Link
+                    key={related.slug}
+                    href={`/blog/${related.slug}`}
+                    className="group p-6 bg-paper border border-line rounded-2xl hover:border-blue transition-colors flex flex-col justify-between"
+                  >
+                    <div>
+                      <span className="text-xs text-blue font-medium block mb-2">
+                        {related.category}
+                      </span>
+                      <h4 className="text-base font-semibold text-ink group-hover:text-blue transition-colors mb-2">
+                        {related.title}
+                      </h4>
+                      <p className="text-xs text-mist line-clamp-2">
+                        {related.description}
+                      </p>
+                    </div>
+                    <span className="text-xs text-blue font-medium mt-4 block">
+                      Read note
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      <div className="mt-12 p-8 bg-paper border border-line rounded-3xl text-center">
-        <h3 className="text-h3 text-ink mb-2">Want help with this?</h3>
-        <p className="text-mist mb-6">Talk directly with our team in Anantnag. First call is free.</p>
-        <Link
-          href="/book-a-call"
-          className="inline-block px-7 py-3.5 bg-blue text-white rounded-full font-medium shadow-floating hover:bg-blue-deep transition-colors"
-        >
-          Book a free call
-        </Link>
-      </div>
-    </div>
+    </article>
   );
 }

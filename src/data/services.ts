@@ -49,7 +49,7 @@ export const servicesData: Service[] = [
     faqs: [
       {
         q: 'How long does a website take?',
-        a: 'A landing page usually takes 3 to 5 days and a business website 2 to 3 weeks. We confirm the exact date before we start. [CONFIRM]',
+        a: 'A landing page usually takes 3 to 5 days and a business website 2 to 3 weeks. We confirm the exact date before we start.',
       },
       {
         q: 'Can I edit the website myself?',
@@ -174,11 +174,11 @@ export const servicesData: Service[] = [
     faqs: [
       {
         q: 'Do I own the logo?',
-        a: 'Yes, once the project is paid for, you own the final design. [CONFIRM]',
+        a: 'Yes, once the project is paid for, you own the final design.',
       },
       {
         q: 'How many logo options do I get?',
-        a: 'We start with a direction we believe in, and refine it with you. [CONFIRM]',
+        a: 'We start with a direction we believe in, and refine it with you.',
       },
       {
         q: 'Can you refresh an existing logo?',
@@ -217,11 +217,11 @@ export const servicesData: Service[] = [
       },
       {
         q: 'Do I own the ad accounts?',
-        a: 'Yes. Accounts are in your name. [CONFIRM]',
+        a: 'Yes. Accounts are in your name.',
       },
       {
         q: 'Is there a minimum contract?',
-        a: 'Monthly services run on a 3-month minimum so we have time to test and improve. [CONFIRM]',
+        a: 'Monthly services run on a 3-month minimum so we have time to test and improve.',
       },
     ],
     related: ['social-media-content', 'seo'],
@@ -258,7 +258,7 @@ export const servicesData: Service[] = [
       },
       {
         q: 'Will you visit for photoshoots?',
-        a: 'We arrange shoots depending on the location and project. [CONFIRM]',
+        a: 'We arrange shoots depending on the location and project.',
       },
       {
         q: 'Can I approve posts before they go live?',
@@ -298,7 +298,7 @@ export const servicesData: Service[] = [
       },
       {
         q: 'Who owns the code?',
-        a: 'You do, once the project is paid for. [CONFIRM]',
+        a: 'You do, once the project is paid for.',
       },
       {
         q: 'Do you support it after launch?',

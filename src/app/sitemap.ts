@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const serviceRoutes = servicesData.map((s) => `services/${s.slug}`);
   const projectRoutes = projectsData.map((p) => `work/${p.slug}`);
-  const blogRoutes = getAllPosts().map((p) => `blog/${p.slug}`);
+  const blogRoutes = getAllPosts(false).map((p) => `blog/${p.slug}`);
 
   const allPaths = [
     ...staticRoutes,

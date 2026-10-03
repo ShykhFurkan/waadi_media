@@ -79,7 +79,7 @@ export const locationsData: Record<string, LocalPageData> = {
     openingCopy:
       'Srinagar is Kashmir’s business hub: hotels, houseboats, retailers, clinics, schools and startups. If you run one, your customers are searching for you on their phones right now.',
     uniqueAngle:
-      'City business mix; Google Business Profile and local search in Srinagar; hospitality and retail focus; meeting by call, WhatsApp or in person [CONFIRM].',
+      'City business mix; Google Business Profile and local search in Srinagar; hospitality and retail focus; meeting by call, WhatsApp or in person.',
     introParagraphs: [
       "From Boulevard Road and Lal Chowk to Rajbagh and Karan Nagar, Srinagar represents the commercial heartbeat of the valley. Whether you run a luxury boutique hotel along Dal Lake, an educational consultancy guiding students toward foreign degrees, or a high-end handicraft showroom, competition is fierce.",
       "When a traveller lands at Sheikh ul-Alam International Airport or a student in Srinagar searches for guidance, they turn immediately to Google on their phone. If your business lacks a fast website and an optimized Google Business Profile, your competitors capture that client before you ever know they were looking.",
@@ -99,8 +99,8 @@ export const locationsData: Record<string, LocalPageData> = {
         text: 'You work directly with the founder and builder. We respond within one business day and turn around typical business websites in two to three weeks.',
       },
       {
-        title: 'In-person consultation when needed [CONFIRM]',
-        text: 'Because we are based nearby in Anantnag, we can easily coordinate in-person meetings in Srinagar or connect seamlessly over Google Meet and WhatsApp.',
+        title: 'In-person consultation when needed',
+        text: 'Because we are based in Anantnag and work across the valley, we can coordinate in-person meetings in Srinagar or connect seamlessly over Google Meet and WhatsApp.',
       },
     ],
     relevantServices: [
@@ -113,7 +113,7 @@ export const locationsData: Record<string, LocalPageData> = {
     faqs: [
       {
         q: 'Can we meet in Srinagar to discuss our project?',
-        a: 'Yes. While most initial scopes are handled efficiently over a quick phone or video call, we regularly visit Srinagar for client kickoffs. [CONFIRM]',
+        a: 'Yes. While most initial discussions happen quickly over phone, WhatsApp or Google Meet, we can arrange an in-person meeting in Srinagar for project kickoffs.',
       },
       {
         q: 'How do you help Srinagar hotels and houseboats get direct bookings?',
