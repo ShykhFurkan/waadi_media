@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { packagesData } from '@/data/packages';
-import { pricingItems, formatINR } from '@/data/pricing';
+import { pricingItems, formatINR, formatItemUnitLabel } from '@/data/pricing';
 import { servicesData } from '@/data/services';
 import { defaultWhatsAppMessages, whatsappLink } from '@/lib/whatsapp';
 import { Tabs } from '@/components/ui/Tabs';
@@ -125,7 +125,7 @@ export function PackagesSection() {
       <div className="p-4 bg-snow border border-line rounded-xl text-xs text-mist space-y-1">
         <p>• Monthly packages run on a 3-month minimum so we have adequate time to test and optimize.</p>
         <p>• Ad spend is paid directly by you to Google or Meta. Our fee covers strategy and management.</p>
-        <p>• Packages cost less than buying each service separately.</p>
+        <p>• Packages save you money on the main services.</p>
       </div>
     </div>
   );
@@ -147,9 +147,6 @@ export function PriceListSection() {
   return (
     <div className="space-y-8">
       <div>
-        <span className="text-xs uppercase tracking-wider text-mist font-semibold block mb-1">
-          Section B
-        </span>
         <h2 className="text-h2 text-ink">
           Complete price list
         </h2>
@@ -191,7 +188,7 @@ export function PriceListSection() {
                   {formatINR(item.price)}
                 </span>
                 <span className="text-xs text-mist ml-1 font-normal font-sans">
-                  /{item.unit}
+                  {formatItemUnitLabel(item.unit)}
                 </span>
               </div>
 

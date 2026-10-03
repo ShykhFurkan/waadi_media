@@ -96,3 +96,31 @@ export function getBreadcrumbSchema(items: { name: string; url: string }[]) {
     })),
   };
 }
+
+export function getCreativeWorkSchema(project: {
+  name: string;
+  slug: string;
+  summary: string;
+  sector: string;
+  liveUrl: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: project.name,
+    headline: project.name,
+    description: project.summary,
+    genre: project.sector,
+    url: `${siteConfig.url}/work/${project.slug}`,
+    sameAs: project.liveUrl,
+    creator: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+  };
+}
+
+export function getLocalBusinessSchema() {
+  return getProfessionalServiceSchema();
+}

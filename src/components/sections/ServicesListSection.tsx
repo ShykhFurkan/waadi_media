@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { servicesData } from '@/data/services';
-import { formatINR } from '@/data/pricing';
+import { formatStartingPrice } from '@/data/pricing';
 import { Button } from '@/components/ui/Button';
 
 export function ServicesListSection() {
@@ -41,7 +41,7 @@ export function ServicesListSection() {
 
                 <div className="flex items-center gap-4 self-start md:self-auto shrink-0">
                   <span className="text-price text-graphite group-hover:text-blue tabular-numbers transition-all duration-200 group-hover:translate-x-1.5">
-                    From {formatINR(service.startingPrice)}
+                    {formatStartingPrice(service.startingPrice, service.priceUnit)}
                   </span>
                 </div>
               </div>

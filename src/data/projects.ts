@@ -48,7 +48,7 @@ export const projectsData: Project[] = [
     liveUrl: 'https://www.kaaliedge.com/',
     summary:
       'A trust-first website for an education consultancy that guides Kashmiri students toward careers abroad.',
-    services: ['Website design and development', 'SEO', 'Blog setup'],
+    services: ['Website design and development', 'Blog setup'],
     overview:
       'Kaali Edge is an educational consultancy in Kashmir helping students and families choose where to study. Choosing a university abroad is a big decision, so trust matters more than anything.',
     challenge:

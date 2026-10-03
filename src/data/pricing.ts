@@ -1,4 +1,4 @@
-export type PriceUnit = 'one-time' | 'per month';
+export type PriceUnit = 'one-time' | 'per month' | 'per page';
 
 export type PriceItem = {
   id: string;
@@ -18,6 +18,23 @@ export function formatINR(amount: number): string {
     currency: 'INR',
     maximumFractionDigits: 0,
   }).format(amount);
+}
+
+/**
+ * Format "From ₹X" prices ensuring unit appears when not one-time (e.g., "From ₹1,000 per page")
+ */
+export function formatStartingPrice(price: number, unit?: PriceUnit | string): string {
+  const formatted = formatINR(price);
+  if (!unit || unit === 'one-time') {
+    return `From ${formatted}`;
+  }
+  return `From ${formatted} ${unit}`;
+}
+
+export function formatItemUnitLabel(unit: PriceUnit | string): string {
+  if (unit === 'per month') return '/month';
+  if (unit === 'per page') return 'per page';
+  return 'one-time';
 }
 
 /**
@@ -235,7 +252,7 @@ export const pricingItems: PriceItem[] = [
     serviceSlug: 'social-media-content',
     label: 'Copywriting (per page)',
     price: 1000,
-    unit: 'one-time',
+    unit: 'per page',
   },
 ];
 
@@ -256,7 +273,7 @@ export function calculatePricingEstimate(
 ) {
   const selected = pricingItems.filter((item) => selectedIds.includes(item.id));
   
-  const oneTimeItems = selected.filter((item) => item.unit === 'one-time');
+  const oneTimeItems = selected.filter((item) => item.unit !== 'per month');
   const monthlyItems = selected.filter((item) => item.unit === 'per month');
 
   const oneTimeSubtotal = oneTimeItems.reduce((acc, curr) => acc + curr.price, 0);

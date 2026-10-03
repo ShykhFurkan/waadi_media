@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { servicesData } from '@/data/services';
-import { formatINR } from '@/data/pricing';
+import { formatStartingPrice } from '@/data/pricing';
 import { Button } from '@/components/ui/Button';
 import { defaultWhatsAppMessages, whatsappLink } from '@/lib/whatsapp';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -71,12 +71,7 @@ export default function ServicesPage() {
 
                 <div className="flex items-center gap-4 self-start md:self-auto shrink-0">
                   <span className="text-price text-graphite group-hover:text-blue tabular-numbers transition-all duration-200 group-hover:translate-x-1.5">
-                    From {formatINR(service.startingPrice)}
-                    {service.priceUnit === 'per month' && (
-                      <span className="text-xs text-mist font-normal ml-1 font-sans">
-                        /month
-                      </span>
-                    )}
+                    {formatStartingPrice(service.startingPrice, service.priceUnit)}
                   </span>
                 </div>
               </div>

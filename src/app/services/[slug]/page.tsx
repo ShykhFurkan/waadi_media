@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { servicesData, getServiceBySlug } from '@/data/services';
-import { getPriceItemsByService, formatINR } from '@/data/pricing';
+import { getPriceItemsByService, formatINR, formatStartingPrice, formatItemUnitLabel } from '@/data/pricing';
 import { getProjectBySlug } from '@/data/projects';
 import { Badge } from '@/components/ui/Badge';
 import { Accordion } from '@/components/ui/Accordion';
@@ -99,8 +99,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
           <div>
             <Badge className="mb-4">
-              Starting from {formatINR(service.startingPrice)}
-              {service.priceUnit === 'per month' && ' / month'}
+              {formatStartingPrice(service.startingPrice, service.priceUnit).replace('From ', 'Starting from ')}
             </Badge>
             <h1 className="text-h1 text-ink mb-6">
               {service.h1}
@@ -220,7 +219,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                       {formatINR(item.price)}
                     </span>
                     <span className="text-xs text-mist ml-1 font-normal font-sans">
-                      /{item.unit}
+                      {formatItemUnitLabel(item.unit)}
                     </span>
                   </div>
                 </div>
@@ -334,7 +333,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                       {rel.shortLine}
                     </p>
                     <span className="text-sm font-medium text-blue">
-                      From {formatINR(rel.startingPrice)}
+                      {formatStartingPrice(rel.startingPrice, rel.priceUnit)}
                     </span>
                   </Link>
                 );

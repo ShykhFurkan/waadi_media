@@ -231,7 +231,7 @@ export const servicesData: Service[] = [
     name: 'Social media and content',
     shortLine: 'Consistent monthly posts, reels, product photos, and copywriting that keep your brand top-of-mind.',
     startingPrice: 1000,
-    priceUnit: 'one-time',
+    priceUnit: 'per page',
     icon: 'Share2',
     metaTitle: 'Social Media and Content in Kashmir - Waadi Media',
     metaDescription: 'Posts, reels, photos, copy and email marketing for Kashmir businesses. Social media management from ₹8,000 per month.',
