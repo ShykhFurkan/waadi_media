@@ -1,124 +1,249 @@
-import React from 'react';
-import { generateSeoMetadata, generateServiceSchema, generateBreadcrumbSchema, generateFaqSchema } from '@/lib/seo';
-import { Code, CheckCircle2, ArrowRight, ShieldCheck, Zap, Globe, Layers } from 'lucide-react';
-import Link from 'next/link';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Globe2, CheckCircle2, ArrowUpRight, Code2, Zap, ShieldCheck, Award } from "lucide-react";
+import { JsonLd } from "@/components/JsonLd";
+import { ProjectCard } from "@/components/ProjectCard";
+import { PageHero } from "@/components/PageHero";
+import { AnimatedSection } from "@/components/AnimatedSection";
 
-export const metadata = generateSeoMetadata({
-    title: 'Web Development Company in Kashmir | Custom Next.js & Web Apps',
-    description: 'Premier web development company in Kashmir & Srinagar. We build high-speed Next.js websites, custom e-commerce stores, and web applications built for high conversion.',
-    path: '/services/web-development'
-});
+export const metadata: Metadata = {
+  title: "Web Development Company in Kashmir | Waadi Media",
+  description:
+    "Custom website design & development for businesses in Anantnag, Srinagar and beyond. Fast, mobile-first, SEO-ready websites built by Waadi Media.",
+  alternates: {
+    canonical: "https://waadimedia.com/services/web-development",
+  },
+  openGraph: {
+    title: "Web Development Company in Kashmir | Waadi Media",
+    description:
+      "Custom website design & development for businesses in Anantnag, Srinagar and beyond.",
+    url: "https://waadimedia.com/services/web-development",
+    siteName: "Waadi Media",
+    images: ["/kashmir_hero_bg.jpg"],
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Web Development Company in Kashmir | Waadi Media",
+    description:
+      "Custom website design & development for businesses in Anantnag, Srinagar and beyond.",
+    images: ["/kashmir_hero_bg.jpg"],
+  },
+};
 
-const faqs = [
-    { q: "Why choose Next.js for web development in Kashmir?", a: "Next.js delivers ultra-fast page load speeds (<0.8s), superior Google search ranking capabilities (SSR/SSG), and bank-grade security compared to bloated traditional website builders." },
-    { q: "How long does a custom web development project take?", a: "Standard corporate web platforms take 2 weeks, while complex e-commerce or custom web applications take 3 to 4 weeks." },
-    { q: "Do you integrate payment gateways like Razorpay, UPI, and Stripe?", a: "Yes, we handle complete payment gateway setups including Razorpay, UPI, PayTM, Stripe, and international multi-currency checkouts." }
-];
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  serviceType: "Web Development",
+  provider: {
+    "@type": "Organization",
+    name: "Waadi Media",
+  },
+  areaServed: ["Anantnag", "Srinagar", "Kashmir Valley", "Remote"],
+  description:
+    "Custom website design and development for businesses, including e-commerce, travel booking portals, educational consultancies, and web applications.",
+  url: "https://waadimedia.com/services/web-development",
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://waadimedia.com/" },
+    { "@type": "ListItem", position: 2, name: "Services", item: "https://waadimedia.com/services" },
+    { "@type": "ListItem", position: 3, name: "Web Development", item: "https://waadimedia.com/services/web-development" },
+  ],
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "How much does a custom website cost in Kashmir?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Website pricing depends on scope, features, and functionality. We offer transparent project-based pricing tailored for small local businesses up to custom full-stack web applications.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Are Waadi Media websites mobile-friendly and SEO-optimized?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, every website built by Waadi Media is 100% mobile responsive, ultra-fast loading, and pre-configured with JSON-LD schema markup and search engine metadata.",
+      },
+    },
+  ],
+};
 
 export default function WebDevelopmentPage() {
-    const serviceSchema = generateServiceSchema({
-        name: "Web Development Services in Kashmir",
-        description: "Custom Next.js web applications, e-commerce stores, and high-performance websites built for Kashmir businesses.",
-        path: "/services/web-development"
-    });
+  const caseStudies = [
+    {
+      title: "Wonder Delight Travels",
+      category: "Travel Booking Platform",
+      url: "https://wonderdelighttravels.com",
+      image: "/wonder-delight-mockup.png",
+      alt: "Wonder Delight Travels website built by Waadi Media in Kashmir",
+      description:
+        "Full-featured travel booking website allowing guests to browse, customize, and book tour packages with real-time inquiries.",
+      outcomes: [
+        "Custom travel package booking workflow",
+        "Responsive, mobile-optimized experience",
+        "SEO architecture tailored for Kashmir tourism",
+      ],
+      tech: ["Next.js", "React", "Tailwind CSS", "SEO Schema"],
+    },
+    {
+      title: "Kaali Edge Consultancy",
+      category: "EdTech & Consultant Portal",
+      url: "https://kaaliedge.com",
+      image: "/kaali-edge-mockup.png",
+      alt: "Kaali Edge educational consultancy website built by Waadi Media in Kashmir",
+      description:
+        "Digital portal for an educational consultancy in Kashmir assisting students with MBBS admissions abroad.",
+      outcomes: [
+        "Lead generation & student application forms",
+        "University search & guidance catalog",
+        "High-conversion mobile landing structure",
+      ],
+      tech: ["React", "TypeScript", "Tailwind CSS", "Form Automation"],
+    },
+  ];
 
-    const breadcrumbSchema = generateBreadcrumbSchema([
-        { name: "Home", url: "/" },
-        { name: "Services", url: "/services" },
-        { name: "Web Development", url: "/services/web-development" }
-    ]);
+  return (
+    <>
+      <JsonLd data={serviceSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <JsonLd data={faqSchema} />
 
-    const faqSchema = generateFaqSchema(faqs);
+      {/* Eye-Catching Scenic Page Hero */}
+      <PageHero
+        badge="Full-Stack Web Engineering"
+        title="Custom Web Development"
+        highlightText="Services in Kashmir"
+        description="We design and engineer fast, mobile-first, SEO-ready websites for businesses in Anantnag, Srinagar, and across the Kashmir Valley."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Services", href: "/services" },
+          { label: "Web Development" },
+        ]}
+        stats={[
+          { label: "Engineering Standard", value: "Next.js 14", icon: <Code2 className="h-4 w-4 text-blue-400" /> },
+          { label: "Load Speed Target", value: "< 0.8s", icon: <Zap className="h-4 w-4 text-blue-400" /> },
+          { label: "Mobile Responsive", value: "100%", icon: <Globe2 className="h-4 w-4 text-blue-400" /> },
+          { label: "Kashmir Projects", value: "Wonder & Kaali", icon: <Award className="h-4 w-4 text-blue-400" /> },
+        ]}
+      />
 
-    return (
-        <div className="min-h-screen bg-[#FAFAFD] dark:bg-[#030712] text-slate-900 dark:text-slate-100 pt-36 pb-28 px-4 sm:px-6 transition-colors">
-            
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      {/* Main Content & Features */}
+      <AnimatedSection className="py-24 bg-white border-b border-slate-200/80">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 items-center">
+            <div className="lg:col-span-7 space-y-6">
+              <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl lg:text-5xl tracking-tight">
+                Why Choose Waadi Media for Web Development in Kashmir?
+              </h2>
+              <p className="text-slate-600 leading-relaxed text-base">
+                Unlike traditional agencies using heavy, slow template plugins, Waadi Media builds custom web applications using modern technologies like Next.js, React, and Tailwind CSS.
+              </p>
 
-            <div className="max-w-5xl mx-auto space-y-16">
-
-                {/* Hero */}
-                <div className="text-center space-y-4 max-w-3xl mx-auto">
-                    <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
-                        <Code size={14} />
-                        <span>Kashmir Web Development Leader</span>
+              <div className="space-y-4 pt-2">
+                {[
+                  {
+                    title: "Mobile-First & Ultra Fast",
+                    desc: "Over 80% of users in Kashmir browse on mobile phones. Our websites load in under 0.8 seconds.",
+                  },
+                  {
+                    title: "Built-In SEO & Schema Markup",
+                    desc: "Every page is built with JSON-LD structured data so your business ranks high on Google for local keywords.",
+                  },
+                  {
+                    title: "Custom Functional Workflows",
+                    desc: "From travel booking engines to educational inquiry forms, we write custom logic for your business needs.",
+                  },
+                ].map((f, idx) => (
+                  <div key={idx} className="flex items-start gap-3 rounded-2xl border border-slate-200 p-5 bg-slate-50">
+                    <CheckCircle2 className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">{f.title}</div>
+                      <div className="text-xs text-slate-600 mt-0.5">{f.desc}</div>
                     </div>
-
-                    <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                        Web Development Company <br />
-                        <span className="text-blue-600 dark:text-blue-500">in Kashmir & Srinagar</span>
-                    </h1>
-
-                    <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
-                        We engineer lightning-fast Next.js websites, custom e-commerce platforms, and web applications built to convert visitors into paying clients.
-                    </p>
-                </div>
-
-                {/* Key Features Grid */}
-                <div className="grid md:grid-cols-3 gap-6">
-                    {[
-                        { title: "Ultra-Fast Page Speed", desc: "Page loads under 0.8s for maximum Google Core Web Vitals performance.", icon: <Zap className="text-blue-600 dark:text-blue-400" /> },
-                        { title: "Custom Next.js & React", desc: "Zero slow page builders. Clean custom code built for scale.", icon: <Globe className="text-blue-600 dark:text-blue-400" /> },
-                        { title: "High Conversion UX", desc: "Strategic design layouts optimized to capture qualified leads.", icon: <Layers className="text-blue-600 dark:text-blue-400" /> }
-                    ].map((item, i) => (
-                        <div key={i} className="ui-card p-6 rounded-2xl border border-slate-200 dark:border-white/10 space-y-3">
-                            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 w-fit">{item.icon}</div>
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white">{item.title}</h3>
-                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{item.desc}</p>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Deliverables Checklist */}
-                <div className="ui-card rounded-3xl p-8 sm:p-10 space-y-6">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Included Web Engineering Deliverables</h2>
-                    <div className="grid sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        {[
-                            "Custom Responsive Next.js & React Architecture",
-                            "Razorpay, Stripe, and UPI Payment Integrations",
-                            "On-Page SEO & Schema Structured Data",
-                            "Custom Admin CMS Dashboard",
-                            "SSL Security & HTTPS Setup",
-                            "Mobile-First Touch Responsive Design",
-                            "Domain, Hosting & DNS Management",
-                            "Google Analytics 4 & Meta Pixel Tracking"
-                        ].map((d, i) => (
-                            <div key={i} className="flex items-center space-x-2">
-                                <CheckCircle2 size={16} className="text-blue-600 dark:text-blue-400 shrink-0" />
-                                <span>{d}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* FAQs */}
-                <div className="space-y-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white text-center">Frequently Asked Questions</h2>
-                    <div className="space-y-3">
-                        {faqs.map((faq, idx) => (
-                            <div key={idx} className="ui-card p-6 rounded-2xl space-y-2">
-                                <h3 className="font-bold text-sm text-slate-900 dark:text-white">{faq.q}</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{faq.a}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* CTA */}
-                <div className="ui-card rounded-3xl p-8 text-center space-y-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ready To Build Your Custom Web Platform?</h2>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">Book a free technical consultation with our engineering team in Srinagar.</p>
-                    <Link href="/lets-talk" passHref>
-                        <div className="inline-flex items-center space-x-2 px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase shadow-md shadow-blue-500/20 cursor-pointer">
-                            <span>Request Web Proposal</span>
-                            <ArrowRight size={14} />
-                        </div>
-                    </Link>
-                </div>
-
+                  </div>
+                ))}
+              </div>
             </div>
+
+            <div className="lg:col-span-5 rounded-3xl border border-slate-200 bg-slate-900 p-8 text-white space-y-6 shadow-2xl">
+              <div className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Web Development Stack</div>
+              <h3 className="text-2xl font-bold text-white">Engineered for Performance</h3>
+              <ul className="space-y-3 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <Code2 className="h-4 w-4 text-blue-400" />
+                  <span>Next.js 14 App Router & React 19</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-amber-400" />
+                  <span>Tailwind CSS & Glassmorphic UI</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <span>HTTPS SSL & Performance Optimization</span>
+                </li>
+              </ul>
+              <div className="pt-4 border-t border-slate-800">
+                <Link
+                  href="/contact"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 py-3.5 text-xs font-bold text-white hover:bg-blue-500 transition-all shadow-md"
+                >
+                  <span>Request Web Dev Proposal</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Featured Case Studies */}
+          <div className="space-y-8 pt-8 border-t border-slate-100">
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              Featured Web Development Projects
+            </h2>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              {caseStudies.map((project, idx) => (
+                <ProjectCard key={idx} project={project} />
+              ))}
+            </div>
+          </div>
+
+          {/* FAQ Block */}
+          <div className="space-y-6 pt-8 border-t border-slate-200">
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              Frequently Asked Questions (FAQ)
+            </h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-3xl border border-slate-200 p-6 bg-slate-50 space-y-2">
+                <h3 className="text-base font-bold text-slate-900">
+                  Does Waadi Media build e-commerce and booking engines?
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Yes! We built <strong>wonderdelighttravels.com</strong> specifically to handle package browsing and custom travel booking requests.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 p-6 bg-slate-50 space-y-2">
+                <h3 className="text-base font-bold text-slate-900">
+                  How long does it take to complete a web project?
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Most custom business websites are delivered within 1 to 3 weeks depending on the complexity of functionality required.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-    );
+      </AnimatedSection>
+    </>
+  );
 }

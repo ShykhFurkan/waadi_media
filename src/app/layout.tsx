@@ -1,59 +1,151 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import LayoutWrapper from '@/components/LayoutWrapper';
+import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans, Cormorant_Garamond, Playfair_Display } from "next/font/google";
+import Script from "next/script";
+import "./globals.css";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#020617",
+};
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-sans",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.waadimedia.com'),
+  metadataBase: new URL("https://waadimedia.com"),
   title: {
-    default: 'Digital Marketing & Web Agency in Kashmir | Waadi Media',
-    template: '%s | Waadi Media'
+    default: "Waadi Media | Web Development, AI & Digital Agency in Jammu & Kashmir, India",
+    template: "%s | Waadi Media",
   },
-  description: 'Kashmir-based digital agency offering websites, content creation, automations, and ads for local businesses, hotels, cafés, and startups.',
-  authors: [{ name: 'Waadi Media Team' }],
-  creator: 'Waadi Media',
-  publisher: 'Waadi Media',
+  description:
+    "Waadi Media is Jammu & Kashmir's premier freelance digital engineering and creative agency based in Anantnag and Srinagar. Led by Furkan Mushtaq, delivering high-performance Next.js web applications, custom AI automation pipelines, and high-impact social media brand management across India and globally.",
+  keywords: [
+    "Web development company in Kashmir",
+    "Website design Anantnag",
+    "Web developer Srinagar",
+    "Digital marketing agency Jammu and Kashmir",
+    "AI automation pipelines India",
+    "Kashmir tourism website design",
+    "Next.js web agency India",
+    "Furkan Mushtaq software engineer",
+    "Social media management Kashmir",
+    "E-commerce website development Kashmir",
+  ],
+  authors: [{ name: "Furkan Mushtaq", url: "https://waadimedia.com/about" }],
+  creator: "Furkan Mushtaq",
+  publisher: "Waadi Media",
   icons: {
-    icon: '/icon.png',
-    shortcut: '/favicon.ico',
-    apple: '/apple-icon.png',
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
+  manifest: "/site.webmanifest",
   openGraph: {
-    type: 'website',
-    locale: 'en_IN',
-    siteName: 'Waadi Media',
-    url: 'https://www.waadimedia.com/',
-    title: 'Digital Marketing & Web Agency in Kashmir | Waadi Media',
-    description: 'Kashmir-based digital agency offering websites, content creation, automations, and ads for local businesses.',
+    title: "Waadi Media | Web Development, AI & Digital Agency in Jammu & Kashmir, India",
+    description:
+      "Premier digital engineering studio in Kashmir. Next.js websites, custom AI pipelines, and strategic brand growth for businesses in Srinagar, Anantnag, and across India.",
+    url: "https://waadimedia.com",
+    siteName: "Waadi Media",
     images: [
       {
-        url: '/logo.png',
-        width: 800,
-        height: 600,
-        alt: 'Waadi Media Logo',
+        url: "/kashmir_hero_bg.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Waadi Media - Web Development & AI Agency in Jammu and Kashmir, India",
       },
     ],
+    locale: "en_IN",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Digital Marketing & Web Agency in Kashmir | Waadi Media',
-    description: 'Websites, content, automations, and digital growth systems for Kashmir-based businesses.',
-    images: ['/logo.png'],
-    creator: '@waadi_media',
+    card: "summary_large_image",
+    title: "Waadi Media | Web Development, AI & Digital Agency in Jammu & Kashmir",
+    description:
+      "Premier digital engineering studio in Kashmir. Next.js websites, custom AI pipelines, and brand growth.",
+    images: ["/kashmir_hero_bg.jpg"],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
+};
+
+const professionalServiceSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Waadi Media",
+  image: "https://waadimedia.com/logo.png",
+  url: "https://waadimedia.com",
+  telephone: "+91-7780940317",
+  email: "contact@waadimedia.com",
+  priceRange: "₹₹",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Main Town, KP Road",
+    addressLocality: "Anantnag",
+    addressRegion: "Jammu and Kashmir",
+    postalCode: "192101",
+    addressCountry: "IN",
   },
-  alternates: {
-    canonical: 'https://www.waadimedia.com/',
-  }
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: "33.7311",
+    longitude: "75.1487",
+  },
+  areaServed: [
+    { "@type": "City", name: "Anantnag" },
+    { "@type": "City", name: "Srinagar" },
+    { "@type": "AdministrativeArea", name: "Jammu and Kashmir" },
+    { "@type": "Country", name: "India" },
+    { "@type": "Country", name: "Worldwide" },
+  ],
+  sameAs: [
+    "https://www.instagram.com/waadimedia",
+    "https://www.linkedin.com/company/waadimedia",
+    "https://www.facebook.com/waadimedia",
+  ],
+  founder: {
+    "@type": "Person",
+    name: "Furkan Mushtaq",
+    jobTitle: "Founder & Lead Software Engineer",
+    alumniOf: "Computer Science & Technology",
+  },
+};
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Waadi Media",
+  url: "https://waadimedia.com",
+  logo: "https://waadimedia.com/logo.png",
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+91-7780940317",
+    contactType: "customer service",
+    email: "contact@waadimedia.com",
+    areaServed: ["IN", "Worldwide"],
+    availableLanguage: ["English", "Urdu", "Kashmiri", "Hindi"],
+  },
 };
 
 export default function RootLayout({
@@ -62,79 +154,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark" data-theme="dark">
+    <html lang="en" className={`${plusJakartaSans.variable} ${cormorantGaramond.variable} ${playfairDisplay.variable}`}>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var stored = localStorage.getItem('waadi_theme');
-                  var theme = stored ? stored : 'dark';
-                  document.documentElement.setAttribute('data-theme', theme);
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.classList.remove('light');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
+        {/* Google Analytics GA4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-PLACEHOLDER"
+          strategy="afterInteractive"
         />
-        <link rel="icon" href="/icon.png" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-PLACEHOLDER');
+          `}
+        </Script>
+
+        {/* Site-wide Schemas */}
+        <JsonLd data={professionalServiceSchema} />
+        <JsonLd data={organizationSchema} />
       </head>
-      <body className="antialiased bg-[#FAFAFD] dark:bg-[#030712] text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 selection:text-blue-500 transition-colors duration-200">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'ProfessionalService',
-              name: 'Waadi Media',
-              url: 'https://www.waadimedia.com',
-              logo: 'https://www.waadimedia.com/logo.png',
-              image: 'https://www.waadimedia.com/logo.png',
-              description: 'Waadi Media is a Kashmir-based digital agency providing structured digital services for local businesses, hospitality brands, cafés, restaurants, startups, and service providers.',
-              address: {
-                '@type': 'PostalAddress',
-                addressRegion: 'Jammu & Kashmir',
-                addressCountry: 'IN'
-              },
-              areaServed: {
-                '@type': 'Place',
-                name: 'Kashmir, Jammu & Kashmir, India'
-              },
-              sameAs: [
-                'https://x.com/shykh_furkan?s=21',
-                'https://www.instagram.com/waadi_media?igsh=dmQ3eXV2ejRuMWsx',
-                'https://www.linkedin.com/in/shykh-furkan-1193b4249?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
-              ],
-              contactPoint: {
-                '@type': 'ContactPoint',
-                telephone: '+91-9876543210',
-                contactType: 'customer service',
-                areaServed: 'IN',
-                availableLanguage: 'en'
-              },
-              knowsAbout: [
-                'Website design and development',
-                'Internal management tools',
-                'Content creation',
-                'Social media strategy',
-                'Digital advertising campaigns',
-                'Brand positioning'
-              ]
-            }),
-          }}
-        />
-        <LayoutWrapper>{children}</LayoutWrapper>
+      <body className="flex min-h-screen flex-col font-sans antialiased bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );

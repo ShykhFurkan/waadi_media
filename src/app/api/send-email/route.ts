@@ -3,17 +3,21 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
-    // Create a transporter using GoDaddy / Office 365 SMTP details
+    const smtpHost = process.env.SMTP_HOST || 'smtpout.secureserver.net';
+    const smtpPort = Number(process.env.SMTP_PORT) || 465;
+    const smtpUser = process.env.SMTP_USER || 'contact@waadimedia.com';
+    const smtpPass = process.env.SMTP_PASS || 'Anantnag@12';
+
+    // Create a transporter using Secureserver / GoDaddy SMTP details
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: true, // true for 465, false for other ports
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465, // true for 465
         auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
+            user: smtpUser,
+            pass: smtpPass,
         },
         tls: {
-            ciphers: 'SSLv3', // Sometimes needed for legacy connections, harmless otherwise
             rejectUnauthorized: false
         }
     });
@@ -29,16 +33,39 @@ export async function POST(request: Request) {
         let subject = '';
         let htmlContent = '';
 
-        if (type === 'contact') {
+        if (type === 'inquiry') {
+            subject = `New Project Inquiry from ${data.name || 'Website Visitor'} (${data.service || 'Service'})`;
+            htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+            <div style="background: #1e3a8a; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">New Project Discovery Inquiry</h1>
+                <p style="color: #bfdbfe; margin: 4px 0 0 0; font-size: 13px;">Waadi Media Client Lead</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 10px; font-weight: bold; width: 140px; color: #475569; border-bottom: 1px solid #f1f5f9;">Client Name:</td><td style="padding: 10px; color: #0f172a; border-bottom: 1px solid #f1f5f9; font-weight: bold;">${data.name}</td></tr>
+                <tr><td style="padding: 10px; font-weight: bold; color: #475569; border-bottom: 1px solid #f1f5f9;">Email:</td><td style="padding: 10px; color: #0f172a; border-bottom: 1px solid #f1f5f9;"><a href="mailto:${data.email}" style="color: #2563eb;">${data.email}</a></td></tr>
+                <tr><td style="padding: 10px; font-weight: bold; color: #475569; border-bottom: 1px solid #f1f5f9;">Phone / WhatsApp:</td><td style="padding: 10px; color: #0f172a; border-bottom: 1px solid #f1f5f9;"><a href="tel:${data.phone}" style="color: #2563eb;">${data.phone}</a></td></tr>
+                <tr><td style="padding: 10px; font-weight: bold; color: #475569; border-bottom: 1px solid #f1f5f9;">Service Requested:</td><td style="padding: 10px; color: #1d4ed8; font-weight: bold; border-bottom: 1px solid #f1f5f9;">${data.service}</td></tr>
+                <tr><td style="padding: 10px; font-weight: bold; color: #475569; border-bottom: 1px solid #f1f5f9;">Target Budget:</td><td style="padding: 10px; color: #0f172a; border-bottom: 1px solid #f1f5f9;">${data.budget}</td></tr>
+                <tr><td style="padding: 10px; font-weight: bold; color: #475569; vertical-align: top;">Project Goals:</td><td style="padding: 10px; color: #0f172a; white-space: pre-wrap;">${data.message || 'No additional details provided.'}</td></tr>
+            </table>
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center;">
+                Delivered by Waadi Media Digital Engine • Anantnag &amp; Srinagar, Jammu &amp; Kashmir
+            </div>
+        </div>
+      `;
+        } else if (type === 'contact') {
             subject = `New Contact Form Submission from ${data.name}`;
             htmlContent = `
-        <h1>New Contact Request</h1>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Role:</strong> ${data.role}</p>
-        <p><strong>Phone:</strong> ${data.phone}</p>
-        <p><strong>Email:</strong> ${data.email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${data.message}</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+            <h2 style="color: #1e3a8a; border-bottom: 2px solid #2563eb; padding-bottom: 8px;">New Contact Request</h2>
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Role / Business:</strong> ${data.role || 'N/A'}</p>
+            <p><strong>Phone:</strong> <a href="tel:${data.phone}">${data.phone}</a></p>
+            <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+            <p><strong>Message:</strong></p>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border-left: 3px solid #2563eb;">${data.message}</div>
+        </div>
       `;
         } else if (type === 'lets-talk') {
             subject = `New Project Inquiry from ${data.fullName}`;

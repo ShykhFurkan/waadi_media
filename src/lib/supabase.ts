@@ -104,9 +104,12 @@ export interface Match {
 export interface MatchEvent {
   id: string;
   match_id: string;
-  event_type: 'goal' | 'card_yellow' | 'card_red' | 'substitution' | 'wicket' | 'four' | 'six' | 'over' | 'period_end';
+  event_type: 'goal' | 'card_yellow' | 'card_red' | 'substitution' | 'wicket' | 'four' | 'six' | 'over' | 'period_end' | string;
   team_id?: string;
   player_id?: string;
+  player_name?: string;
+  jersey_number?: number;
+  detail?: string;
   match_time: string;
   timestamp: string;
   metadata_json?: Record<string, any>;

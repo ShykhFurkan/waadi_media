@@ -1,108 +1,170 @@
-import React from 'react';
-import { generateSeoMetadata, generateServiceSchema, generateBreadcrumbSchema, generateFaqSchema } from '@/lib/seo';
-import { Cpu, CheckCircle2, ArrowRight, Database, ShieldCheck, Smartphone } from 'lucide-react';
-import Link from 'next/link';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Code2, CheckCircle2, ArrowUpRight, Cpu, Layers, Database, Sparkles, Server, Zap, ShieldCheck } from "lucide-react";
+import { JsonLd } from "@/components/JsonLd";
+import { PageHero } from "@/components/PageHero";
+import { AnimatedSection } from "@/components/AnimatedSection";
+import { ConsultationCta } from "@/components/ConsultationCta";
 
-export const metadata = generateSeoMetadata({
-    title: 'Software Development Company in Kashmir | Custom Apps & Systems',
-    description: 'Leading software development company in Kashmir & Srinagar. Custom mobile apps, POS software, internal management tools, and enterprise systems built for local businesses.',
-    path: '/services/software-development'
-});
+export const metadata: Metadata = {
+  title: "Custom Software Development & Cloud ERPs in Kashmir | Waadi Media",
+  description:
+    "Bespoke full-stack software development, cloud ERPs for cold storages and apple mandis, SaaS products, and database engineering led by Furkan Mushtaq (B.Tech CS) in Anantnag and Srinagar, Kashmir.",
+  alternates: {
+    canonical: "https://waadimedia.com/services/software-development",
+  },
+  openGraph: {
+    title: "Custom Software Development & Cloud ERPs in Kashmir | Waadi Media",
+    description:
+      "Custom full-stack software development, cold storage ERPs, and API integrations by Waadi Media.",
+    url: "https://waadimedia.com/services/software-development",
+    siteName: "Waadi Media",
+    images: ["/kashmir_hero_bg.jpg"],
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Custom Software Development & Cloud ERPs in Kashmir | Waadi Media",
+    description:
+      "Custom full-stack software development, cold storage ERPs, and API integrations by Waadi Media.",
+    images: ["/kashmir_hero_bg.jpg"],
+  },
+};
 
-const faqs = [
-    { q: "What types of software do you build in Kashmir?", a: "We build Point of Sale (POS) software, internal management CRM tools, mobile cross-platform apps (iOS & Android), inventory tracking systems, and custom business databases." },
-    { q: "Can your software operate offline during Kashmir internet outages?", a: "Yes! We specialize in local offline-first architecture that keeps your business operating smoothly during network interruptions and auto-syncs when online." }
-];
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  serviceType: "Software Development",
+  provider: {
+    "@type": "Organization",
+    name: "Waadi Media",
+  },
+  areaServed: ["Anantnag", "Srinagar", "Kashmir Valley", "Jammu and Kashmir", "India"],
+  description:
+    "Custom full-stack software application development, SaaS products, REST APIs, and automated business databases.",
+  url: "https://waadimedia.com/services/software-development",
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://waadimedia.com/" },
+    { "@type": "ListItem", position: 2, name: "Services", item: "https://waadimedia.com/services" },
+    { "@type": "ListItem", position: 3, name: "Software Development", item: "https://waadimedia.com/services/software-development" },
+  ],
+};
 
 export default function SoftwareDevelopmentPage() {
-    const serviceSchema = generateServiceSchema({
-        name: "Software & Mobile App Development in Kashmir",
-        description: "Custom business software, POS systems, mobile applications, and internal tools engineered for Kashmir enterprises.",
-        path: "/services/software-development"
-    });
+  const capabilities = [
+    {
+      icon: Layers,
+      title: "Custom Cloud ERPs & Mandi Ledgers",
+      description: "Bespoke database solutions built for Kashmir's fruit mandis (Sopore, Shopian), cold storages, and wholesale traders with offline-first synchronization and instant WhatsApp ledger billing.",
+      badge: "Kashmir Agri-Tech",
+    },
+    {
+      icon: Database,
+      title: "High-Performance Next.js & REST APIs",
+      description: "Clean, type-safe API architectures, real-time database synchronization via PostgreSQL/Supabase, and microservices built to withstand high concurrency.",
+      badge: "Backend & Cloud",
+    },
+    {
+      icon: Cpu,
+      title: "Enterprise AI & Candidate Pipelines",
+      description: "Proprietary AI recruitment systems (like SmartHire), intelligent document parsers, and custom WhatsApp Business API workflows that eliminate operational overhead.",
+      badge: "AI Powered",
+    },
+    {
+      icon: Server,
+      title: "Hospitality & Tourism Reservation Backends",
+      description: "Direct booking engines for Kashmir houseboats, luxury Pahalgam resorts, and tour operators with live room inventory management and Indian payment gateways.",
+      badge: "Hospitality Tech",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Offline-First Valley Architecture",
+      description: "Architectures engineered to maintain flawless local functionality during intermittent network connectivity, auto-syncing seamlessly once connection is restored.",
+      badge: "Zero Downtime",
+    },
+    {
+      icon: Zap,
+      title: "SaaS & MVP Rapid Prototyping",
+      description: "Accelerated 2 to 4 week build-out for Indian and international startup founders looking to validate products with clean code, scalable databases, and Stripe/Razorpay billing.",
+      badge: "Startup Accelerator",
+    },
+  ];
 
-    const breadcrumbSchema = generateBreadcrumbSchema([
-        { name: "Home", url: "/" },
-        { name: "Services", url: "/services" },
-        { name: "Software Development", url: "/services/software-development" }
-    ]);
+  return (
+    <>
+      <JsonLd data={serviceSchema} />
+      <JsonLd data={breadcrumbSchema} />
 
-    const faqSchema = generateFaqSchema(faqs);
+      <PageHero
+        badge="Enterprise Engineering • Anantnag & Srinagar"
+        title="Custom Software &"
+        highlightText="Cloud Architecture"
+        description="We engineer bespoke full-stack applications, apple mandi cloud ERPs, and automated business pipelines tailored to eliminate operational friction across Jammu, Kashmir, and India."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Services", href: "/services" },
+          { label: "Software Development" },
+        ]}
+      />
 
-    return (
-        <div className="min-h-screen bg-[#FAFAFD] dark:bg-[#030712] text-slate-900 dark:text-slate-100 pt-36 pb-28 px-4 sm:px-6 transition-colors">
-            
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-
-            <div className="max-w-5xl mx-auto space-y-16">
-
-                {/* Hero */}
-                <div className="text-center space-y-4 max-w-3xl mx-auto">
-                    <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
-                        <Cpu size={14} />
-                        <span>Kashmir Software Engineering Leader</span>
-                    </div>
-
-                    <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                        Software & App Development <br />
-                        <span className="text-blue-600 dark:text-blue-500">Company in Kashmir</span>
-                    </h1>
-
-                    <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
-                        We build custom business software, mobile applications (iOS/Android), and internal management systems that eliminate operational bottlenecks.
-                    </p>
-                </div>
-
-                {/* Deliverables Checklist */}
-                <div className="ui-card rounded-3xl p-8 sm:p-10 space-y-6">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Software & App Development Scope</h2>
-                    <div className="grid sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        {[
-                            "Cross-Platform Mobile Apps (iOS & Android)",
-                            "Custom Point of Sale (POS) Systems",
-                            "Internal Business CRM & ERP Tools",
-                            "Offline-First Data Syncing Architecture",
-                            "Database Architecture & Cloud Servers",
-                            "Secure RESTful API Development",
-                            "Role-Based Staff Access & Audit Logs",
-                            "Ongoing Technical Support & Maintenance"
-                        ].map((d, i) => (
-                            <div key={i} className="flex items-center space-x-2">
-                                <CheckCircle2 size={16} className="text-blue-600 dark:text-blue-400 shrink-0" />
-                                <span>{d}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* FAQs */}
-                <div className="space-y-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white text-center">Frequently Asked Questions</h2>
-                    <div className="space-y-3">
-                        {faqs.map((faq, idx) => (
-                            <div key={idx} className="ui-card p-6 rounded-2xl space-y-2">
-                                <h3 className="font-bold text-sm text-slate-900 dark:text-white">{faq.q}</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{faq.a}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* CTA */}
-                <div className="ui-card rounded-3xl p-8 text-center space-y-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Need Custom Business Software or App?</h2>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">Speak with our lead software engineers in Srinagar today.</p>
-                    <Link href="/lets-talk" passHref>
-                        <div className="inline-flex items-center space-x-2 px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase shadow-md shadow-blue-500/20 cursor-pointer">
-                            <span>Discuss Software Project</span>
-                            <ArrowRight size={14} />
-                        </div>
-                    </Link>
-                </div>
-
+      <AnimatedSection className="textured-bg py-28 border-b border-slate-200/80">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <div className="luxury-badge">
+              <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+              <span>Full-Stack Capabilities</span>
             </div>
+            <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl lg:text-5xl tracking-tight">
+              Software Architected for <span className="font-serif italic font-normal text-blue-600">Reliability &amp; Scale</span>
+            </h2>
+            <p className="text-slate-600 text-base max-w-2xl mx-auto">
+              Every system is engineered by Furkan Mushtaq (B.Tech CS) adhering to strict type safety, modular architecture, and zero technical debt.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {capabilities.map((cap, idx) => {
+              const Icon = cap.icon;
+              return (
+                <div
+                  key={idx}
+                  className="glass-card glass-card-hover group flex flex-col justify-between rounded-3xl p-8 bg-white/85 backdrop-blur-2xl border border-slate-200/90 shadow-xl transition-all space-y-5"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
+                        <Icon className="h-7 w-7" />
+                      </div>
+                      <span className="rounded-full bg-slate-100 px-3.5 py-1 text-xs font-bold text-slate-700 border border-slate-200/80">
+                        {cap.badge}
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      {cap.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      {cap.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-bold text-blue-600">
+                    <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                    <span>Engineered with TypeScript &amp; Next.js</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-    );
+      </AnimatedSection>
+
+      <ConsultationCta />
+    </>
+  );
 }

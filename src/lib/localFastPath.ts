@@ -81,15 +81,13 @@ export class LocalFastPathHost {
     }, PROBE_TIMEOUT_MS);
 
     pc.ontrack = (event) => {
-      if (event.streams && event.streams[0]) {
-        const stream = event.streams[0];
-        const rtt = Math.max(8, Date.now() - startTime);
-        isConnected = true;
-        clearTimeout(timeoutTimer);
+      const stream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
+      const rtt = Math.max(8, Date.now() - startTime);
+      isConnected = true;
+      clearTimeout(timeoutTimer);
 
-        this.onStatusCallback(sourceId, { mode: 'local', latencyMs: rtt });
-        this.onTrackCallback(sourceId, stream, rtt);
-      }
+      this.onStatusCallback(sourceId, { mode: 'local', latencyMs: rtt });
+      this.onTrackCallback(sourceId, stream, rtt);
     };
 
     pc.onicecandidate = (event) => {

@@ -1,125 +1,156 @@
-'use client';
-import React from 'react';
-import { ArrowUpRight, Instagram, Linkedin, Twitter, MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+import Link from "next/link";
+import Image from "next/image";
+import { Phone, Mail, MapPin, MessageSquare, ArrowUpRight } from "lucide-react";
 
-const Footer = () => {
-    return (
-        <footer className="bg-slate-900 dark:bg-[#02050E] text-slate-300 pt-20 pb-12 border-t border-slate-800 dark:border-white/10 transition-colors">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+export function Footer() {
+  return (
+    <footer className="border-t border-slate-800 bg-slate-950 text-slate-300">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-5">
+          {/* Brand Col */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="relative h-10 w-10 overflow-hidden rounded-full border border-blue-500/40 bg-white p-0.5 shadow-lg shadow-blue-500/20 transition-transform group-hover:scale-105">
+                <Image
+                  src="/logo.png"
+                  alt="Waadi Media Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-2xl font-extrabold tracking-tight text-white">
+                Waadi<span className="text-blue-500">Media</span>
+              </span>
+            </Link>
 
-                {/* Big Banner */}
-                <div className="ui-card rounded-3xl p-8 sm:p-12 mb-16 border border-slate-800 dark:border-white/10 bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-950 text-white">
-                    <div className="max-w-2xl space-y-4">
-                        <span className="px-3 py-1 rounded-full bg-blue-600/20 text-blue-400 text-xs font-bold uppercase tracking-wider">
-                            Accepting New Projects
-                        </span>
-                        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-                            Ready to scale your <span className="text-blue-500">digital presence?</span>
-                        </h2>
-                        <p className="text-slate-400 text-sm sm:text-base">
-                            Partner with Kashmir&apos;s leading website, mobile app, software development & social media agency.
-                        </p>
-                        <div className="pt-2">
-                            <Link href="/lets-talk" passHref>
-                                <motion.div
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}
-                                    className="inline-flex items-center space-x-2 px-6 py-3 rounded-full text-xs font-bold uppercase text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 cursor-pointer"
-                                >
-                                    <span>Start a Project</span>
-                                    <ArrowUpRight size={16} />
-                                </motion.div>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+            <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
+              Waadi Media is a software, web development & digital brand management agency based in Anantnag, Kashmir. Founded by Furkan Mushtaq to elevate local businesses and global startups with custom software & AI pipelines.
+            </p>
 
-                {/* Footer Main Columns */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
-                    
-                    {/* Brand */}
-                    <div className="lg:col-span-2 space-y-4">
-                        <Link href="/" passHref className="flex items-center space-x-1.5 cursor-pointer">
-                            <span className="font-extrabold text-2xl tracking-tight text-blue-500">
-                                waadi
-                            </span>
-                            <span className="font-bold text-2xl tracking-tight text-white">
-                                media.com
-                            </span>
-                        </Link>
-                        <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-                            Kashmir website, mobile app, software development & social media agency. Engineering Next.js web applications, automated workflows, and high-conversion ad campaigns.
-                        </p>
-                        <div className="flex items-center space-x-2 text-xs text-slate-400">
-                            <MapPin size={14} className="text-blue-400" />
-                            <span>Srinagar, Jammu & Kashmir, India</span>
-                        </div>
-                    </div>
-
-                    {/* Service Vertical SEO Links */}
-                    <div>
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-white mb-4">Core Capabilities</h4>
-                        <ul className="space-y-2.5 text-xs font-semibold text-slate-400">
-                            <li><Link href="/services/web-development" className="hover:text-blue-400 transition-colors">Web Development</Link></li>
-                            <li><Link href="/services/software-development" className="hover:text-blue-400 transition-colors">Software & Mobile Apps</Link></li>
-                            <li><Link href="/services/social-media-marketing" className="hover:text-blue-400 transition-colors">Social Media Marketing</Link></li>
-                            <li><Link href="/services/branding" className="hover:text-blue-400 transition-colors">Branding & Identity</Link></li>
-                            <li><Link href="/services/automation-ai" className="hover:text-blue-400 transition-colors">Automations & AI</Link></li>
-                            <li><Link href="/services/digital-marketing" className="hover:text-blue-400 transition-colors">Digital Ads & Funnels</Link></li>
-                            <li><Link href="/services/seo-services" className="hover:text-blue-400 transition-colors">SEO Services</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Locations & Case Studies */}
-                    <div>
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-white mb-4">Locations & Work</h4>
-                        <ul className="space-y-2.5 text-xs font-semibold text-slate-400">
-                            <li><Link href="/locations/kashmir" className="hover:text-blue-400 transition-colors">Kashmir Agency</Link></li>
-                            <li><Link href="/locations/srinagar" className="hover:text-blue-400 transition-colors">Srinagar Software Hub</Link></li>
-                            <li><Link href="/locations/srinagar-digital-agency" className="hover:text-blue-400 transition-colors">Srinagar Digital Agency</Link></li>
-                            <li><Link href="/work/kehribal-fc" className="hover:text-blue-400 transition-colors">Kehribal FC</Link></li>
-                            <li><Link href="/work/wonder-delight" className="hover:text-blue-400 transition-colors">Wonder Delight</Link></li>
-                            <li><Link href="/work/kaali-edge" className="hover:text-blue-400 transition-colors">Kaali Edge</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Company & Insights */}
-                    <div>
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-white mb-4">Company & Resources</h4>
-                        <ul className="space-y-2.5 text-xs font-semibold text-slate-400">
-                            <li><Link href="/about" className="hover:text-blue-400 transition-colors">About Waadi Media</Link></li>
-                            <li><Link href="/insights" className="hover:text-blue-400 transition-colors">Insights & Articles</Link></li>
-                            <li><Link href="/method" className="hover:text-blue-400 transition-colors">Agency Method</Link></li>
-                            <li><Link href="/lets-talk" className="hover:text-blue-400 transition-colors">Book Consultation</Link></li>
-                            <li><Link href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
-                            <li><Link href="/cookies" className="hover:text-blue-400 transition-colors">Cookie Policy</Link></li>
-                        </ul>
-                    </div>
-
-                </div>
-
-                {/* Bottom copyright */}
-                <div className="pt-8 border-t border-slate-800 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-500">
-                    <p>© {new Date().getFullYear()} Waadi Media. All rights reserved. Srinagar, Kashmir, India.</p>
-                    <div className="flex items-center space-x-6 text-slate-400">
-                        <a href="https://www.instagram.com/waadi_media" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors flex items-center space-x-1">
-                            <Instagram size={14} /> <span>Instagram</span>
-                        </a>
-                        <a href="https://www.linkedin.com/in/shykh-furkan-1193b4249" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors flex items-center space-x-1">
-                            <Linkedin size={14} /> <span>LinkedIn</span>
-                        </a>
-                        <a href="https://x.com/shykh_furkan" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors flex items-center space-x-1">
-                            <Twitter size={14} /> <span>Twitter</span>
-                        </a>
-                    </div>
-                </div>
-
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <a
+                href="https://wa.me/917780940317?text=Hi%20Waadi%20Media,%20I'd%20like%20to%20inquire%20about%20a%20project."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-emerald-600/20 px-4 py-2.5 min-h-[44px] text-xs font-semibold text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors active:scale-95"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span>WhatsApp Us</span>
+              </a>
+              <a
+                href="tel:+917780940317"
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600/20 px-4 py-2.5 min-h-[44px] text-xs font-semibold text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 transition-colors active:scale-95"
+              >
+                <Phone className="h-4 w-4" />
+                <span>Call Now</span>
+              </a>
             </div>
-        </footer>
-    );
-};
+          </div>
 
-export default Footer;
+          {/* Services Links */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white">Services</h3>
+            <ul className="space-y-2 text-sm text-slate-400">
+              <li>
+                <Link href="/services/web-development" className="hover:text-blue-400 transition-colors">
+                  Web Development
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/software-development" className="hover:text-blue-400 transition-colors">
+                  Custom Software
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/ai-automation" className="hover:text-blue-400 transition-colors">
+                  AI Automation & Hiring
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/social-media-management" className="hover:text-blue-400 transition-colors">
+                  Social Media Growth
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/brand-management" className="hover:text-blue-400 transition-colors">
+                  Brand Management
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white">Quick Links</h3>
+            <ul className="space-y-2 text-sm text-slate-400">
+              <li>
+                <Link href="/about" className="hover:text-blue-400 transition-colors">
+                  About Founder
+                </Link>
+              </li>
+              <li>
+                <Link href="/portfolio" className="hover:text-blue-400 transition-colors">
+                  Case Studies & Work
+                </Link>
+              </li>
+              <li>
+                <Link href="/anantnag-kashmir" className="hover:text-blue-400 transition-colors">
+                  Anantnag & Kashmir SEO
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="hover:text-blue-400 transition-colors">
+                  Blog & Guides
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-blue-400 transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Details */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white">Contact Info</h3>
+            <ul className="space-y-2.5 text-sm text-slate-400">
+              <li className="flex items-start gap-2.5">
+                <MapPin className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                <span>Anantnag, Jammu & Kashmir, 192101, India</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 text-blue-400 shrink-0" />
+                <a href="tel:+917780940317" className="hover:text-white transition-colors">
+                  +91 7780940317
+                </a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 text-blue-400 shrink-0" />
+                <a href="mailto:contact@waadimedia.com" className="hover:text-white transition-colors">
+                  contact@waadimedia.com
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <p>&copy; {new Date().getFullYear()} Waadi Media. All rights reserved. Led by Furkan Mushtaq.</p>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="hover:text-slate-400">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-slate-400">
+              Terms of Service
+            </Link>
+            <Link href="/sitemap.xml" className="hover:text-slate-400 flex items-center gap-1">
+              <span>Sitemap</span>
+              <ArrowUpRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
