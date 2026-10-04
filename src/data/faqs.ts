@@ -17,7 +17,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'timeline',
     question: 'How long does it take?',
     answer:
-      'Typical times: landing page 3 to 5 days, business website 2 to 3 weeks, online store 3 to 5 weeks.',
+      'Typical times: landing page 3 to 5 days, business website 2 to 3 weeks, online store 3 to 5 weeks. For software and apps: we give you a date after a short discovery phase.',
     category: 'process',
   },
   {

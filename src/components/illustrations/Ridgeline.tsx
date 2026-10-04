@@ -1,37 +1,65 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { m, useScroll, useTransform, useReducedMotion, LazyMotion, domAnimation } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { easeCustom } from '@/components/ui/MotionHelpers';
 
 interface RidgelineProps {
   variant?: 'hero' | 'footer' | 'divider';
   className?: string;
 }
 
+function subscribeReducedMotion(callback: () => void) {
+  const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+  media.addEventListener('change', callback);
+  return () => media.removeEventListener('change', callback);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function getReducedMotionServerSnapshot() {
+  return false;
+}
+
 export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
-
-  // Scroll parallax for hero variant
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  });
-
-  // Parallax rates: back layers 0.2x, front layers 0.6x
-  const yLayer1 = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
-  const yLayer2 = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const yLayer3 = useTransform(scrollYProgress, [0, 1], ['0%', '40%']);
-  const yLayer4 = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
-  const yLayer5 = useTransform(scrollYProgress, [0, 1], ['0%', '60%']);
-
-  // Pointer follow (desktop only, max 12px)
+  const reducedMotion = React.useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  );
+  const [scrollYProgress, setScrollYProgress] = useState(0);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
 
+  // Scroll parallax for hero variant
   useEffect(() => {
-    if (shouldReduceMotion || variant !== 'hero') return;
+    if (reducedMotion || variant !== 'hero') return;
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            const top = rect.top;
+            const height = rect.height || 400;
+            const progress = Math.min(Math.max(-top / height, 0), 1);
+            setScrollYProgress(progress);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [reducedMotion, variant]);
+
+  // Pointer follow (desktop only, max 12px)
+  useEffect(() => {
+    if (reducedMotion || variant !== 'hero') return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const { innerWidth, innerHeight } = window;
@@ -48,7 +76,7 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [shouldReduceMotion, variant]);
+  }, [reducedMotion, variant]);
 
   // Heights per variant to prevent CLS
   const heightClasses = {
@@ -80,60 +108,53 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
     'M0,340 L0,290 Q220,270 520,305 T1020,285 Q1220,280 1440,300 L1440,400 L0,400 Z',
   ];
 
-  const yTransforms = [yLayer1, yLayer2, yLayer3, yLayer4, yLayer5];
+  const parallaxRates = [0.2, 0.3, 0.4, 0.5, 0.6];
 
   return (
-    <LazyMotion features={domAnimation}>
-      <div
-        ref={containerRef}
-        className={cn('relative overflow-hidden pointer-events-none select-none', heightClasses, className)}
-        aria-hidden="true"
+    <div
+      ref={containerRef}
+      className={cn('relative overflow-hidden pointer-events-none select-none', heightClasses, className)}
+      aria-hidden="true"
+    >
+      <svg
+        viewBox="0 0 1440 400"
+        preserveAspectRatio="none"
+        className="w-full h-full block"
+        focusable="false"
       >
-        <svg
-          viewBox="0 0 1440 400"
-          preserveAspectRatio="none"
-          className="w-full h-full block"
-          // Non-blocking: SVG is decorative, dimensions reserved via CSS
-          focusable="false"
-        >
-          {paths.map((d, index) => {
-            const delay = index * 0.15; // Staggered page-load rise sequence
-            const pointerDepth = (index + 1) / 5; // Greater shift on front layers
+        {paths.map((d, index) => {
+          const pointerDepth = (index + 1) / 5;
+          const delay = index * 0.12;
 
-            if (shouldReduceMotion || variant !== 'hero') {
-              return (
-                <path
-                  key={index}
-                  d={d}
-                  fill={colors[index]}
-                />
-              );
-            }
-
+          if (reducedMotion || variant !== 'hero') {
             return (
-              <m.path
+              <path
                 key={index}
                 d={d}
                 fill={colors[index]}
-                initial={{ y: '35%', opacity: 0 }}
-                animate={{
-                  y: mouseOffset.y * pointerDepth,
-                  x: mouseOffset.x * pointerDepth,
-                  opacity: 1,
-                }}
-                style={{
-                  y: yTransforms[index],
-                }}
-                transition={{
-                  opacity: { duration: 0.8, delay, ease: easeCustom },
-                  x: { duration: 0.3, ease: 'easeOut' },
-                  y: { duration: 0.8, delay, ease: easeCustom },
-                }}
               />
             );
-          })}
-        </svg>
-      </div>
-    </LazyMotion>
+          }
+
+          const yParallax = scrollYProgress * parallaxRates[index] * 60;
+          const xShift = mouseOffset.x * pointerDepth;
+          const yShift = mouseOffset.y * pointerDepth + yParallax;
+
+          return (
+            <path
+              key={index}
+              d={d}
+              fill={colors[index]}
+              className="animate-ridgeline-rise"
+              style={{
+                animationDelay: `${delay}s`,
+                transform: `translate3d(${xShift}px, ${yShift}px, 0)`,
+                transition: 'transform 0.2s ease-out',
+              }}
+            />
+          );
+        })}
+      </svg>
+    </div>
   );
 }

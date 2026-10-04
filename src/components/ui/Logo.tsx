@@ -30,7 +30,6 @@ export function Logo({
     <Link
       href={href}
       className="inline-block focus-visible:rounded-lg"
-      aria-label="Waadi Media - Return to home"
       prefetch={priority ? true : undefined}
     >
       {content}

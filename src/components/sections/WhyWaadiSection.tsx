@@ -1,5 +1,4 @@
 import React from 'react';
-import { DrawDivider } from '@/components/ui/MotionHelpers';
 
 export function WhyWaadiSection() {
   const points = [
@@ -44,7 +43,7 @@ export function WhyWaadiSection() {
                     {point.text}
                   </p>
                 </div>
-                {index < points.length - 1 && <DrawDivider delay={index * 0.1} />}
+                {index < points.length - 1 && <hr className="border-t border-line" />}
               </div>
             ))}
           </div>

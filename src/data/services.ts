@@ -221,7 +221,7 @@ export const servicesData: Service[] = [
       },
       {
         q: 'Is there a minimum contract?',
-        a: 'Monthly services run on a 3-month initial period, then month-to-month. Cancel anytime with 30 days notice.',
+        a: 'Monthly services run on a 3-month minimum.',
       },
     ],
     related: ['social-media-content', 'seo'],

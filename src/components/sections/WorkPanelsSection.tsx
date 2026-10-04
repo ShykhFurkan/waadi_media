@@ -1,13 +1,10 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { projectsData } from '@/data/projects';
-import { ImageWipe } from '@/components/ui/MotionHelpers';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { trackEvent } from '@/lib/analytics';
+import { OutboundLink } from '@/components/ui/OutboundLink';
 
 export function WorkPanelsSection() {
   return (
@@ -44,40 +41,38 @@ export function WorkPanelsSection() {
                     isReversed ? 'lg:order-2' : 'lg:order-1'
                   }`}
                 >
-                  <ImageWipe delay={index * 0.1}>
-                    <div className="group relative rounded-[28px] overflow-hidden bg-paper border border-line shadow-floating">
-                      {/* CSS Browser Window Chrome */}
-                      <div className="h-10 bg-snow border-b border-line px-4 flex items-center gap-2 select-none">
-                        <div className="flex items-center gap-1.5" aria-hidden="true">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
-                        </div>
-                        <div className="flex-1 mx-3">
-                          <div className="max-w-xs mx-auto h-5 bg-paper rounded-full border border-line text-[11px] text-mist flex items-center justify-center font-mono truncate px-3">
-                            {project.liveUrl.replace('https://', '').replace(/\/$/, '')}
-                          </div>
-                        </div>
+                  <div className="group relative rounded-[28px] overflow-hidden bg-paper border border-line shadow-floating">
+                    {/* CSS Browser Window Chrome */}
+                    <div className="h-10 bg-snow border-b border-line px-4 flex items-center gap-2 select-none">
+                      <div className="flex items-center gap-1.5" aria-hidden="true">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
                       </div>
-
-                      {/* Mockup Image container with 1.03x hover zoom per Section 6.8 */}
-                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-snow">
-                        {project.coverImage ? (
-                          <Image
-                            src={project.coverImage}
-                            alt={`${project.name} website preview`}
-                            fill
-                            sizes="(max-width: 1024px) 100vw, 58vw"
-                            className="object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
-                            Preview coming soon
-                          </div>
-                        )}
+                      <div className="flex-1 mx-3">
+                        <div className="max-w-xs mx-auto h-5 bg-paper rounded-full border border-line text-[11px] text-mist flex items-center justify-center font-mono truncate px-3">
+                          {project.liveUrl.replace('https://', '').replace(/\/$/, '')}
+                        </div>
                       </div>
                     </div>
-                  </ImageWipe>
+
+                    {/* Mockup Image container with 1.03x hover zoom per Section 6.8 */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-snow">
+                      {project.coverImage ? (
+                        <Image
+                          src={project.coverImage}
+                          alt={`${project.name} website preview`}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 58vw"
+                          className="object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
+                          Preview coming soon
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Text Content Panel (5 cols) */}
@@ -123,20 +118,13 @@ export function WorkPanelsSection() {
                     >
                       View case study
                     </Link>
-                    <a
+                    <OutboundLink
                       href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() =>
-                        trackEvent({
-                          name: 'outbound_click',
-                          params: { url: project.liveUrl, label: project.name },
-                        })
-                      }
+                      label={project.name}
                       className="text-sm font-medium text-graphite hover:text-ink transition-colors"
                     >
                       Visit site
-                    </a>
+                    </OutboundLink>
                   </div>
                 </div>
               </div>

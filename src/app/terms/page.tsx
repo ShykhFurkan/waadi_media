@@ -61,7 +61,7 @@ export default function TermsPage() {
               For standard fixed-scope projects (such as website design or brand identity), payment is 50% to start and 50% on delivery. For software and apps, payment is split into milestones agreed in writing before work begins.
             </p>
             <p>
-              For ongoing monthly retainers (such as SEO, digital advertising, or website care), invoices are issued at the start of each billing period. Monthly retainers run on a 3-month initial period, then month-to-month. Cancel anytime with 30 days notice.
+              For ongoing monthly retainers (such as SEO, digital advertising, or website care), invoices are issued at the start of each billing period. Monthly services run on a 3-month minimum.
             </p>
           </section>
 

@@ -386,7 +386,7 @@ function CalculatorInner() {
                     },
                   })
                 }
-                className="w-full h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center gap-2 text-sm font-medium hover:opacity-95 transition-opacity"
+                className="w-full h-12 rounded-full bg-[#25D366] text-ink font-semibold flex items-center justify-center gap-2 text-sm hover:opacity-95 transition-opacity"
               >
                 <MessageSquare className="w-4 h-4 stroke-[1.5]" />
                 <span>Send on WhatsApp</span>

@@ -39,7 +39,7 @@ export function ProcessSection() {
               className="p-6 bg-paper border border-line rounded-2xl flex flex-col justify-between"
             >
               <div>
-                <span className="font-display text-4xl text-blue/40 font-light block mb-4">
+                <span className="font-display text-4xl text-blue font-light block mb-4">
                   0{step.num}
                 </span>
                 <h3 className="text-xl font-sans font-semibold text-ink mb-2">

@@ -1,7 +1,17 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import { ContactForm } from '@/components/forms/ContactForm';
+import dynamic from 'next/dynamic';
+
+const ContactForm = dynamic(
+  () => import('@/components/forms/ContactForm').then((m) => m.ContactForm),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-8 bg-paper border border-line rounded-3xl min-h-[400px] animate-pulse" />
+    ),
+  }
+);
 
 export function ServiceQuoteForm({
   serviceName,

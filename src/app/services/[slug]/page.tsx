@@ -174,7 +174,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                 className="p-6 bg-paper border border-line rounded-2xl flex flex-col justify-between"
               >
                 <div>
-                  <span className="font-display text-3xl text-blue/40 font-light block mb-3">
+                  <span className="font-display text-3xl text-blue font-light block mb-3">
                     0{idx + 1}
                   </span>
                   <h3 className="text-lg font-sans font-semibold text-ink mb-2">

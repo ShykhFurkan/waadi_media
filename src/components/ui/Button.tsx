@@ -2,7 +2,6 @@
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'text' | 'ghost';
@@ -16,6 +15,20 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
 }
 
+function subscribeReducedMotion(callback: () => void) {
+  const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+  media.addEventListener('change', callback);
+  return () => media.removeEventListener('change', callback);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function getReducedMotionServerSnapshot() {
+  return false;
+}
+
 export function Button({
   variant = 'primary',
   href,
@@ -25,11 +38,15 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const reducedMotion = React.useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  );
   const buttonRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const isMagnetic = magnetic && variant === 'primary' && !shouldReduceMotion;
+  const isMagnetic = magnetic && variant === 'primary' && !reducedMotion;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isMagnetic || !buttonRef.current) return;
@@ -78,61 +95,46 @@ export function Button({
     </>
   );
 
-  const wrapper = (
+  const innerElement = href ? (
+    external ? (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(baseClasses, variantClasses, className)}
+      >
+        {content}
+      </a>
+    ) : (
+      <Link href={href} className={cn(baseClasses, variantClasses, className)}>
+        {content}
+      </Link>
+    )
+  ) : (
+    <button className={cn(baseClasses, variantClasses, className)} {...props}>
+      {content}
+    </button>
+  );
+
+  return (
     <div
       ref={buttonRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="inline-block"
+      style={
+        isMagnetic
+          ? {
+              transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+              transition:
+                position.x === 0 && position.y === 0
+                  ? 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)'
+                  : 'transform 0.1s ease-out',
+            }
+          : undefined
+      }
     >
-      {isMagnetic ? (
-        <motion.div
-          animate={{ x: position.x, y: position.y }}
-          transition={{ type: 'spring', damping: 15, stiffness: 150 }}
-        >
-          {href ? (
-            external ? (
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(baseClasses, variantClasses, className)}
-              >
-                {content}
-              </a>
-            ) : (
-              <Link href={href} className={cn(baseClasses, variantClasses, className)}>
-                {content}
-              </Link>
-            )
-          ) : (
-            <button className={cn(baseClasses, variantClasses, className)} {...props}>
-              {content}
-            </button>
-          )}
-        </motion.div>
-      ) : href ? (
-        external ? (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(baseClasses, variantClasses, className)}
-          >
-            {content}
-          </a>
-        ) : (
-          <Link href={href} className={cn(baseClasses, variantClasses, className)}>
-            {content}
-          </Link>
-        )
-      ) : (
-        <button className={cn(baseClasses, variantClasses, className)} {...props}>
-          {content}
-        </button>
-      )}
+      {innerElement}
     </div>
   );
-
-  return wrapper;
 }

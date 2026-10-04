@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { easeCustom } from '@/components/ui/MotionHelpers';
 
 export interface TabItem {
   id: string;
@@ -21,8 +19,6 @@ export function Tabs({
   onChange: (id: string) => void;
   className?: string;
 }) {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
     <div
       role="tablist"
@@ -40,18 +36,12 @@ export function Tabs({
             aria-selected={isActive}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'relative px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 select-none cursor-pointer focus-visible:outline-2 focus-visible:outline-blue',
-              isActive ? 'text-white' : 'text-graphite hover:text-ink'
+              'relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 select-none cursor-pointer focus-visible:outline-2 focus-visible:outline-blue',
+              isActive
+                ? 'bg-blue text-white shadow-sm'
+                : 'text-graphite hover:text-ink hover:bg-paper'
             )}
           >
-            {isActive && (
-              <motion.div
-                layoutId="activeTabPill"
-                className="absolute inset-0 bg-blue rounded-full shadow-sm"
-                transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.25, ease: easeCustom }}
-                style={{ zIndex: 0 }}
-              />
-            )}
             <span className="relative z-10">{tab.label}</span>
           </button>
         );

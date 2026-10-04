@@ -3,14 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Menu, X, Phone, MessageSquare } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import { servicesData } from '@/data/services';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
-import { easeCustom } from '@/components/ui/MotionHelpers';
 import { trackEvent } from '@/lib/analytics';
 
 export function Header() {
@@ -105,48 +103,42 @@ export function Header() {
               />
             </button>
 
-            <AnimatePresence>
-              {servicesOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.2, ease: easeCustom }}
-                  className="absolute top-full left-0 mt-2 w-80 p-3 bg-paper border border-line rounded-2xl shadow-floating z-50"
-                >
-                  <div className="mb-2 px-3 py-1.5 border-b border-line flex items-center justify-between">
-                    <span className="text-xs uppercase tracking-wider text-mist font-semibold">
-                      All 8 Services
-                    </span>
-                    <Link
-                      href="/services"
-                      onClick={() => setServicesOpen(false)}
-                      className="text-xs text-blue hover:text-blue-deep font-medium"
-                    >
-                      Overview
-                    </Link>
-                  </div>
-                  <ul className="space-y-1">
-                    {servicesData.map((service) => (
-                      <li key={service.slug}>
-                        <Link
-                          href={`/services/${service.slug}`}
-                          onClick={() => setServicesOpen(false)}
-                          className="block px-3 py-2 rounded-xl hover:bg-snow transition-colors"
-                        >
-                          <span className="block text-sm font-medium text-ink">
-                            {service.name}
-                          </span>
-                          <span className="block text-xs text-mist truncate">
-                            {service.shortLine}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {servicesOpen && (
+              <div
+                className="absolute top-full left-0 mt-2 w-80 p-3 bg-paper border border-line rounded-2xl shadow-floating z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+              >
+                <div className="mb-2 px-3 py-1.5 border-b border-line flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-wider text-mist font-semibold">
+                    All 8 Services
+                  </span>
+                  <Link
+                    href="/services"
+                    onClick={() => setServicesOpen(false)}
+                    className="text-xs text-blue hover:text-blue-deep font-medium"
+                  >
+                    Overview
+                  </Link>
+                </div>
+                <ul className="space-y-1">
+                  {servicesData.map((service) => (
+                    <li key={service.slug}>
+                      <Link
+                        href={`/services/${service.slug}`}
+                        onClick={() => setServicesOpen(false)}
+                        className="block px-3 py-2 rounded-xl hover:bg-snow transition-colors"
+                      >
+                        <span className="block text-sm font-medium text-ink">
+                          {service.name}
+                        </span>
+                        <span className="block text-xs text-mist truncate">
+                          {service.shortLine}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Standard desktop nav links */}
@@ -198,15 +190,10 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Full-Screen Menu Sheet */}
-      <AnimatePresence>
+
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: easeCustom }}
-            className="fixed inset-0 top-[76px] bg-paper z-50 flex flex-col justify-between p-6 sm:p-8 overflow-y-auto"
+          <div
+            className="fixed inset-0 top-[76px] bg-paper z-50 flex flex-col justify-between p-6 sm:p-8 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
           >
             <div className="space-y-6">
               <span className="text-xs uppercase tracking-wider text-mist font-semibold block">
@@ -287,16 +274,15 @@ export function Header() {
                       params: { location: 'header_mobile_menu' },
                     })
                   }
-                  className="h-12 rounded-full border border-line flex items-center justify-center gap-2 text-sm font-medium text-white bg-[#25D366] hover:opacity-95 transition-opacity"
+                  className="h-12 rounded-full border border-line flex items-center justify-center gap-2 text-sm font-semibold text-ink bg-[#25D366] hover:opacity-95 transition-opacity"
                 >
                   <MessageSquare className="w-4 h-4 stroke-[1.5]" />
                   <span>WhatsApp</span>
                 </a>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </header>
   );
 }

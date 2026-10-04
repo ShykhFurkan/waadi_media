@@ -199,3 +199,43 @@ button, a {
     transform: none;
   }
 }
+
+/* Hero Masked Reveal per Section 10.1 (pure CSS, no JS animation overhead) */
+@keyframes hero-reveal {
+  0% {
+    transform: translateY(105%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+.animate-hero-reveal {
+  animation: hero-reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Ridgeline Page-Load Rise Sequence */
+@keyframes ridgeline-rise {
+  0% {
+    transform: translateY(35%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+.animate-ridgeline-rise {
+  animation: ridgeline-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-reveal,
+  .animate-ridgeline-rise {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+

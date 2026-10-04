@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { easeCustom } from '@/components/ui/MotionHelpers';
 
 export interface AccordionItemData {
   id: string;
@@ -22,7 +20,6 @@ export function Accordion({
   className?: string;
 }) {
   const [openIds, setOpenIds] = useState<string[]>([]);
-  const shouldReduceMotion = useReducedMotion();
 
   const toggleItem = (id: string) => {
     if (allowMultiple) {
@@ -62,24 +59,21 @@ export function Accordion({
                 <Plus className="w-4 h-4 stroke-[1.5]" />
               </span>
             </button>
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  initial={shouldReduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                  animate={shouldReduceMotion ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
-                  exit={shouldReduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                  transition={{ duration: 0.32, ease: easeCustom }}
-                  className="overflow-hidden"
-                >
-                  <div className="pb-5 pr-12 text-graphite text-body leading-relaxed">
-                    {item.answer}
-                  </div>
-                </motion.div>
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={buttonId}
+              className={cn(
+                'grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
               )}
-            </AnimatePresence>
+            >
+              <div className="overflow-hidden">
+                <div className="pb-5 pr-12 text-graphite text-body leading-relaxed">
+                  {item.answer}
+                </div>
+              </div>
+            </div>
           </div>
         );
       })}

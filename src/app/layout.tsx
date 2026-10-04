@@ -17,15 +17,15 @@ export const viewport: Viewport = {
 // Only the weights actually used in the design system (300 removed)
 const newsreader = Newsreader({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional',
   variable: '--font-display',
   weight: ['400', '500'],
-  style: ['italic'],
+  style: ['normal', 'italic'],
 });
 
 const outfit = Outfit({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional',
   variable: '--font-sans',
   weight: ['400', '500', '600'],
 });
