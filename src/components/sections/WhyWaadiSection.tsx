@@ -1,6 +1,10 @@
 import React from 'react';
+import { Container } from '@/components/layout/Container';
 
 export function WhyWaadiSection() {
+  const editorialStatement =
+    'A local agency that speaks your language — built on craft, clear pricing, and deep valley context.';
+
   const points = [
     {
       title: 'We understand Kashmir.',
@@ -20,35 +24,67 @@ export function WhyWaadiSection() {
     },
   ];
 
+  const words = editorialStatement.split(' ');
+
   return (
-    <section className="py-20 md:py-28 bg-snow border-t border-line">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* Left Column (5 cols): Heading */}
-          <div className="lg:col-span-5 sticky top-28">
-            <h2 className="text-h2 text-ink leading-tight text-balance">
-              A local agency that speaks your language.
-            </h2>
+    <section id="why-waadi" className="py-24 sm:py-36 bg-snow border-t border-line">
+      <Container>
+        {/* Section Label */}
+        <span className="text-xs uppercase tracking-widest text-mist font-semibold block mb-8">
+          Why Waadi
+        </span>
+
+        {/* Large Editorial Statement (~3rem Cormorant) with scroll-driven opacity */}
+        <div className="max-w-5xl mb-20 sm:mb-28">
+          <p className="font-serif text-[clamp(2.25rem,4.6vw,3.5rem)] font-normal leading-[1.12] text-ink text-balance tracking-tight">
+            {words.map((word, idx) => (
+              <span
+                key={idx}
+                className="inline-block mr-[0.26em] scroll-word-opacity transition-opacity duration-300"
+              >
+                {word}
+              </span>
+            ))}
+          </p>
+        </div>
+
+        {/* Below: Four statements in two columns with hairline dividers */}
+        <div className="border-t border-line grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-line">
+          {/* Column 1: Items 0 and 1 */}
+          <div className="divide-y divide-line pr-0 md:pr-12">
+            {points.slice(0, 2).map((point, index) => (
+              <div key={index} className="py-8 sm:py-10 first:pt-8 last:pb-8">
+                <span className="text-xs font-mono text-mist font-medium uppercase tracking-widest block mb-2">
+                  0{index + 1}
+                </span>
+                <h3 className="font-serif text-2xl font-medium text-ink mb-2">
+                  {point.title}
+                </h3>
+                <p className="text-body text-graphite leading-relaxed">
+                  {point.text}
+                </p>
+              </div>
+            ))}
           </div>
 
-          {/* Right Column (7 cols): Four plain statements separated by dividers */}
-          <div className="lg:col-span-7">
-            {points.map((point, index) => (
-              <div key={index}>
-                <div className="py-8 first:pt-0 last:pb-0">
-                  <h3 className="text-xl font-sans font-semibold text-ink mb-2">
-                    {point.title}
-                  </h3>
-                  <p className="text-body text-graphite max-w-xl">
-                    {point.text}
-                  </p>
-                </div>
-                {index < points.length - 1 && <hr className="border-t border-line" />}
+          {/* Column 2: Items 2 and 3 */}
+          <div className="divide-y divide-line pl-0 md:pl-12">
+            {points.slice(2, 4).map((point, index) => (
+              <div key={index} className="py-8 sm:py-10 first:pt-8 last:pb-8">
+                <span className="text-xs font-mono text-mist font-medium uppercase tracking-widest block mb-2">
+                  0{index + 3}
+                </span>
+                <h3 className="font-serif text-2xl font-medium text-ink mb-2">
+                  {point.title}
+                </h3>
+                <p className="text-body text-graphite leading-relaxed">
+                  {point.text}
+                </p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

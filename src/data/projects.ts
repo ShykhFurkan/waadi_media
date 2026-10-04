@@ -13,6 +13,10 @@ export type Project = {
   results?: string[]; // Kept undefined per Rule 1 until real verified data exists
   quote?: { quote: string; name: string; business: string; role?: string }; // Kept undefined until provided
   coverImage: string;
+  video?: {
+    webm?: string;
+    mp4?: string;
+  };
   featured: boolean;
   badge?: string;
 };

@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface RidgelineProps {
-  variant?: 'hero' | 'footer' | 'divider';
+  variant?: 'hero' | 'footer' | 'divider' | 'backdrop';
   className?: string;
 }
 
@@ -57,7 +57,7 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [reducedMotion, variant]);
 
-  // Pointer follow (desktop only, max 12px)
+  // Pointer depth on desktop (max 12px) per brief
   useEffect(() => {
     if (reducedMotion || variant !== 'hero') return;
 
@@ -78,23 +78,24 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [reducedMotion, variant]);
 
-  // Heights per variant to prevent CLS
+  // Reserved heights per variant to prevent CLS
   const heightClasses = {
-    hero: 'h-[260px] sm:h-[340px] md:h-[400px] lg:h-[460px] w-full',
-    footer: 'h-[100px] sm:h-[140px] md:h-[180px] w-full',
-    divider: 'h-[60px] sm:h-[90px] w-full',
+    hero: 'h-[280px] sm:h-[360px] md:h-[440px] lg:h-[500px] w-full',
+    footer: 'h-[110px] sm:h-[150px] md:h-[190px] w-full',
+    divider: 'h-[70px] sm:h-[100px] w-full',
+    backdrop: 'h-[220px] sm:h-[300px] w-full opacity-60',
   }[variant];
 
-  // Colors: 5 tonal blues back to front
+  // 5 tonal layers of Himalayan ridges: subtle snow-mist blues into deep brand blue
   const colors = [
-    '#E6EEFF', // Back
-    '#C9DAFF',
-    '#9DBAFF',
-    '#5C8DFF',
-    '#0057FF', // Front
+    '#E2ECFA', // Layer 1 (Distant peaks)
+    '#C4DCFA', // Layer 2 (Sweeping mid-distance)
+    '#97C0F7', // Layer 3 (Central ridge)
+    '#5493F2', // Layer 4 (Foothills)
+    '#0057FF', // Layer 5 (Front signature valley rim)
   ];
 
-  // Organic mountain silhouettes designed for 1440x400 viewBox
+  // Mountain silhouettes designed for 1440x400 viewBox
   const paths = [
     // Layer 1: Distant high majestic peaks
     'M0,230 L0,150 Q180,90 320,135 T680,105 Q860,60 1040,115 T1440,130 L1440,400 L0,400 Z',
@@ -108,7 +109,7 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
     'M0,340 L0,290 Q220,270 520,305 T1020,285 Q1220,280 1440,300 L1440,400 L0,400 Z',
   ];
 
-  const parallaxRates = [0.2, 0.3, 0.4, 0.5, 0.6];
+  const parallaxRates = [0.15, 0.25, 0.35, 0.48, 0.6];
 
   return (
     <div
@@ -122,38 +123,131 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
         className="w-full h-full block"
         focusable="false"
       >
-        {paths.map((d, index) => {
-          const pointerDepth = (index + 1) / 5;
-          const delay = index * 0.12;
+        <defs>
+          {/* Subtle mist gradient between layers */}
+          <linearGradient id="mist-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0" />
+            <stop offset="25%" stopColor="#EDF4FF" stopOpacity="0.75" />
+            <stop offset="70%" stopColor="#FFFFFF" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+          </linearGradient>
 
-          if (reducedMotion || variant !== 'hero') {
-            return (
-              <path
-                key={index}
-                d={d}
-                fill={colors[index]}
-              />
-            );
+          {/* Saffron metallic radial gradient for sun disc */}
+          <radialGradient id="saffron-sun" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#D9A855" stopOpacity="0.95" />
+            <stop offset="60%" stopColor="#B8893B" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#B8893B" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Small saffron sun disc rising behind the ridges (hero only) */}
+        {variant === 'hero' && (
+          <circle
+            cx="860"
+            cy="115"
+            r="38"
+            fill="url(#saffron-sun)"
+            className={reducedMotion ? '' : 'animate-sun-rise origin-center'}
+          />
+        )}
+
+        {/* Layer 1: Distant Peaks */}
+        <path
+          d={paths[0]}
+          fill={colors[0]}
+          className={reducedMotion ? '' : 'animate-ridgeline-rise'}
+          style={
+            !reducedMotion && variant === 'hero'
+              ? {
+                  transform: `translate3d(${mouseOffset.x * 0.2}px, ${
+                    mouseOffset.y * 0.2 + scrollYProgress * parallaxRates[0] * 60
+                  }px, 0)`,
+                  transition: 'transform 0.2s ease-out',
+                }
+              : undefined
           }
+        />
 
-          const yParallax = scrollYProgress * parallaxRates[index] * 60;
-          const xShift = mouseOffset.x * pointerDepth;
-          const yShift = mouseOffset.y * pointerDepth + yParallax;
+        {/* Layer 2: Mid-distance */}
+        <path
+          d={paths[1]}
+          fill={colors[1]}
+          className={reducedMotion ? '' : 'animate-ridgeline-rise'}
+          style={
+            !reducedMotion && variant === 'hero'
+              ? {
+                  animationDelay: '0.12s',
+                  transform: `translate3d(${mouseOffset.x * 0.35}px, ${
+                    mouseOffset.y * 0.35 + scrollYProgress * parallaxRates[1] * 60
+                  }px, 0)`,
+                  transition: 'transform 0.2s ease-out',
+                }
+              : undefined
+          }
+        />
 
-          return (
-            <path
-              key={index}
-              d={d}
-              fill={colors[index]}
-              className="animate-ridgeline-rise"
-              style={{
-                animationDelay: `${delay}s`,
-                transform: `translate3d(${xShift}px, ${yShift}px, 0)`,
-                transition: 'transform 0.2s ease-out',
-              }}
-            />
-          );
-        })}
+        {/* Slow drifting mist layer between ridge 2 and 3 */}
+        {variant === 'hero' && (
+          <path
+            d="M-100,160 Q200,120 600,170 T1300,140 Q1500,160 1600,150 L1600,240 L-100,240 Z"
+            fill="url(#mist-grad)"
+            className={reducedMotion ? 'opacity-30' : 'animate-mist-drift'}
+          />
+        )}
+
+        {/* Layer 3: Central Range */}
+        <path
+          d={paths[2]}
+          fill={colors[2]}
+          className={reducedMotion ? '' : 'animate-ridgeline-rise'}
+          style={
+            !reducedMotion && variant === 'hero'
+              ? {
+                  animationDelay: '0.24s',
+                  transform: `translate3d(${mouseOffset.x * 0.55}px, ${
+                    mouseOffset.y * 0.55 + scrollYProgress * parallaxRates[2] * 60
+                  }px, 0)`,
+                  transition: 'transform 0.2s ease-out',
+                }
+              : undefined
+          }
+        />
+
+        {/* Layer 4: Foothills */}
+        <path
+          d={paths[3]}
+          fill={colors[3]}
+          className={reducedMotion ? '' : 'animate-ridgeline-rise'}
+          style={
+            !reducedMotion && variant === 'hero'
+              ? {
+                  animationDelay: '0.36s',
+                  transform: `translate3d(${mouseOffset.x * 0.75}px, ${
+                    mouseOffset.y * 0.75 + scrollYProgress * parallaxRates[3] * 60
+                  }px, 0)`,
+                  transition: 'transform 0.2s ease-out',
+                }
+              : undefined
+          }
+        />
+
+        {/* Layer 5: Front Valley Edge */}
+        <path
+          d={paths[4]}
+          fill={colors[4]}
+          className={reducedMotion ? '' : 'animate-ridgeline-rise'}
+          style={
+            !reducedMotion && variant === 'hero'
+              ? {
+                  animationDelay: '0.48s',
+                  transform: `translate3d(${mouseOffset.x * 1.0}px, ${
+                    mouseOffset.y * 1.0 + scrollYProgress * parallaxRates[4] * 60
+                  }px, 0)`,
+                  transition: 'transform 0.2s ease-out',
+                }
+              : undefined
+          }
+        />
       </svg>
     </div>
   );

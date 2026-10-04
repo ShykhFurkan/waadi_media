@@ -1,10 +1,10 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { HeroSection } from '@/components/sections/HeroSection';
-import { Marquee } from '@/components/ui/Marquee';
-import { WhyWaadiSection } from '@/components/sections/WhyWaadiSection';
-import { ServicesListSection } from '@/components/sections/ServicesListSection';
 import { WorkPanelsSection } from '@/components/sections/WorkPanelsSection';
+import { Marquee } from '@/components/ui/Marquee';
+import { ServicesListSection } from '@/components/sections/ServicesListSection';
+import { WhyWaadiSection } from '@/components/sections/WhyWaadiSection';
 import { ProcessSection } from '@/components/sections/ProcessSection';
 import { PackagesPreviewSection } from '@/components/sections/PackagesPreviewSection';
 import { IndustriesSection } from '@/components/sections/IndustriesSection';
@@ -42,37 +42,37 @@ const marqueeServices = [
 export default function HomePage() {
   return (
     <div className="w-full min-h-screen bg-snow">
-      {/* Section 1: Hero */}
+      {/* 1. Hero */}
       <HeroSection />
 
-      {/* Section 2: Marquee */}
-      <Marquee items={marqueeServices} />
-
-      {/* Section 3: Why Waadi */}
-      <WhyWaadiSection />
-
-      {/* Section 4: Services list */}
-      <ServicesListSection />
-
-      {/* Section 5: Selected work panels */}
+      {/* 2. Work (moved up) */}
       <WorkPanelsSection />
 
-      {/* Section 6: How we work */}
+      {/* 3. Marquee band between Work and Services */}
+      <Marquee items={marqueeServices} />
+
+      {/* 4. Services */}
+      <ServicesListSection />
+
+      {/* 5. Why Waadi */}
+      <WhyWaadiSection />
+
+      {/* 6. Process */}
       <ProcessSection />
 
-      {/* Section 7: Packages preview */}
+      {/* 7. Packages preview */}
       <PackagesPreviewSection />
 
-      {/* Section 8: Industries */}
+      {/* 8. Industries */}
       <IndustriesSection />
 
-      {/* Section 9: Testimonials (conditionally renders only if data exists) */}
+      {/* 9. Testimonials (renders nothing if data is empty) */}
       <TestimonialsSection />
 
-      {/* Section 10: FAQ with FAQPage JSON-LD */}
+      {/* 10. FAQ */}
       <FaqSection />
 
-      {/* Section 11: Final call-to-action band */}
+      {/* 11. Final call to action */}
       <CtaBandSection />
     </div>
   );

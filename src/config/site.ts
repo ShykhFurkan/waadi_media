@@ -61,6 +61,11 @@ export const siteConfig = {
     bundleDiscountRate: 0.10,
     minItemsForDiscount: 3,
   },
+
+  // UI & Design System Flags (Redesign R)
+  ui: {
+    anchorSections: false,
+  },
 } as const;
 
 export type SiteConfig = typeof siteConfig;

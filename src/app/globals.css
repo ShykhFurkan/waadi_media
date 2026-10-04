@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: var(--font-display), 'Newsreader', Georgia, serif;
-  --font-sans: var(--font-sans), 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display-override, var(--font-cormorant, 'Cormorant Garamond')), Georgia, serif;
+  --font-serif: var(--font-serif, 'Newsreader'), Georgia, serif;
+  --font-sans: var(--font-sans, 'Outfit'), system-ui, -apple-system, sans-serif;
 
   --color-snow: #F5F8FC;
+  --color-pearl: #EDF1F7;
   --color-paper: #FFFFFF;
   --color-ink: #000000;
   --color-graphite: #2F343D;
@@ -13,6 +15,8 @@
   --color-blue: #0057FF;
   --color-blue-deep: #0039B3;
   --color-blue-tint: #EAF1FF;
+  --color-navy: #0A1A3F;
+  --color-saffron: #B8893B;
   
   --color-ridgeline-1: #E6EEFF;
   --color-ridgeline-2: #C9DAFF;
@@ -27,6 +31,7 @@
 
 :root {
   --snow: #F5F8FC;
+  --pearl: #EDF1F7;
   --paper: #FFFFFF;
   --ink: #000000;
   --graphite: #2F343D;
@@ -35,6 +40,8 @@
   --blue: #0057FF;
   --blue-deep: #0039B3;
   --blue-tint: #EAF1FF;
+  --navy: #0A1A3F;
+  --saffron: #B8893B;
   
   --ridgeline-1: #E6EEFF;
   --ridgeline-2: #C9DAFF;
@@ -46,7 +53,14 @@
   --error: #C62828;
   --whatsapp: #25D366;
 
-  --ease-signature: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Motion Tokens per Redesign R */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 200ms;
+  --duration-medium: 320ms;
+  --duration-slow: 600ms;
+  --duration-deliberate: 900ms;
+  --duration-grand: 1200ms;
 }
 
 /* Light mode only */
@@ -68,11 +82,31 @@ body {
   font-size: 1.0625rem; /* 17px */
   line-height: 1.65;
   overflow-x: hidden;
+  position: relative;
 }
 
-/* Typography Utility Classes matching Section 6.3 */
+/* Subtle static valley grain texture (inline SVG noise, ~3% opacity, zero network request, zero LCP impact) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Typography Utility Classes matching Redesign R */
 .font-display {
   font-family: var(--font-display);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
 }
 
 .font-sans {
@@ -81,34 +115,34 @@ body {
 
 .text-display {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 7.2vw, 6.25rem);
-  line-height: 1.0;
-  letter-spacing: -0.025em;
-  font-weight: 400;
+  font-size: clamp(3.25rem, 9.5vw, 9rem);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  font-weight: 500;
   color: var(--ink);
 }
 
 .text-h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 5.2vw, 4.5rem);
-  line-height: 1.04;
-  letter-spacing: -0.02em;
-  font-weight: 400;
+  font-size: clamp(2.75rem, 6.5vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  font-weight: 500;
   color: var(--ink);
 }
 
 .text-h2 {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3.6vw, 3.25rem);
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-  font-weight: 400;
+  font-size: clamp(2.25rem, 4.6vw, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-weight: 500;
   color: var(--ink);
 }
 
 .text-h3 {
-  font-family: var(--font-sans);
-  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
   line-height: 1.25;
   letter-spacing: -0.01em;
   font-weight: 500;
@@ -117,7 +151,7 @@ body {
 
 .text-lead {
   font-family: var(--font-sans);
-  font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+  font-size: clamp(1.125rem, 1.8vw, 1.5rem);
   line-height: 1.55;
   font-weight: 300;
   color: var(--graphite);
@@ -127,16 +161,16 @@ body {
   font-size: 1.0625rem;
   line-height: 1.65;
   font-weight: 400;
-  max-width: 70ch;
+  max-width: 68ch;
 }
 
 .text-price {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-size: clamp(1.75rem, 3vw, 2.5rem);
   line-height: 1.1;
   letter-spacing: -0.01em;
   font-variant-numeric: lining-nums tabular-nums;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--ink);
 }
 
@@ -159,7 +193,6 @@ button, a {
   touch-action: manipulation;
 }
 
-/* Tap target min size */
 .touch-target {
   min-height: 44px;
   min-width: 44px;
@@ -190,35 +223,121 @@ button, a {
 }
 
 .animate-marquee {
-  animation: marquee-scroll 60s linear infinite;
+  animation: marquee-scroll 70s linear infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-marquee {
-    animation: none;
-    transform: none;
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Sun disc rise sequence on hero load */
+@keyframes sun-rise {
+  0% {
+    transform: translateY(40px) scale(0.85);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
   }
 }
 
-/* Hero Masked Reveal per Section 10.1 (pure CSS, no JS animation overhead) */
+.animate-sun-rise {
+  animation: sun-rise 1.4s var(--ease-out) both;
+  animation-delay: 0.3s;
+}
+
+/* Slow drifting mist layer */
+@keyframes mist-drift {
+  0% {
+    transform: translateX(-4%);
+  }
+  50% {
+    transform: translateX(4%);
+  }
+  100% {
+    transform: translateX(-4%);
+  }
+}
+
+.animate-mist-drift {
+  animation: mist-drift 24s ease-in-out infinite;
+}
+
+/* Saffron hairline draw reveal */
+@keyframes draw-line {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.reveal-draw {
+  transform-origin: left;
+  animation: draw-line 0.9s var(--ease-out) both;
+}
+
+/* Subtle scroll cue line animation */
+@keyframes scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  50.1% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+.animate-scroll-cue {
+  animation: scroll-cue 2.4s ease-in-out infinite;
+}
+
+/* WhatsApp subtle pulse */
+@keyframes wa-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-wa-pulse {
+  animation: wa-pulse 4s ease-in-out infinite;
+}
+
+/* Tier 1 CSS Reveals */
+.reveal-mask-line {
+  animation: hero-reveal 0.9s var(--ease-out) both;
+}
+
 @keyframes hero-reveal {
   0% {
-    transform: translateY(105%);
+    transform: translateY(102%);
   }
   100% {
     transform: translateY(0%);
   }
 }
 
-.animate-hero-reveal {
-  animation: hero-reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* Ridgeline Page-Load Rise Sequence */
 @keyframes ridgeline-rise {
   0% {
-    transform: translateY(35%);
-    opacity: 0;
+    transform: translateY(20%);
+    opacity: 0.5;
   }
   100% {
     transform: translateY(0%);
@@ -227,15 +346,55 @@ button, a {
 }
 
 .animate-ridgeline-rise {
-  animation: ridgeline-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: ridgeline-rise 1.1s var(--ease-out) both;
 }
 
+/* Link underline draw */
+.link-draw {
+  position: relative;
+}
+.link-draw::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--saffron);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-medium) var(--ease-out);
+}
+.link-draw:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Prefers Reduced Motion: turn all motion off instantly */
 @media (prefers-reduced-motion: reduce) {
-  .animate-hero-reveal,
-  .animate-ridgeline-rise {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-marquee,
+  .animate-sun-rise,
+  .animate-mist-drift,
+  .animate-scroll-cue,
+  .animate-wa-pulse,
+  .animate-ridgeline-rise,
+  .reveal-mask-line,
+  .reveal-draw {
     animation: none !important;
     transform: none !important;
     opacity: 1 !important;
   }
-}
 
+  body::before {
+    display: none;
+  }
+}

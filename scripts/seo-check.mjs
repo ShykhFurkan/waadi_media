@@ -23,7 +23,7 @@ function collectHtmlFiles(dir, baseRoute = '') {
 
     if (entry.isDirectory()) {
       // Skip internal and private segments
-      if (entry.name.startsWith('_') || entry.name === 'api' || entry.name === 'design-system') {
+      if (entry.name.startsWith('_') || entry.name === 'api' || entry.name === 'design-system' || entry.name === 'dev') {
         continue;
       }
       results = results.concat(collectHtmlFiles(fullPath, `${baseRoute}/${entry.name}`));
@@ -33,7 +33,7 @@ function collectHtmlFiles(dir, baseRoute = '') {
         : `${baseRoute}/${entry.name.replace(/\.html$/, '')}`;
 
       // Skip non-user pages
-      if (routeName.includes('/_') || routeName === '/design-system') {
+      if (routeName.includes('/_') || routeName === '/design-system' || routeName.startsWith('/dev')) {
         continue;
       }
 

@@ -25,13 +25,8 @@ export function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-paper border-t border-line relative mt-20">
-      {/* Ridgeline quiet topper along footer edge per Section 6.7 */}
-      <div className="w-full overflow-hidden border-b border-line/40">
-        <Ridgeline variant="footer" />
-      </div>
-
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 pt-16 pb-12">
+    <footer className="w-full bg-paper border-t border-line relative mt-24 overflow-hidden">
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 pt-20 pb-12">
         {/* Main 4 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Column */}
@@ -139,8 +134,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-line pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mist">
+        {/* Bottom Bar: Copyright & Legal */}
+        <div className="border-t border-line pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mist mb-12">
           <p>
             © {siteConfig.foundedYear} {siteConfig.name}. Made with care in Anantnag, Kashmir.
           </p>
@@ -153,6 +148,34 @@ export function Footer() {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* Ridgeline above the cropped wordmark */}
+      <div className="w-full overflow-hidden">
+        <Ridgeline variant="footer" />
+      </div>
+
+      {/* Giant cropped "waadi media.com" wordmark at the bottom */}
+      <div className="w-full overflow-hidden select-none pointer-events-none -mb-3 sm:-mb-6 md:-mb-8" aria-hidden="true">
+        <svg
+          viewBox="0 0 1440 180"
+          className="w-full h-auto block"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <text
+            x="50%"
+            y="155"
+            textAnchor="middle"
+            fill="#EDF1F7"
+            fontFamily="var(--font-display)"
+            fontWeight="500"
+            fontSize="190"
+            letterSpacing="-0.04em"
+          >
+            waadi media.com
+          </text>
+        </svg>
       </div>
     </footer>
   );

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Newsreader, Outfit } from 'next/font/google';
+import { Cormorant_Garamond, Newsreader, Outfit } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -14,15 +14,25 @@ export const viewport: Viewport = {
   themeColor: '#F5F8FC',
 };
 
-// Only the weights actually used in the design system (300 removed)
+// Display font (headings 40px and up)
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-cormorant',
+  weight: ['500', '600'],
+  style: ['normal', 'italic'],
+});
+
+// Editorial / reading serif font & price tabular font
 const newsreader = Newsreader({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-display',
+  variable: '--font-serif',
   weight: ['400', '500'],
   style: ['normal', 'italic'],
 });
 
+// UI & body sans font
 const outfit = Outfit({
   subsets: ['latin'],
   display: 'swap',
@@ -91,7 +101,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${newsreader.variable} ${outfit.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${newsreader.variable} ${outfit.variable}`}>
       <head>
         <JsonLd data={getProfessionalServiceSchema()} />
         <JsonLd data={getWebSiteSchema()} />

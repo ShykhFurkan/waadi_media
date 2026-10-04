@@ -2,69 +2,113 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { projectsData } from '@/data/projects';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { OutboundLink } from '@/components/ui/OutboundLink';
+import { Container } from '@/components/layout/Container';
 
 export function WorkPanelsSection() {
   return (
-    <section id="work" className="py-20 md:py-28 bg-snow border-t border-line">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-          <div>
-            <h2 className="text-h2 text-ink mb-2">Work we&apos;re proud of.</h2>
-            <p className="text-lead text-mist">
-              A few projects that show how we think and build.
-            </p>
+    <section id="work" className="py-24 sm:py-32 bg-snow border-t border-line">
+      <Container>
+        {/* Asymmetric Section Header: Heading in cols 1-5, lead in cols 7-12 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end mb-16 sm:mb-24">
+          <div className="lg:col-span-6">
+            <span className="text-xs uppercase tracking-widest text-mist font-semibold block mb-3">
+              Selected Projects
+            </span>
+            <h2 className="text-h2 text-ink">
+              Work engineered for Kashmir&apos;s commercial market.
+            </h2>
           </div>
-          <div>
+          <div className="lg:col-span-5 lg:col-start-8 flex flex-col items-start gap-4">
+            <p className="text-lead text-graphite">
+              Fast loading, clear pricing, and built with local context. Here are three recent systems we delivered.
+            </p>
             <Button href="/work" variant="text">
               View all work
             </Button>
           </div>
         </div>
 
-        {/* Selected Work Alternating Panels */}
-        <div className="space-y-20 md:space-y-28">
-          {projectsData.map((project, index) => {
-            const isReversed = index % 2 === 1;
+        {/* Large Editorial Project Rows */}
+        <div className="divide-y divide-line border-y border-line">
+          {projectsData.map((project, index) => (
+            <div
+              key={project.slug}
+              className="group relative py-10 sm:py-16 transition-colors duration-300 hover:bg-pearl/50"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                {/* Left: Row Number & Project Details (Cols 1-7) */}
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono text-mist font-medium uppercase tracking-widest">
+                      0{index + 1}
+                    </span>
+                    <span className="text-xs uppercase tracking-widest text-mist">
+                      {project.sector}
+                    </span>
+                    {project.badge && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-tint text-blue font-medium">
+                        {project.badge}
+                      </span>
+                    )}
+                  </div>
 
-            return (
-              <div
-                key={project.slug}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center"
-              >
-                {/* Visual Panel (7 cols): CSS Browser Window with Clip-path Wipe */}
-                <div
-                  className={`lg:col-span-7 ${
-                    isReversed ? 'lg:order-2' : 'lg:order-1'
-                  }`}
-                >
-                  <div className="group relative rounded-[28px] overflow-hidden bg-paper border border-line shadow-floating">
-                    {/* CSS Browser Window Chrome */}
-                    <div className="h-10 bg-snow border-b border-line px-4 flex items-center gap-2 select-none">
-                      <div className="flex items-center gap-1.5" aria-hidden="true">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#E1E7F0]" />
-                      </div>
-                      <div className="flex-1 mx-3">
-                        <div className="max-w-xs mx-auto h-5 bg-paper rounded-full border border-line text-[11px] text-mist flex items-center justify-center font-mono truncate px-3">
-                          {project.liveUrl.replace('https://', '').replace(/\/$/, '')}
-                        </div>
-                      </div>
-                    </div>
+                  <Link href={`/work/${project.slug}`} className="block group">
+                    <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-medium text-ink group-hover:text-blue transition-colors">
+                      {project.name}
+                    </h3>
+                  </Link>
 
-                    {/* Mockup Image container with 1.03x hover zoom per Section 6.8 */}
-                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-snow">
-                      {project.coverImage ? (
+                  <p className="text-body text-graphite max-w-xl">
+                    {project.summary}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-6 pt-2">
+                    <Link
+                      href={`/work/${project.slug}`}
+                      className="text-sm font-medium text-blue hover:text-blue-deep transition-colors"
+                    >
+                      Read case study
+                    </Link>
+                    <OutboundLink
+                      href={project.liveUrl}
+                      label={project.name}
+                      className="text-sm font-medium text-graphite hover:text-ink transition-colors flex items-center gap-1"
+                    >
+                      <span>Visit site</span>
+                      <span className="text-xs text-mist">↗</span>
+                    </OutboundLink>
+                  </div>
+                </div>
+
+                {/* Right: Media Thumbnail / Preview (Cols 8-12) */}
+                <div className="lg:col-span-5">
+                  <Link href={`/work/${project.slug}`} className="block group">
+                    <div className="relative aspect-[16/10] w-full rounded-[28px] overflow-hidden bg-paper border border-line shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]">
+                      {project.video?.mp4 || project.video?.webm ? (
+                        <video
+                          muted
+                          loop
+                          playsInline
+                          preload="none"
+                          poster={project.coverImage}
+                          className="w-full h-full object-cover object-top"
+                        >
+                          {project.video.webm && (
+                            <source src={project.video.webm} type="video/webm" />
+                          )}
+                          {project.video.mp4 && (
+                            <source src={project.video.mp4} type="video/mp4" />
+                          )}
+                        </video>
+                      ) : project.coverImage ? (
                         <Image
                           src={project.coverImage}
                           alt={`${project.name} website preview`}
                           fill
-                          sizes="(max-width: 1024px) 100vw, 58vw"
-                          className="object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                          sizes="(max-width: 1024px) 100vw, 40vw"
+                          className="object-cover object-top"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
@@ -72,66 +116,13 @@ export function WorkPanelsSection() {
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-
-                {/* Text Content Panel (5 cols) */}
-                <div
-                  className={`lg:col-span-5 space-y-5 ${
-                    isReversed ? 'lg:order-1' : 'lg:order-2'
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge>{project.sector}</Badge>
-                    {project.badge && (
-                      <span className="text-xs text-mist font-medium">
-                        ({project.badge})
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-h2 text-ink">
-                    {project.name}
-                  </h3>
-
-                  <p className="text-body text-graphite line-clamp-3">
-                    {project.summary}
-                  </p>
-
-                  {/* Services Used */}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {project.services.map((serviceName) => (
-                      <span
-                        key={serviceName}
-                        className="px-2.5 py-1 rounded-[6px] bg-snow border border-line text-xs text-mist font-medium"
-                      >
-                        {serviceName}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Action Links */}
-                  <div className="pt-3 flex items-center gap-6">
-                    <Link
-                      href={`/work/${project.slug}`}
-                      className="text-sm font-medium text-blue hover:text-blue-deep transition-colors"
-                    >
-                      View case study
-                    </Link>
-                    <OutboundLink
-                      href={project.liveUrl}
-                      label={project.name}
-                      className="text-sm font-medium text-graphite hover:text-ink transition-colors"
-                    >
-                      Visit site
-                    </OutboundLink>
-                  </div>
+                  </Link>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
