@@ -100,7 +100,7 @@ export const packagesData: Package[] = [
 ];
 
 export const packageDisclaimers = [
-  'Monthly packages run on a 3-month minimum.',
+  'Monthly packages run on a 3-month initial period, then month-to-month. Cancel anytime with 30 days notice.',
   'Ad spend is paid directly to Google or Meta.',
   'Packages save you money on the main services.',
 ];

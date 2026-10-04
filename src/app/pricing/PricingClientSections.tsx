@@ -123,7 +123,7 @@ export function PackagesSection() {
 
       {/* Disclaimers (No [CONFIRM] tags on screen per Rule 4) */}
       <div className="p-4 bg-snow border border-line rounded-xl text-xs text-mist space-y-1">
-        <p>• Monthly packages run on a 3-month minimum so we have adequate time to test and optimize.</p>
+        <p>• Monthly packages run on a 3-month initial period, then month-to-month. Cancel anytime with 30 days notice.</p>
         <p>• Ad spend is paid directly by you to Google or Meta. Our fee covers strategy and management.</p>
         <p>• Packages save you money on the main services.</p>
       </div>

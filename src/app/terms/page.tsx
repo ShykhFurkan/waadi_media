@@ -48,7 +48,7 @@ export default function TermsPage() {
           <section className="space-y-3 pt-6">
             <h2 className="text-h3 text-ink">3. Intellectual property &amp; asset ownership</h2>
             <p>
-              We believe in full client ownership. Once a project is paid in full according to the agreed contract milestones, complete ownership of all custom design files, bespoke frontend code, and final brand assets created specifically for you transfers directly to your business.
+              We believe in full client ownership. Once a project is paid in full, you own your domain, website code, content and accounts. All custom design files and brand assets created specifically for you transfer directly to your business.
             </p>
             <p>
               Waadi Media retains ownership of proprietary agency boilerplates, pre-existing code libraries, and generic developer tools used during production. Waadi Media also reserves the right to display completed project screenshots and case studies in our portfolio, unless a formal non-disclosure agreement (NDA) is executed prior to kickoff.
@@ -58,10 +58,10 @@ export default function TermsPage() {
           <section className="space-y-3 pt-6">
             <h2 className="text-h3 text-ink">4. Payment terms &amp; milestones</h2>
             <p>
-              For standard fixed-scope projects (such as website design, brand identity, or custom development), payment is split into agreed milestones, typically a 50% deposit before kickoff and 50% upon final delivery and staging approval.
+              For standard fixed-scope projects (such as website design or brand identity), payment is 50% to start and 50% on delivery. For software and apps, payment is split into milestones agreed in writing before work begins.
             </p>
             <p>
-              For ongoing monthly retainers (such as SEO, digital advertising, or website care), invoices are issued at the start of each billing period.
+              For ongoing monthly retainers (such as SEO, digital advertising, or website care), invoices are issued at the start of each billing period. Monthly retainers run on a 3-month initial period, then month-to-month. Cancel anytime with 30 days notice.
             </p>
           </section>
 

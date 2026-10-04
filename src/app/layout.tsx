@@ -3,8 +3,7 @@ import { Newsreader, Outfit } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { FloatingActions } from '@/components/layout/FloatingActions';
-import { CookieNotice } from '@/components/layout/CookieNotice';
+import { ClientDeferred } from '@/components/layout/ClientDeferred';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getProfessionalServiceSchema, getWebSiteSchema } from '@/lib/seo';
 import { siteConfig } from '@/config/site';
@@ -15,19 +14,20 @@ export const viewport: Viewport = {
   themeColor: '#F5F8FC',
 };
 
+// Only the weights actually used in the design system (300 removed)
 const newsreader = Newsreader({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-display',
-  weight: ['300', '400', '500'],
-  style: ['normal', 'italic'],
+  weight: ['400', '500'],
+  style: ['italic'],
 });
 
 const outfit = Outfit({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
-  weight: ['300', '400', '500', '600'],
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -104,14 +104,14 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        
+
         <Header />
         <main id="main-content" className="flex-1 w-full pb-16 md:pb-0">
           {children}
         </main>
         <Footer />
-        <FloatingActions />
-        <CookieNotice gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        {/* ClientDeferred: FloatingActions + CookieNotice loaded lazily after hydration */}
+        <ClientDeferred gaId={process.env.NEXT_PUBLIC_GA_ID} />
       </body>
     </html>
   );

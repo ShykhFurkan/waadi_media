@@ -119,11 +119,36 @@ export function CalEmbed() {
       }
     };
 
-    initCal();
+    let idleId: number | null = null;
+    let started = false;
+    const runOnce = () => {
+      if (started || isCancelled) return;
+      started = true;
+      window.removeEventListener('pointerdown', runOnce);
+      window.removeEventListener('scroll', runOnce);
+      window.removeEventListener('keydown', runOnce);
+      initCal();
+    };
+
+    window.addEventListener('pointerdown', runOnce, { once: true, passive: true });
+    window.addEventListener('scroll', runOnce, { once: true, passive: true });
+    window.addEventListener('keydown', runOnce, { once: true, passive: true });
+
+    if ('requestIdleCallback' in window) {
+      idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(runOnce, { timeout: 1500 });
+    } else {
+      setTimeout(runOnce, 400);
+    }
 
     return () => {
       isCancelled = true;
       clearTimeout(timeout);
+      window.removeEventListener('pointerdown', runOnce);
+      window.removeEventListener('scroll', runOnce);
+      window.removeEventListener('keydown', runOnce);
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      }
     };
   }, [calLink, isLoading, isUnconfigured]);
 

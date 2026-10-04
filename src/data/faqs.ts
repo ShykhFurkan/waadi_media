@@ -31,7 +31,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'payments',
     question: 'How do payments work?',
     answer:
-      'For one-time projects, 50% to start and 50% on delivery. Monthly services are billed at the start of each month.',
+      'For one-time projects, 50% to start and 50% on delivery. For software and apps, payment is split into milestones agreed in writing. Monthly services are billed at the start of each month.',
     category: 'pricing',
   },
   {
@@ -45,7 +45,7 @@ export const mainFaqs: FAQItem[] = [
     id: 'ownership',
     question: 'Who owns the website?',
     answer:
-      'You do. Once the project is paid for, the domain, content and design files are yours.',
+      'You do. Once the project is paid in full, you own your domain, website code, content and accounts.',
     category: 'general',
   },
   {

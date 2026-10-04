@@ -7,10 +7,14 @@ import { servicesData, getServiceBySlug } from '@/data/services';
 import { getPriceItemsByService, formatINR, formatStartingPrice, formatItemUnitLabel } from '@/data/pricing';
 import { getProjectBySlug } from '@/data/projects';
 import { Badge } from '@/components/ui/Badge';
+import dynamic from 'next/dynamic';
 import { Accordion } from '@/components/ui/Accordion';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { ServiceQuoteForm } from '@/components/forms/ServiceQuoteForm';
 import { defaultWhatsAppMessages, whatsappLink } from '@/lib/whatsapp';
+
+const ServiceQuoteForm = dynamic(() =>
+  import('@/components/forms/ServiceQuoteForm').then((m) => m.ServiceQuoteForm)
+);
 import {
   getServiceSchema,
   getBreadcrumbSchema,

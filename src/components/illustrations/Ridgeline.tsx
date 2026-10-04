@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
+import { m, useScroll, useTransform, useReducedMotion, LazyMotion, domAnimation } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { easeCustom } from '@/components/ui/MotionHelpers';
 
@@ -83,53 +83,57 @@ export function Ridgeline({ variant = 'hero', className }: RidgelineProps) {
   const yTransforms = [yLayer1, yLayer2, yLayer3, yLayer4, yLayer5];
 
   return (
-    <div
-      ref={containerRef}
-      className={cn('relative overflow-hidden pointer-events-none select-none', heightClasses, className)}
-      aria-hidden="true"
-    >
-      <svg
-        viewBox="0 0 1440 400"
-        preserveAspectRatio="none"
-        className="w-full h-full block"
+    <LazyMotion features={domAnimation}>
+      <div
+        ref={containerRef}
+        className={cn('relative overflow-hidden pointer-events-none select-none', heightClasses, className)}
+        aria-hidden="true"
       >
-        {paths.map((d, index) => {
-          const delay = index * 0.15; // Staggered page-load rise sequence
-          const pointerDepth = (index + 1) / 5; // Greater shift on front layers
+        <svg
+          viewBox="0 0 1440 400"
+          preserveAspectRatio="none"
+          className="w-full h-full block"
+          // Non-blocking: SVG is decorative, dimensions reserved via CSS
+          focusable="false"
+        >
+          {paths.map((d, index) => {
+            const delay = index * 0.15; // Staggered page-load rise sequence
+            const pointerDepth = (index + 1) / 5; // Greater shift on front layers
 
-          if (shouldReduceMotion || variant !== 'hero') {
+            if (shouldReduceMotion || variant !== 'hero') {
+              return (
+                <path
+                  key={index}
+                  d={d}
+                  fill={colors[index]}
+                />
+              );
+            }
+
             return (
-              <path
+              <m.path
                 key={index}
                 d={d}
                 fill={colors[index]}
+                initial={{ y: '35%', opacity: 0 }}
+                animate={{
+                  y: mouseOffset.y * pointerDepth,
+                  x: mouseOffset.x * pointerDepth,
+                  opacity: 1,
+                }}
+                style={{
+                  y: yTransforms[index],
+                }}
+                transition={{
+                  opacity: { duration: 0.8, delay, ease: easeCustom },
+                  x: { duration: 0.3, ease: 'easeOut' },
+                  y: { duration: 0.8, delay, ease: easeCustom },
+                }}
               />
             );
-          }
-
-          return (
-            <motion.path
-              key={index}
-              d={d}
-              fill={colors[index]}
-              initial={{ y: '35%', opacity: 0 }}
-              animate={{
-                y: mouseOffset.y * pointerDepth,
-                x: mouseOffset.x * pointerDepth,
-                opacity: 1,
-              }}
-              style={{
-                y: yTransforms[index],
-              }}
-              transition={{
-                opacity: { duration: 0.8, delay, ease: easeCustom },
-                x: { duration: 0.3, ease: 'easeOut' },
-                y: { duration: 0.8, delay, ease: easeCustom },
-              }}
-            />
-          );
-        })}
-      </svg>
-    </div>
+          })}
+        </svg>
+      </div>
+    </LazyMotion>
   );
 }

@@ -174,7 +174,7 @@ export const servicesData: Service[] = [
     faqs: [
       {
         q: 'Do I own the logo?',
-        a: 'Yes, once the project is paid for, you own the final design.',
+        a: 'Yes. Once the project is paid in full, you own all final design files and accounts.',
       },
       {
         q: 'How many logo options do I get?',
@@ -221,7 +221,7 @@ export const servicesData: Service[] = [
       },
       {
         q: 'Is there a minimum contract?',
-        a: 'Monthly services run on a 3-month minimum so we have time to test and improve.',
+        a: 'Monthly services run on a 3-month initial period, then month-to-month. Cancel anytime with 30 days notice.',
       },
     ],
     related: ['social-media-content', 'seo'],
@@ -298,7 +298,7 @@ export const servicesData: Service[] = [
       },
       {
         q: 'Who owns the code?',
-        a: 'You do, once the project is paid for.',
+        a: 'You do. Once the project is paid in full, you own the code, data and accounts.',
       },
       {
         q: 'Do you support it after launch?',
