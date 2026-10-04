@@ -71,7 +71,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc pl-5 space-y-2 text-graphite">
               <li><strong>Vercel:</strong> Web hosting, global content delivery, and serverless compute.</li>
-              <li><strong>Resend:</strong> Secure transactional email processing for contact form notifications.</li>
+              <li><strong>Nodemailer (SMTP):</strong> Secure transactional email delivery for contact form notifications.</li>
               <li><strong>Cal.com:</strong> Self-serve calendar scheduling for discovery calls.</li>
               <li><strong>Google Analytics:</strong> Aggregated, privacy-compliant website traffic metrics.</li>
             </ul>

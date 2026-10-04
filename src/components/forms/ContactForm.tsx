@@ -230,27 +230,6 @@ export function ContactForm({
         />
       </div>
 
-      {serverError && (
-        <div className="p-4 bg-error/10 border border-error/30 rounded-xl text-sm text-ink flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
-          <div>
-            <strong className="block text-ink font-semibold">Your message didn&apos;t send.</strong>
-            <p className="text-graphite mt-0.5">
-              Check your connection and try again, or{' '}
-              <a
-                href={siteConfig.contact.whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-whatsapp font-medium underline"
-              >
-                message us on WhatsApp
-              </a>
-              .
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Name */}
       <div>
         <Input
@@ -340,6 +319,27 @@ export function ContactForm({
           {...register('message')}
         />
       </div>
+
+      {serverError && (
+        <div className="p-4 bg-error/10 border border-error/30 rounded-xl text-sm text-ink flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
+          <div>
+            <strong className="block text-ink font-semibold">Your message didn&apos;t send.</strong>
+            <p className="text-graphite mt-0.5">
+              Check your connection and try again, or{' '}
+              <a
+                href={siteConfig.contact.whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-whatsapp font-medium underline"
+              >
+                message us on WhatsApp
+              </a>
+              .
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Submit Button */}
       <div>

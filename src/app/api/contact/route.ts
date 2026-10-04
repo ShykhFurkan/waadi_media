@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { contactFormSchema } from '@/lib/validations/contact';
+
+export const runtime = 'nodejs';
 
 // In-memory rate limiting map (IP -> { count, resetTime })
 // Limits to 5 submissions per IP per hour
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
         {
           ok: false,
           error:
-            "Too many requests. Please try again later or message us directly on WhatsApp.",
+            'Too many requests. Please try again later or message us directly on WhatsApp.',
         },
         { status: 429 }
       );
@@ -51,7 +53,9 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           ok: false,
-          error: firstError || "Your message didn't send. Check your connection and try again, or message us on WhatsApp.",
+          error:
+            firstError ||
+            "Your message didn't send. Check your connection and try again, or message us on WhatsApp.",
           fieldErrors: result.error.flatten().fieldErrors,
         },
         { status: 400 }
@@ -71,18 +75,34 @@ export async function POST(request: Request) {
     // 4. Time-based spam check: submitted under 3 seconds after page load
     if (data.loadTimestamp && Date.now() - data.loadTimestamp < 3000) {
       return NextResponse.json(
-        { ok: false, error: 'Submission was too fast. Please take a moment to review your message.' },
+        {
+          ok: false,
+          error:
+            'Submission was too fast. Please take a moment to review your message.',
+        },
         { status: 400 }
       );
     }
 
-    // 5. Email delivery via Resend
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const toEmail = process.env.CONTACT_TO_EMAIL || 'contact@waadimedia.com';
-    const fromEmail = process.env.CONTACT_FROM_EMAIL || 'Waadi Media <no-reply@waadimedia.com>';
+    // 5. Check SMTP variables
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPortRaw = process.env.SMTP_PORT;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
 
-    if (!resendApiKey) {
+    const toEmail = process.env.CONTACT_TO_EMAIL || 'contact@waadimedia.com';
+
+    if (!smtpHost || !smtpUser || !smtpPass) {
       if (process.env.NODE_ENV !== 'production') {
+        console.log('[Dev Contact Form Submission (SMTP unconfigured)]:', {
+          name: data.name,
+          phone: data.phone,
+          email: data.email,
+          services: data.services,
+          budget: data.budget,
+          sourcePage: data.sourcePage,
+          message: data.message,
+        });
         return NextResponse.json({ ok: true });
       } else {
         // In production, never log personal data; return clear user-facing error
@@ -97,19 +117,37 @@ export async function POST(request: Request) {
       }
     }
 
-    const resend = new Resend(resendApiKey);
+    const smtpPort = smtpPortRaw ? parseInt(smtpPortRaw, 10) : 587;
+    const fromEmail =
+      process.env.CONTACT_FROM_EMAIL || `Waadi Media <${smtpUser}>`;
 
-    // Email to owner
-    await resend.emails.send({
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    // Send notification email to Waadi Media
+    await transporter.sendMail({
       from: fromEmail,
       to: toEmail,
       replyTo: data.email || undefined,
-      subject: `New enquiry from ${data.name}${data.services?.length ? ` - ${data.services.join(', ')}` : ''}`,
+      subject: `New enquiry from ${data.name}${
+        data.services?.length ? ` - ${data.services.join(', ')}` : ''
+      }`,
       text: [
         `Name: ${data.name}`,
         `Phone: ${data.phone}`,
         `Email: ${data.email || 'Not provided'}`,
-        `Services: ${data.services && data.services.length > 0 ? data.services.join(', ') : 'Not specified'}`,
+        `Services: ${
+          data.services && data.services.length > 0
+            ? data.services.join(', ')
+            : 'Not specified'
+        }`,
         `Budget: ${data.budget || 'Not specified'}`,
         `Source Page: ${data.sourcePage || '/contact'}`,
         '',
@@ -118,9 +156,9 @@ export async function POST(request: Request) {
       ].join('\n'),
     });
 
-    // Confirmation email to visitor if they provided an email address
-    if (data.email) {
-      await resend.emails.send({
+    // Optional confirmation email to visitor (off by default)
+    if (process.env.ENABLE_VISITOR_CONFIRMATION_EMAIL === 'true' && data.email) {
+      await transporter.sendMail({
         from: fromEmail,
         to: data.email,
         subject: 'We got your message - Waadi Media',

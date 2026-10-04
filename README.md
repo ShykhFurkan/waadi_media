@@ -14,7 +14,7 @@
 - **Animations:** `motion/react` with strict `prefers-reduced-motion` compliance
 - **Content:** MDX via `next-mdx-remote` with RSS feed generator
 - **Form Handling & Validation:** `react-hook-form` + `zod`
-- **Integrations:** Cal.com embed, Google Analytics 4 (gated behind consent notice), Resend email API
+- **Integrations:** Cal.com embed, Google Analytics 4 (gated behind consent notice), Nodemailer (SMTP) email transport
 
 ---
 
@@ -54,9 +54,12 @@ Create `.env.local` based on `.env.example`:
 | `NEXT_PUBLIC_GA_ID` | Google Analytics 4 Measurement ID | `G-XXXXXXXXXX` |
 | `NEXT_PUBLIC_CAL_LINK` | Cal.com booking slug | `waadimedia/free-call` |
 | `GOOGLE_SITE_VERIFICATION` | Google Search Console verification code | `your_google_verification_token` |
-| `RESEND_API_KEY` | Resend API key for contact form emails | `re_xxxxxxxxxxxx` |
+| `SMTP_HOST` | SMTP server host | `smtp.example.com` |
+| `SMTP_PORT` | SMTP port (e.g., 587 for TLS, 465 for SSL) | `587` |
+| `SMTP_USER` | SMTP username / email | `contact@waadimedia.com` |
+| `SMTP_PASS` | SMTP password / app password | `your_smtp_password` |
 | `CONTACT_TO_EMAIL` | Target inbox for contact form submissions | `contact@waadimedia.com` |
-| `CONTACT_FROM_EMAIL` | Sender address verified in Resend | `Waadi Media <no-reply@waadimedia.com>` |
+| `CONTACT_FROM_EMAIL` | Sender address | `Waadi Media <contact@waadimedia.com>` |
 
 ---
 
@@ -124,8 +127,8 @@ All prices across the entire website live in a single typed configuration file:
 Before pointing production DNS to the new build:
 
 - [ ] **Domain & DNS:** Set apex `waadimedia.com` and `www.waadimedia.com` records in host DNS.
-- [ ] **Environment Variables:** Populate production values for `RESEND_API_KEY`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_CAL_LINK`, and `GOOGLE_SITE_VERIFICATION`.
-- [ ] **Email Delivery:** Verify sender domain in Resend and test submission via `/contact`.
+- [ ] **Environment Variables:** Populate production values for `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_CAL_LINK`, and `GOOGLE_SITE_VERIFICATION`.
+- [ ] **Email Delivery:** Verify SMTP settings with `node scripts/test-mail.mjs` and test submission via `/contact`.
 - [ ] **Calendar Integration:** Confirm Cal.com booking slug and test timezone slot availability on `/book-a-call`.
 - [ ] **Redirects:** Map any legacy URLs from the old website into `src/config/redirects.ts`.
 - [ ] **Search Console:** Submit `https://waadimedia.com/sitemap.xml` in Google Search Console after verification.

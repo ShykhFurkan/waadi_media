@@ -142,7 +142,7 @@ Most visitors will be on **Android phones**, often on average mobile networks, a
 | Animation | `motion` (the library formerly named Framer Motion), imported from `motion/react` |
 | Icons | `lucide-react` (stroke 1.5) |
 | Forms | `react-hook-form` + `zod` |
-| Email | Resend (API route `/api/contact`), sending to contact@waadimedia.com |
+| Email | Nodemailer (SMTP via API route `/api/contact`), sending to contact@waadimedia.com |
 | Call booking | Cal.com inline embed via `@calcom/embed-react` (free plan), username from env |
 | Blog | MDX files in `/content/blog`, parsed with `gray-matter` + `next-mdx-remote`, `remark-gfm`, `rehype-slug`, `rehype-autolink-headings` |
 | Fonts | `next/font/google` (Section 6.3) |
@@ -185,9 +185,12 @@ Most visitors will be on **Android phones**, often on average mobile networks, a
 NEXT_PUBLIC_SITE_URL=https://waadimedia.com
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 NEXT_PUBLIC_CAL_LINK=your-username/free-call
-RESEND_API_KEY=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
 CONTACT_TO_EMAIL=contact@waadimedia.com
-CONTACT_FROM_EMAIL=Waadi Media <no-reply@waadimedia.com>
+CONTACT_FROM_EMAIL=Waadi Media <contact@waadimedia.com>
 GOOGLE_SITE_VERIFICATION=
 ```
 
@@ -799,7 +802,7 @@ Prefill from query params: `?service=<id>`, `?package=<id>`, and calculator item
 - **Button:** **Send message.** Loading label: "Sending". Success state (inline, no page reload): **Thanks, we got your message.** *We'll reply on WhatsApp or by email within one business day. If it's urgent, call +91 77809 40317.* Failure: **Your message didn't send.** *Check your connection and try again, or message us on WhatsApp.* Field errors: "Enter your name", "Enter a 10-digit phone number", "Tell us a little about your business (at least 10 characters)".
 - **Below the form:** the Google Maps embed (Section 2) in a 28px-radius frame, with the "quiet shikara" illustration beside it on desktop.
 
-**API (`/api/contact`):** validate with the same zod schema server-side; reject if honeypot filled or if submitted under 3 seconds after load; basic rate limit per IP (for example 5 per hour; use Upstash Redis if available, otherwise in-memory with a note that it resets); send an email via Resend to `CONTACT_TO_EMAIL` with all fields and the page the visitor came from; send a short confirmation email to the visitor if they gave an email. Return JSON `{ ok: true }` or a typed error. Never log personal data.
+**API (`/api/contact`):** validate with the same zod schema server-side; reject if honeypot filled or if submitted under 3 seconds after load; basic rate limit per IP (for example 5 per hour; in-memory with a note that it resets); send an email via Nodemailer (SMTP) to `CONTACT_TO_EMAIL` with all fields and the page the visitor came from; confirmation email to visitor is disabled by default. Return JSON `{ ok: true }` or a typed error. Never log personal data.
 
 ### 10.7 Book a call (`/book-a-call`)
 
@@ -850,7 +853,7 @@ Internal linking: each local page links to the pricing page, 3 relevant services
 
 ### 10.10 Legal pages
 
-- **`/privacy`:** what we collect (contact form fields, analytics data, call-booking details), why, which services process it (Vercel, Resend, Google Analytics, Cal.com), how long we keep it, how to ask for deletion, and contact details. Reference India's Digital Personal Data Protection Act, 2023, in plain words.
+- **`/privacy`:** what we collect (contact form fields, analytics data, call-booking details), why, which services process it (Vercel, Nodemailer / SMTP host, Google Analytics, Cal.com), how long we keep it, how to ask for deletion, and contact details. Reference India's Digital Personal Data Protection Act, 2023, in plain words.
 - **`/terms`:** use of the site, estimates are not offers until a written quote is accepted, intellectual property, limitation of liability, governing law India with courts at Anantnag, J&K `[CONFIRM]`.
 - Write both in plain language. Mark at the top of each file: "Draft: have a qualified legal professional review before launch." Do not display that note on the live site, keep it as a code comment and in the PR notes.
 
@@ -916,7 +919,7 @@ After each phase: run typecheck, lint and build, review in the browser at 360px 
 ### Launch checklist
 1. Owner supplies the assets in Section 15 and answers the open items in Section 16
 2. Deploy to Vercel preview; owner reviews all pages on a real phone
-3. Verify the Resend domain (SPF and DKIM) so emails land in the inbox
+3. Configure SMTP credentials (host, port, user, pass) and verify email delivery via `node scripts/test-mail.mjs`
 4. Add the 301 redirects from the old site's URLs
 5. Point waadimedia.com DNS to Vercel; confirm HTTPS
 6. In Search Console: submit the sitemap and request indexing of key pages
@@ -937,7 +940,7 @@ After each phase: run typecheck, lint and build, review in the browser at 360px 
 | Testimonials and reviews | Owner has them; supply as `name, business, quote` (and written permission) |
 | Social links | `TODO` |
 | Cal.com account and event | `TODO` (create a free account, event "Free 20-minute call") |
-| Resend account | `TODO` (add and verify waadimedia.com) |
+| SMTP credentials | `TODO` (configure SMTP credentials in .env.local) |
 | Street address | `TODO` (optional) |
 | Old site URL list | `TODO` (for redirects) |
 | Photo of Furkan | Optional for the About page |
