@@ -1,88 +1,89 @@
 import React from 'react';
 import { Container } from '@/components/layout/Container';
+import { Sticker } from '@/components/ui/Sticker';
+import { HighlighterSwash } from '@/components/ui/HighlighterSwash';
+import { StickerIcon } from '@/components/illustrations/StickerSprite';
 
 export function WhyWaadiSection() {
-  const editorialStatement =
-    'A local agency that speaks your language — built on craft, clear pricing, and deep valley context.';
-
   const points = [
     {
+      num: '01',
       title: 'We understand Kashmir.',
       text: 'We know your customers, your seasons and your market, because we live here.',
+      color: 'bg-paper-2',
+      rotate: -1.5,
+      icon: 'chinar' as const,
     },
     {
+      num: '02',
       title: 'We keep it simple.',
       text: "No jargon and no long reports you don't need. We tell you what matters and what happens next.",
+      color: 'bg-saffron',
+      rotate: 1,
+      icon: 'sparkle' as const,
     },
     {
+      num: '03',
       title: 'Prices you can see.',
       text: "Our starting prices are on this site. You'll know the cost before you call.",
+      color: 'bg-mint',
+      rotate: -1,
+      icon: 'star' as const,
     },
     {
+      num: '04',
       title: 'We work fast.',
       text: 'Small team, direct line to the person building your project, quick answers.',
+      color: 'bg-sky',
+      rotate: 1.5,
+      icon: 'bolt' as const,
     },
   ];
 
-  const words = editorialStatement.split(' ');
-
   return (
-    <section id="why-waadi" className="py-24 sm:py-36 bg-snow border-t border-line">
+    <section id="why-waadi" className="py-24 sm:py-36 bg-paper relative border-t-[3px] border-ink">
       <Container>
-        {/* Section Label */}
-        <span className="text-xs uppercase tracking-widest text-mist font-semibold block mb-8">
-          Why Waadi
-        </span>
-
-        {/* Large Editorial Statement (~3rem Cormorant) with scroll-driven opacity */}
-        <div className="max-w-5xl mb-20 sm:mb-28">
-          <p className="font-serif text-[clamp(2.25rem,4.6vw,3.5rem)] font-normal leading-[1.12] text-ink text-balance tracking-tight">
-            {words.map((word, idx) => (
-              <span
-                key={idx}
-                className="inline-block mr-[0.26em] scroll-word-opacity transition-opacity duration-300"
-              >
-                {word}
-              </span>
-            ))}
-          </p>
+        {/* Section Sticker */}
+        <div className="inline-block mb-6">
+          <Sticker color="chinar" rotate={-1.5} icon={<StickerIcon name="chinar" size={16} />}>
+            Why Waadi
+          </Sticker>
         </div>
 
-        {/* Below: Four statements in two columns with hairline dividers */}
-        <div className="border-t border-line grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-line">
-          {/* Column 1: Items 0 and 1 */}
-          <div className="divide-y divide-line pr-0 md:pr-12">
-            {points.slice(0, 2).map((point, index) => (
-              <div key={index} className="py-8 sm:py-10 first:pt-8 last:pb-8">
-                <span className="text-xs font-mono text-mist font-medium uppercase tracking-widest block mb-2">
-                  0{index + 1}
-                </span>
-                <h3 className="font-serif text-2xl font-medium text-ink mb-2">
-                  {point.title}
-                </h3>
-                <p className="text-body text-graphite leading-relaxed">
-                  {point.text}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* One Giant Statement with Saffron Highlighter Swashes */}
+        <div className="max-w-5xl mb-16 sm:mb-24">
+          <h2 className="text-h1 text-ink leading-tight">
+            A LOCAL AGENCY THAT SPEAKS YOUR LANGUAGE —{' '}
+            <HighlighterSwash>built on craft, clear prices,</HighlighterSwash>{' '}
+            AND DEEP VALLEY CONTEXT.
+          </h2>
+        </div>
 
-          {/* Column 2: Items 2 and 3 */}
-          <div className="divide-y divide-line pl-0 md:pl-12">
-            {points.slice(2, 4).map((point, index) => (
-              <div key={index} className="py-8 sm:py-10 first:pt-8 last:pb-8">
-                <span className="text-xs font-mono text-mist font-medium uppercase tracking-widest block mb-2">
-                  0{index + 3}
+        {/* Four Tilted Bento Tiles (-1.5 to +1.5 degrees) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {points.map((point) => (
+            <div
+              key={point.num}
+              style={{ transform: `rotate(${point.rotate}deg)` }}
+              className={`tile-neo ${point.color} text-ink p-8 sm:p-10 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg transition-transform`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="font-display font-black text-2xl text-ink">
+                  {point.num}
                 </span>
-                <h3 className="font-serif text-2xl font-medium text-ink mb-2">
-                  {point.title}
-                </h3>
-                <p className="text-body text-graphite leading-relaxed">
-                  {point.text}
-                </p>
+                <div className="w-10 h-10 rounded-full border-2 border-ink bg-white flex items-center justify-center shadow-hard-sm">
+                  <StickerIcon name={point.icon} size={20} />
+                </div>
               </div>
-            ))}
-          </div>
+
+              <h3 className="font-display text-2xl font-black text-ink uppercase mb-2">
+                {point.title}
+              </h3>
+              <p className="text-body font-medium leading-relaxed">
+                {point.text}
+              </p>
+            </div>
+          ))}
         </div>
       </Container>
     </section>

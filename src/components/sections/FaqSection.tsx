@@ -4,6 +4,8 @@ import { Accordion } from '@/components/ui/Accordion';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getFaqPageSchema } from '@/lib/seo';
 import { Container } from '@/components/layout/Container';
+import { Sticker } from '@/components/ui/Sticker';
+import { StickerIcon } from '@/components/illustrations/StickerSprite';
 
 export function FaqSection() {
   const homeFaqs = mainFaqs.slice(0, 6);
@@ -17,26 +19,28 @@ export function FaqSection() {
   const faqSchema = getFaqPageSchema(homeFaqs);
 
   return (
-    <section id="faq" className="py-24 sm:py-36 bg-snow border-t border-line">
-      {/* FAQPage JSON-LD schema */}
+    <section id="faq" className="py-24 sm:py-36 bg-paper relative border-t-[3px] border-ink">
+      {/* FAQPage JSON-LD schema preserved */}
       <JsonLd data={faqSchema} />
 
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Left Column (5 cols): Heading & lead */}
           <div className="lg:col-span-5 lg:sticky lg:top-28">
-            <span className="text-xs uppercase tracking-widest text-mist font-semibold block mb-3">
-              FAQ
-            </span>
+            <div className="inline-block mb-3">
+              <Sticker color="saffron" rotate={-2} icon={<StickerIcon name="sparkle" size={16} />}>
+                Questions
+              </Sticker>
+            </div>
             <h2 className="text-h2 text-ink mb-4">
-              Frequently asked questions.
+              FREQUENTLY ASKED QUESTIONS.
             </h2>
-            <p className="text-lead text-graphite max-w-md">
+            <p className="text-lead max-w-md font-medium">
               Clear answers about pricing, turnaround times, payments, and complete IP ownership.
             </p>
           </div>
 
-          {/* Right Column (7 cols): Accordion */}
+          {/* Right Column (7 cols): Accordion with rotating plus sticker */}
           <div className="lg:col-span-7">
             <Accordion items={accordionItems} />
           </div>

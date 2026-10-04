@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { HeroSection } from '@/components/sections/HeroSection';
+import { CrossingMarquees } from '@/components/ui/CrossingMarquees';
 import { WorkPanelsSection } from '@/components/sections/WorkPanelsSection';
-import { Marquee } from '@/components/ui/Marquee';
 import { ServicesListSection } from '@/components/sections/ServicesListSection';
 import { WhyWaadiSection } from '@/components/sections/WhyWaadiSection';
 import { ProcessSection } from '@/components/sections/ProcessSection';
@@ -28,28 +28,17 @@ export const metadata: Metadata = {
   },
 };
 
-const marqueeServices = [
-  'Websites',
-  'Online stores',
-  'SEO',
-  'Brand identity',
-  'Google and Meta ads',
-  'Social media',
-  'Software and apps',
-  'WhatsApp and AI automation',
-];
-
 export default function HomePage() {
   return (
-    <div className="w-full min-h-screen bg-snow">
+    <div className="w-full min-h-screen bg-paper">
       {/* 1. Hero */}
       <HeroSection />
 
-      {/* 2. Work (moved up) */}
-      <WorkPanelsSection />
+      {/* 2. Crossing Marquees between Hero and Work */}
+      <CrossingMarquees />
 
-      {/* 3. Marquee band between Work and Services */}
-      <Marquee items={marqueeServices} />
+      {/* 3. Work */}
+      <WorkPanelsSection />
 
       {/* 4. Services */}
       <ServicesListSection />
@@ -66,7 +55,7 @@ export default function HomePage() {
       {/* 8. Industries */}
       <IndustriesSection />
 
-      {/* 9. Testimonials (renders nothing if data is empty) */}
+      {/* 9. Testimonials (renders nothing when empty) */}
       <TestimonialsSection />
 
       {/* 10. FAQ */}

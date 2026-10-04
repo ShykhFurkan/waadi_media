@@ -2,69 +2,122 @@ import React from 'react';
 import Link from 'next/link';
 import { servicesData } from '@/data/services';
 import { formatStartingPrice } from '@/data/pricing';
-import { Button } from '@/components/ui/Button';
+import { Sticker } from '@/components/ui/Sticker';
 import { Container } from '@/components/layout/Container';
+import { StickerIcon, StickerIconName } from '@/components/illustrations/StickerSprite';
 
 export function ServicesListSection() {
+  const tileColors = [
+    'paper-2',
+    'sky',
+    'mint',
+    'saffron',
+    'almond',
+    'paper',
+    'chinar',
+    'sky',
+  ] as const;
+
+  const iconList: StickerIconName[] = [
+    'star',
+    'apple',
+    'sparkle',
+    'chinar',
+    'blossom',
+    'cloud',
+    'bolt',
+    'crocus',
+  ];
+
+  const rotations = [-1, 1, 1.5, -1.5, 1, -1, 1.5, -1];
+
   return (
-    <section id="services" className="py-24 sm:py-32 bg-snow border-t border-line">
+    <section id="services" className="py-24 sm:py-32 bg-paper relative border-t-[3px] border-ink">
       <Container>
-        {/* Asymmetric Section Header: Heading in cols 1-6, intro in 8-12 */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end mb-16 sm:mb-20">
-          <div className="lg:col-span-6">
-            <span className="text-xs uppercase tracking-widest text-mist font-semibold block mb-3">
-              Capabilities
-            </span>
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 sm:mb-20">
+          <div>
+            <div className="inline-block mb-3">
+              <Sticker color="saffron" rotate={-2} icon={<StickerIcon name="bolt" size={16} />}>
+                Capabilities
+              </Sticker>
+            </div>
             <h2 className="text-h2 text-ink">
-              Everything your business needs online.
+              EVERYTHING YOUR BUSINESS NEEDS ONLINE.
             </h2>
-          </div>
-          <div className="lg:col-span-5 lg:col-start-8 flex flex-col items-start gap-4">
-            <p className="text-lead text-graphite">
-              Pick one service or let us handle the lot. Every project is scoped with fixed milestones and clear deliverables.
+            <p className="text-lead mt-2">
+              Pick one service or let us handle the lot. Fixed scopes, fast delivery.
             </p>
-            <Button href="/services" variant="text">
-              See all services
-            </Button>
+          </div>
+          <div>
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-1 font-display font-black text-base uppercase underline decoration-[3px] underline-offset-4 hover:text-chinar transition-colors"
+            >
+              <span>See all 8 services</span>
+              <span>→</span>
+            </Link>
           </div>
         </div>
 
-        {/* Large Services Rows: 40 to 64px typography, hover blue-tint + saffron hairline */}
-        <div className="divide-y divide-line border-y border-line">
-          {servicesData.map((service) => (
-            <Link
-              key={service.slug}
-              href={`/services/${service.slug}`}
-              className="group block py-8 sm:py-10 px-4 sm:px-6 rounded-2xl relative transition-all duration-300 hover:bg-blue-tint focus-visible:outline-2 focus-visible:outline-blue"
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div className="max-w-3xl">
-                  <h3 className="font-serif text-[clamp(2.25rem,4.2vw,3.75rem)] font-medium leading-[1.05] text-ink group-hover:text-blue transition-colors">
+        {/* 8-Tile Bento Grid of Mixed Sizes and Fills */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {servicesData.map((service, index) => {
+            const color = tileColors[index % tileColors.length];
+            const icon = iconList[index % iconList.length];
+            const rotate = rotations[index % rotations.length];
+
+            const colorBgClasses = {
+              paper: 'bg-paper',
+              'paper-2': 'bg-paper-2',
+              sky: 'bg-sky',
+              mint: 'bg-mint',
+              saffron: 'bg-saffron',
+              almond: 'bg-almond',
+              chinar: 'bg-chinar',
+              white: 'bg-white',
+              blue: 'bg-blue',
+            }[color];
+
+            const isColSpan2 = index === 0 || index === 6;
+
+            return (
+              <Link
+                key={service.slug}
+                href={`/services/${service.slug}`}
+                style={{ transform: `rotate(${rotate}deg)` }}
+                className={`tile-neo ${colorBgClasses} text-ink p-7 sm:p-8 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg hover:scale-[1.02] transition-all flex flex-col justify-between ${
+                  isColSpan2 ? 'md:col-span-2 lg:col-span-1' : ''
+                }`}
+              >
+                <div>
+                  {/* Top row: Icon Sticker + Price Sticker */}
+                  <div className="flex items-center justify-between gap-2 mb-6">
+                    <div className="w-12 h-12 rounded-full border-[3px] border-ink bg-white flex items-center justify-center shadow-hard-sm">
+                      <StickerIcon name={icon} size={24} />
+                    </div>
+
+                    <Sticker color="white" rotate={1.5}>
+                      From {formatStartingPrice(service.startingPrice, service.priceUnit)}
+                    </Sticker>
+                  </div>
+
+                  <h3 className="text-h3 text-ink mb-3 group-hover:underline">
                     {service.name}
                   </h3>
-                  <p className="text-sm sm:text-base text-graphite/90 mt-2 line-clamp-1 max-w-2xl font-normal">
+
+                  <p className="text-body font-medium text-ink/85">
                     {service.shortLine}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 self-start lg:self-auto shrink-0 mt-2 lg:mt-0">
-                  <span className="text-xs uppercase tracking-widest text-mist font-medium">From</span>
-                  <span className="text-price text-2xl sm:text-3xl text-ink font-medium group-hover:text-blue tabular-nums transition-colors">
-                    {formatStartingPrice(service.startingPrice, service.priceUnit)}
-                  </span>
-                  <span className="text-mist group-hover:text-blue group-hover:translate-x-1 transition-all duration-200">
-                    →
-                  </span>
+                <div className="pt-6 mt-6 border-t-2 border-ink/20 flex items-center justify-between font-display font-black text-xs uppercase tracking-wider">
+                  <span>Explore Service</span>
+                  <span className="text-base">→</span>
                 </div>
-              </div>
-
-              {/* Hover draws a saffron hairline along bottom per brief */}
-              <div
-                className="absolute bottom-0 left-4 right-4 sm:left-6 sm:right-6 h-[1px] bg-saffron origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                aria-hidden="true"
-              />
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </Container>
     </section>

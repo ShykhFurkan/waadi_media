@@ -1,46 +1,55 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
-import { Ridgeline } from '@/components/illustrations/Ridgeline';
+import { ValleyScene } from '@/components/illustrations/ValleyScene';
 import { Container } from '@/components/layout/Container';
+import { Sticker } from '@/components/ui/Sticker';
+import { StickerIcon } from '@/components/illustrations/StickerSprite';
 import { defaultWhatsAppMessages, whatsappLink } from '@/lib/whatsapp';
 
 export function CtaBandSection() {
   const whatsappUrl = whatsappLink(defaultWhatsAppMessages.general);
 
   return (
-    <section id="cta" className="relative py-32 sm:py-44 bg-snow border-t border-line overflow-hidden">
-      {/* Ridgeline as a low quiet backdrop */}
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none z-0">
-        <Ridgeline variant="backdrop" />
-      </div>
+    <section id="cta" className="py-20 sm:py-32 bg-paper relative border-t-[3px] border-ink">
+      <Container>
+        {/* Giant Blue Sheet with White Text */}
+        <div className="bg-blue text-white rounded-[28px] border-[4px] border-ink shadow-hard-lg overflow-hidden relative pt-16 sm:pt-24 pb-8 sm:pb-12 px-6 sm:px-12 text-center">
+          <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 relative z-10">
+            {/* Free First Call Sticker */}
+            <div className="inline-block">
+              <Sticker color="saffron" rotate={-2} icon={<StickerIcon name="star" size={18} />}>
+                Free First Call
+              </Sticker>
+            </div>
 
-      <Container className="relative z-10 text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <span className="text-xs uppercase tracking-widest text-mist font-semibold block">
-            Start a Project
-          </span>
+            {/* Huge Headline in White Archivo */}
+            <h2 className="text-h1 text-white tracking-tight">
+              HAVE AN IDEA, OR A SITE THAT NEEDS A FRESH START?
+            </h2>
 
-          {/* Huge Display Headline */}
-          <h2 className="font-display text-[clamp(2.75rem,6.5vw,5.75rem)] font-normal text-ink leading-[0.98] tracking-tight text-balance">
-            Have an idea, or a website that needs a fresh start?
-          </h2>
+            <p className="text-lead text-white/90 max-w-xl mx-auto font-medium">
+              Tell us about it. The first call is free and there is zero pressure.
+            </p>
 
-          <p className="text-lead text-graphite max-w-xl mx-auto text-balance">
-            Tell us about it. The first call is free and there is no pressure.
-          </p>
+            {/* Action Buttons: Saffron Button + WhatsApp Button */}
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button href="/book-a-call" variant="saffron" className="px-9 text-base">
+                Book a free call
+              </Button>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-neo bg-white text-ink h-[52px] px-8 rounded-full flex items-center justify-center font-bold text-base shadow-hard-sm hover:shadow-hard-md"
+              >
+                Message on WhatsApp
+              </a>
+            </div>
+          </div>
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button href="/book-a-call" variant="primary" magnetic>
-              Book a free call
-            </Button>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center font-sans font-medium text-[16px] h-[52px] px-8 rounded-full border border-ink text-ink bg-paper hover:bg-snow focus-visible:outline-2 focus-visible:outline-blue transition-colors"
-            >
-              Message on WhatsApp
-            </a>
+          {/* Valley Art along the bottom of the CTA sheet */}
+          <div className="w-full relative z-0 mt-12 sm:mt-16 pointer-events-none -mb-8 sm:-mb-12 border-t-2 border-white/20">
+            <ValleyScene variant="mini" />
           </div>
         </div>
       </Container>

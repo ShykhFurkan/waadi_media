@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/ui/Logo';
-import { Ridgeline } from '@/components/illustrations/Ridgeline';
+import { ValleyScene } from '@/components/illustrations/ValleyScene';
 import { servicesData } from '@/data/services';
 import { siteConfig } from '@/config/site';
 import { trackEvent } from '@/lib/analytics';
@@ -25,32 +25,39 @@ export function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-paper border-t border-line relative mt-24 overflow-hidden">
-      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 pt-20 pb-12">
+    <footer className="w-full bg-blue text-white border-t-[4px] border-ink relative mt-24 overflow-hidden">
+      {/* Valley Art along top edge of footer */}
+      <div className="w-full overflow-hidden border-b-2 border-white/20 bg-paper">
+        <ValleyScene variant="footer" />
+      </div>
+
+      <div className="max-w-[1280px] mx-auto px-6 sm:px-10 pt-16 pb-12 relative z-10">
         {/* Main 4 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Column */}
           <div className="space-y-4">
-            <Logo />
-            <p className="text-body text-graphite font-normal max-w-xs">
+            <div className="bg-paper inline-block px-3 py-1.5 rounded-full border-[3px] border-ink shadow-hard-sm">
+              <Logo />
+            </div>
+            <p className="text-body text-white font-medium max-w-xs">
               {siteConfig.tagline}
             </p>
-            <p className="text-xs text-mist">
+            <p className="text-sm text-white">
               {siteConfig.location.city}, {siteConfig.location.state}, {siteConfig.location.country}
             </p>
           </div>
 
           {/* Services Column */}
           <div>
-            <h3 className="text-sm font-semibold text-ink uppercase tracking-wider mb-4">
+            <h3 className="font-display text-lg text-white uppercase tracking-wider mb-4 border-b-2 border-white/20 pb-1 inline-block">
               Services
             </h3>
-            <ul className="space-y-2.5 text-sm text-graphite">
+            <ul className="space-y-2.5 text-sm font-medium">
               {servicesData.map((s) => (
                 <li key={s.slug}>
                   <Link
                     href={`/services/${s.slug}`}
-                    className="hover:text-blue transition-colors block py-0.5"
+                    className="hover:underline transition-colors block py-0.5 text-white"
                   >
                     {s.name}
                   </Link>
@@ -61,15 +68,15 @@ export function Footer() {
 
           {/* Company Column */}
           <div>
-            <h3 className="text-sm font-semibold text-ink uppercase tracking-wider mb-4">
+            <h3 className="font-display text-lg text-white uppercase tracking-wider mb-4 border-b-2 border-white/20 pb-1 inline-block">
               Company
             </h3>
-            <ul className="space-y-2.5 text-sm text-graphite">
+            <ul className="space-y-2.5 text-sm font-medium">
               {companyLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="hover:text-blue transition-colors block py-0.5"
+                    className="hover:underline transition-colors block py-0.5 text-white"
                   >
                     {link.label}
                   </Link>
@@ -80,10 +87,10 @@ export function Footer() {
 
           {/* Contact Column */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-ink uppercase tracking-wider mb-4">
+            <h3 className="font-display text-lg text-white uppercase tracking-wider mb-4 border-b-2 border-white/20 pb-1 inline-block">
               Contact
             </h3>
-            <p className="text-sm text-graphite">
+            <p className="text-sm text-white">
               Have an idea or enquiry? Speak directly with our team.
             </p>
             <div className="space-y-1.5">
@@ -95,7 +102,7 @@ export function Footer() {
                     params: { location: 'footer', phone: siteConfig.contact.tel },
                   })
                 }
-                className="block text-sm font-medium text-ink hover:text-blue transition-colors"
+                className="block text-base font-bold text-white hover:underline transition-colors"
               >
                 {siteConfig.contact.phone}
               </a>
@@ -107,26 +114,26 @@ export function Footer() {
                     params: { location: 'footer', email: siteConfig.contact.email },
                   })
                 }
-                className="block text-sm font-medium text-ink hover:text-blue transition-colors"
+                className="block text-base font-bold text-white hover:underline transition-colors"
               >
                 {siteConfig.contact.email}
               </a>
             </div>
-            <p className="text-xs text-mist">
+            <p className="text-xs text-white">
               {siteConfig.contact.businessHours}
             </p>
           </div>
         </div>
 
         {/* Local Landing Pages Row */}
-        <div className="border-t border-line py-6 flex flex-wrap items-center justify-between gap-4 text-xs text-mist">
-          <span className="font-medium text-graphite">Locations:</span>
+        <div className="border-t-2 border-white/40 py-6 flex flex-wrap items-center justify-between gap-4 text-xs text-white">
+          <span className="font-bold uppercase tracking-wider text-white">Locations:</span>
           <div className="flex flex-wrap gap-4 sm:gap-6">
             {localLinks.map((loc) => (
               <Link
                 key={loc.href}
                 href={loc.href}
-                className="hover:text-blue transition-colors"
+                className="hover:underline transition-colors font-medium text-white"
               >
                 {loc.label}
               </Link>
@@ -135,28 +142,23 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar: Copyright & Legal */}
-        <div className="border-t border-line pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mist mb-12">
-          <p>
+        <div className="border-t-2 border-white/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white mb-8">
+          <p className="font-medium text-white">
             © {siteConfig.foundedYear} {siteConfig.name}. Made with care in Anantnag, Kashmir.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-ink transition-colors">
+            <Link href="/privacy" className="hover:underline transition-colors font-medium text-white">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-ink transition-colors">
+            <Link href="/terms" className="hover:underline transition-colors font-medium text-white">
               Terms of Service
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Ridgeline above the cropped wordmark */}
-      <div className="w-full overflow-hidden">
-        <Ridgeline variant="footer" />
-      </div>
-
-      {/* Giant cropped "waadi media.com" wordmark at the bottom */}
-      <div className="w-full overflow-hidden select-none pointer-events-none -mb-3 sm:-mb-6 md:-mb-8" aria-hidden="true">
+      {/* Giant cropped "waadi media.com" wordmark along the bottom */}
+      <div className="w-full overflow-hidden select-none pointer-events-none -mb-3 sm:-mb-6" aria-hidden="true">
         <svg
           viewBox="0 0 1440 180"
           className="w-full h-auto block"
@@ -167,13 +169,14 @@ export function Footer() {
             x="50%"
             y="155"
             textAnchor="middle"
-            fill="#EDF1F7"
+            fill="#FFFFFF"
+            fillOpacity="0.12"
             fontFamily="var(--font-display)"
-            fontWeight="500"
+            fontWeight="900"
             fontSize="190"
-            letterSpacing="-0.04em"
+            letterSpacing="-0.03em"
           >
-            waadi media.com
+            WAADI MEDIA.COM
           </text>
         </svg>
       </div>

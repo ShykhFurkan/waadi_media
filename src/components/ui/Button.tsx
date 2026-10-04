@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'text' | 'ghost';
+export type ButtonVariant = 'saffron' | 'blue' | 'outline' | 'primary' | 'secondary' | 'text' | 'ghost';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -15,126 +15,57 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
 }
 
-function subscribeReducedMotion(callback: () => void) {
-  const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-  media.addEventListener('change', callback);
-  return () => media.removeEventListener('change', callback);
-}
-
-function getReducedMotionSnapshot() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-function getReducedMotionServerSnapshot() {
-  return false;
-}
-
 export function Button({
-  variant = 'primary',
+  variant = 'saffron',
   href,
   external = false,
-  magnetic = false,
   className,
   children,
   ...props
 }: ButtonProps) {
-  const reducedMotion = React.useSyncExternalStore(
-    subscribeReducedMotion,
-    getReducedMotionSnapshot,
-    getReducedMotionServerSnapshot
-  );
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const isMagnetic = magnetic && variant === 'primary' && !reducedMotion;
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isMagnetic || !buttonRef.current) return;
-    const { clientX, clientY } = e;
-    const { left, top, width, height } = buttonRef.current.getBoundingClientRect();
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-
-    // Max 8px pull per Section 6.7
-    const pullX = ((clientX - centerX) / (width / 2)) * 8;
-    const pullY = ((clientY - centerY) / (height / 2)) * 8;
-
-    setPosition({ x: pullX, y: pullY });
-  };
-
-  const handleMouseLeave = () => {
-    if (!isMagnetic) return;
-    setPosition({ x: 0, y: 0 });
-  };
-
-  // Base styles
+  // Base neo-brutalist button: 3px ink border, 999px pill radius, 4px hard shadow
   const baseClasses =
-    'inline-flex items-center justify-center font-sans font-medium text-[16px] transition-colors duration-200 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none';
+    'inline-flex items-center justify-center font-sans font-semibold text-[16px] px-8 h-[52px] rounded-full border-[3px] border-ink select-none cursor-pointer transition-transform duration-100 ease-out active:translate-x-1 active:translate-y-1 active:shadow-none hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none shadow-hard-sm hover:shadow-hard-md';
 
-  // Variant styles per Section 6.6 & 6.7
-  const variantClasses = {
-    primary:
-      'h-[52px] px-7 rounded-full bg-blue text-white hover:bg-blue-deep focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-3',
-    secondary:
-      'h-[52px] px-7 rounded-full border-[1.5px] border-ink text-ink bg-transparent hover:bg-paper focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-3',
-    ghost:
-      'h-[44px] px-4 rounded-full text-graphite hover:text-ink hover:bg-paper focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-3',
-    text:
-      'relative text-blue hover:text-blue-deep font-medium py-1 group focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-3',
-  }[variant];
+  // Variant color mapping adhering strictly to contrast rules:
+  // - saffron: bg-saffron text-ink
+  // - blue / primary: bg-blue text-white (WHITE text on blue only)
+  // - outline / secondary / paper: bg-paper text-ink
+  const variantClasses: Record<string, string> = {
+    saffron: 'bg-saffron text-ink',
+    blue: 'bg-blue text-white',
+    primary: 'bg-saffron text-ink', // default primary action in Kashmir Pop
+    secondary: 'bg-paper text-ink hover:bg-paper-2',
+    outline: 'bg-paper text-ink hover:bg-paper-2',
+    ghost: 'bg-transparent text-ink hover:bg-paper-2 shadow-none border-transparent hover:border-ink hover:shadow-hard-sm',
+    text: 'bg-transparent text-ink hover:underline p-0 h-auto border-none shadow-none hover:translate-x-0 hover:translate-y-0',
+  };
 
-  const content = (
-    <>
-      <span>{children}</span>
-      {variant === 'text' && (
-        <span
-          className="absolute bottom-0 left-0 h-[1.5px] w-full bg-blue origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          aria-hidden="true"
-        />
-      )}
-    </>
-  );
+  const selectedClass = variantClasses[variant] || variantClasses.saffron;
 
-  const innerElement = href ? (
-    external ? (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(baseClasses, variantClasses, className)}
-      >
-        {content}
-      </a>
-    ) : (
-      <Link href={href} className={cn(baseClasses, variantClasses, className)}>
-        {content}
+  if (href) {
+    if (external) {
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(baseClasses, selectedClass, className)}
+        >
+          {children}
+        </a>
+      );
+    }
+    return (
+      <Link href={href} className={cn(baseClasses, selectedClass, className)}>
+        {children}
       </Link>
-    )
-  ) : (
-    <button className={cn(baseClasses, variantClasses, className)} {...props}>
-      {content}
-    </button>
-  );
+    );
+  }
 
   return (
-    <div
-      ref={buttonRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="inline-block"
-      style={
-        isMagnetic
-          ? {
-              transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
-              transition:
-                position.x === 0 && position.y === 0
-                  ? 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)'
-                  : 'transform 0.1s ease-out',
-            }
-          : undefined
-      }
-    >
-      {innerElement}
-    </div>
+    <button className={cn(baseClasses, selectedClass, className)} {...props}>
+      {children}
+    </button>
   );
 }

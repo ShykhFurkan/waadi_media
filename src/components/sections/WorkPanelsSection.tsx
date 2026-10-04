@@ -3,124 +3,168 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { projectsData } from '@/data/projects';
 import { Button } from '@/components/ui/Button';
+import { Sticker } from '@/components/ui/Sticker';
 import { OutboundLink } from '@/components/ui/OutboundLink';
 import { Container } from '@/components/layout/Container';
+import { StickerIcon } from '@/components/illustrations/StickerSprite';
 
 export function WorkPanelsSection() {
+  const tileColors: ('saffron' | 'almond' | 'mint')[] = ['saffron', 'almond', 'mint'];
+  const rotations: (-1.5 | 1.5 | -1)[] = [-1.5, 1.5, -1];
+  const sectorIcons = ['crocus', 'blossom', 'bolt'] as const;
+
   return (
-    <section id="work" className="py-24 sm:py-32 bg-snow border-t border-line">
+    <section id="work" className="py-24 sm:py-32 bg-paper relative">
       <Container>
-        {/* Asymmetric Section Header: Heading in cols 1-5, lead in cols 7-12 */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end mb-16 sm:mb-24">
-          <div className="lg:col-span-6">
-            <span className="text-xs uppercase tracking-widest text-mist font-semibold block mb-3">
-              Selected Projects
-            </span>
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 sm:mb-20">
+          <div>
+            <div className="inline-block mb-3">
+              <Sticker color="white" rotate={-2} icon={<StickerIcon name="star" size={16} />}>
+                Recent Projects
+              </Sticker>
+            </div>
             <h2 className="text-h2 text-ink">
-              Work engineered for Kashmir&apos;s commercial market.
+              WORK WE&apos;RE PROUD OF.
             </h2>
-          </div>
-          <div className="lg:col-span-5 lg:col-start-8 flex flex-col items-start gap-4">
-            <p className="text-lead text-graphite">
-              Fast loading, clear pricing, and built with local context. Here are three recent systems we delivered.
+            <p className="text-lead mt-2">
+              Three systems engineered specifically for Kashmir&apos;s commercial landscape.
             </p>
-            <Button href="/work" variant="text">
+          </div>
+          <div>
+            <Button href="/work" variant="outline">
               View all work
             </Button>
           </div>
         </div>
 
-        {/* Large Editorial Project Rows */}
-        <div className="divide-y divide-line border-y border-line">
-          {projectsData.map((project, index) => (
-            <div
-              key={project.slug}
-              className="group relative py-10 sm:py-16 transition-colors duration-300 hover:bg-pearl/50"
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                {/* Left: Row Number & Project Details (Cols 1-7) */}
-                <div className="lg:col-span-7 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono text-mist font-medium uppercase tracking-widest">
-                      0{index + 1}
-                    </span>
-                    <span className="text-xs uppercase tracking-widest text-mist">
-                      {project.sector}
-                    </span>
-                    {project.badge && (
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-tint text-blue font-medium">
-                        {project.badge}
-                      </span>
-                    )}
-                  </div>
+        {/* Three Big Bento Tiles (Saffron, Almond, Mint) */}
+        <div className="space-y-12 sm:space-y-16">
+          {projectsData.map((project, index) => {
+            const color = tileColors[index % tileColors.length];
+            const rotate = rotations[index % rotations.length];
+            const iconName = sectorIcons[index % sectorIcons.length];
 
-                  <Link href={`/work/${project.slug}`} className="block group">
-                    <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-medium text-ink group-hover:text-blue transition-colors">
-                      {project.name}
-                    </h3>
-                  </Link>
+            const colorBgClasses = {
+              saffron: 'bg-saffron',
+              almond: 'bg-almond',
+              mint: 'bg-mint',
+            }[color];
 
-                  <p className="text-body text-graphite max-w-xl">
-                    {project.summary}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-6 pt-2">
-                    <Link
-                      href={`/work/${project.slug}`}
-                      className="text-sm font-medium text-blue hover:text-blue-deep transition-colors"
-                    >
-                      Read case study
-                    </Link>
-                    <OutboundLink
-                      href={project.liveUrl}
-                      label={project.name}
-                      className="text-sm font-medium text-graphite hover:text-ink transition-colors flex items-center gap-1"
-                    >
-                      <span>Visit site</span>
-                      <span className="text-xs text-mist">↗</span>
-                    </OutboundLink>
-                  </div>
-                </div>
-
-                {/* Right: Media Thumbnail / Preview (Cols 8-12) */}
-                <div className="lg:col-span-5">
-                  <Link href={`/work/${project.slug}`} className="block group">
-                    <div className="relative aspect-[16/10] w-full rounded-[28px] overflow-hidden bg-paper border border-line shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]">
-                      {project.video?.mp4 || project.video?.webm ? (
-                        <video
-                          muted
-                          loop
-                          playsInline
-                          preload="none"
-                          poster={project.coverImage}
-                          className="w-full h-full object-cover object-top"
-                        >
-                          {project.video.webm && (
-                            <source src={project.video.webm} type="video/webm" />
-                          )}
-                          {project.video.mp4 && (
-                            <source src={project.video.mp4} type="video/mp4" />
-                          )}
-                        </video>
-                      ) : project.coverImage ? (
-                        <Image
-                          src={project.coverImage}
-                          alt={`${project.name} website preview`}
-                          fill
-                          sizes="(max-width: 1024px) 100vw, 40vw"
-                          className="object-cover object-top"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-mist font-medium">
-                          Preview coming soon
-                        </div>
+            return (
+              <div
+                key={project.slug}
+                style={{ transform: `rotate(${rotate}deg)` }}
+                className={`tile-neo ${colorBgClasses} text-ink p-7 sm:p-10 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg transition-transform duration-200`}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  {/* Left: Project Details & Stickers (5 cols) */}
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Sticker color="white" rotate={1} icon={<StickerIcon name={iconName} size={16} />}>
+                        {project.sector}
+                      </Sticker>
+                      {project.badge && (
+                        <span className="font-display font-black text-xs uppercase px-3 py-1 rounded-full bg-paper border-2 border-ink shadow-hard-sm">
+                          {project.badge}
+                        </span>
                       )}
                     </div>
-                  </Link>
+
+                    <Link href={`/work/${project.slug}`} className="block group">
+                      <h3 className="text-h2 text-ink group-hover:underline decoration-[3px] underline-offset-4">
+                        {project.name}
+                      </h3>
+                    </Link>
+
+                    <p className="text-body font-medium">
+                      {project.summary}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {project.services.map((serviceName) => (
+                        <span
+                          key={serviceName}
+                          className="px-3 py-1 rounded-full bg-white border-2 border-ink text-xs font-display font-black uppercase shadow-hard-sm"
+                        >
+                          {serviceName}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-6 pt-4">
+                      <Link
+                        href={`/work/${project.slug}`}
+                        className="inline-flex items-center gap-1 font-display font-black text-sm uppercase underline decoration-[3px] underline-offset-4 hover:text-chinar transition-colors"
+                      >
+                        <span>Read case study</span>
+                        <span>→</span>
+                      </Link>
+                      <OutboundLink
+                        href={project.liveUrl}
+                        label={project.name}
+                        className="inline-flex items-center gap-1 font-display font-black text-sm uppercase text-ink/80 hover:text-ink transition-colors"
+                      >
+                        <span>Visit site</span>
+                        <span>↗</span>
+                      </OutboundLink>
+                    </div>
+                  </div>
+
+                  {/* Right: Thick-Bordered Browser Frame (7 cols) */}
+                  <div className="lg:col-span-7">
+                    <div className="rounded-[16px] overflow-hidden border-[3px] border-ink bg-white shadow-hard-md">
+                      {/* Browser Chrome Bar */}
+                      <div className="h-10 bg-paper-2 border-b-[3px] border-ink px-4 flex items-center justify-between select-none">
+                        <div className="flex items-center gap-2" aria-hidden="true">
+                          <span className="w-3 h-3 rounded-full bg-chinar border-[1.5px] border-ink" />
+                          <span className="w-3 h-3 rounded-full bg-saffron border-[1.5px] border-ink" />
+                          <span className="w-3 h-3 rounded-full bg-mint border-[1.5px] border-ink" />
+                        </div>
+                        <div className="h-6 bg-white rounded-full border-2 border-ink px-4 text-xs font-mono font-bold text-ink flex items-center justify-center max-w-xs truncate">
+                          {project.liveUrl.replace('https://', '').replace(/\/$/, '')}
+                        </div>
+                        <div className="w-6" />
+                      </div>
+
+                      {/* Mockup Preview */}
+                      <div className="relative aspect-[16/10] w-full bg-paper overflow-hidden">
+                        {project.video?.mp4 || project.video?.webm ? (
+                          <video
+                            muted
+                            loop
+                            playsInline
+                            preload="none"
+                            poster={project.coverImage}
+                            className="w-full h-full object-cover object-top"
+                          >
+                            {project.video.webm && (
+                              <source src={project.video.webm} type="video/webm" />
+                            )}
+                            {project.video.mp4 && (
+                              <source src={project.video.mp4} type="video/mp4" />
+                            )}
+                          </video>
+                        ) : project.coverImage ? (
+                          <Image
+                            src={project.coverImage}
+                            alt={`${project.name} preview`}
+                            fill
+                            sizes="(max-width: 1024px) 100vw, 55vw"
+                            className="object-cover object-top"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-display font-bold text-sm text-ink/60">
+                            Preview Coming Soon
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Container>
     </section>

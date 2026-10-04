@@ -24,9 +24,9 @@ export function Section({
     tone === 'anchor' && !siteConfig.ui?.anchorSections ? 'pearl' : tone;
 
   const toneClasses: Record<SectionTone, string> = {
-    light: 'bg-snow text-graphite',
-    pearl: 'bg-pearl text-graphite border-y border-line/60',
-    anchor: 'bg-navy text-paper border-y border-navy/40',
+    light: 'bg-paper text-ink',
+    pearl: 'bg-paper-2 text-ink border-y-[3px] border-ink',
+    anchor: 'bg-blue text-white border-y-[4px] border-ink',
   };
 
   return (

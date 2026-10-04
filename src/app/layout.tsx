@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Newsreader, Outfit } from 'next/font/google';
+import { Archivo, Instrument_Serif, Outfit } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -11,25 +11,24 @@ import { siteConfig } from '@/config/site';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#F5F8FC',
+  themeColor: '#FBF6EA',
 };
 
-// Display font (headings 40px and up)
-const cormorant = Cormorant_Garamond({
+// Neo-Brutalist heavy display font
+const archivo = Archivo({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-cormorant',
-  weight: ['500', '600'],
-  style: ['normal', 'italic'],
+  variable: '--font-display',
+  weight: ['800', '900'],
 });
 
-// Editorial / reading serif font & price tabular font
-const newsreader = Newsreader({
+// Accent serif for editorial highlights over highlighter swashes
+const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-serif',
-  weight: ['400', '500'],
-  style: ['normal', 'italic'],
+  variable: '--font-accent',
+  weight: ['400'],
+  style: ['italic', 'normal'],
 });
 
 // UI & body sans font
@@ -101,12 +100,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${newsreader.variable} ${outfit.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${instrumentSerif.variable} ${outfit.variable}`}>
       <head>
         <JsonLd data={getProfessionalServiceSchema()} />
         <JsonLd data={getWebSiteSchema()} />
       </head>
-      <body className="min-h-screen bg-snow text-graphite font-sans antialiased flex flex-col selection:bg-blue selection:text-white">
+      <body className="min-h-screen bg-paper text-ink font-sans antialiased flex flex-col selection:bg-saffron selection:text-ink">
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
