@@ -7,6 +7,7 @@ import { ClientDeferred } from '@/components/layout/ClientDeferred';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getProfessionalServiceSchema, getWebSiteSchema } from '@/lib/seo';
 import { siteConfig } from '@/config/site';
+import { GoogleTagManager } from '@next/third-parties/google';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -90,9 +91,9 @@ export const metadata: Metadata = {
     description:
       "Websites, SEO, branding, ads and software for Kashmir's businesses. Clear prices, fast delivery, built in Anantnag.",
   },
-  verification: process.env.GOOGLE_SITE_VERIFICATION
-    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
-    : undefined,
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || '1Fatb0r-aLsTSMMwmoorkk6FqjUuRxPZZUapOxNg7EM',
+  },
 };
 
 export default function RootLayout({
@@ -100,16 +101,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-FRL8C83R8C';
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
   return (
     <html lang="en" className={`${archivo.variable} ${instrumentSerif.variable} ${outfit.variable}`}>
+      {gtmId && <GoogleTagManager gtmId={gtmId} />}
       <head>
         <JsonLd data={getProfessionalServiceSchema()} />
         <JsonLd data={getWebSiteSchema()} />
-        {process.env.NEXT_PUBLIC_GA_ID && (
+        {gaId && (
           <>
             <script
               async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
             />
             <script
               id="google-analytics"
@@ -118,7 +123,7 @@ export default function RootLayout({
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                  gtag('config', '${gaId}', {
                     page_path: window.location.pathname,
                   });
                 `,
