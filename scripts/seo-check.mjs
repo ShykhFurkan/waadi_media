@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import matter from 'gray-matter';
 
 const ROOT_DIR = process.cwd();
 const APP_SERVER_DIR = path.join(ROOT_DIR, '.next', 'server', 'app');
@@ -138,6 +139,71 @@ for (const { route, filePath } of htmlPages) {
   });
 }
 
+// 6. Blog Publish Guard Audit (content/blog/)
+const blogDir = path.join(ROOT_DIR, 'content', 'blog');
+const blogAuditResults = [];
+
+if (fs.existsSync(blogDir)) {
+  const blogFiles = fs.readdirSync(blogDir).filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
+  for (const file of blogFiles) {
+    const filePath = path.join(blogDir, file);
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const { data } = matter(raw);
+    const isPublished = data.draft === false;
+
+    if (isPublished) {
+      // 1. Marker check
+      if (raw.includes('[FURKAN') || raw.includes('[VERIFY')) {
+        errors.push(`[Blog Publish Guard: ${file}] Published post (draft: false) contains unresolved [FURKAN or [VERIFY marker.`);
+      }
+
+      // 2. Service page link check
+      const hasServiceLink = /\/services\/[a-z0-9-]+/.test(raw);
+      if (!hasServiceLink) {
+        errors.push(`[Blog Publish Guard: ${file}] Published post missing internal link to a service page (/services/...).`);
+      }
+
+      // 3. /pricing link check
+      const hasPricingLink = /\/pricing\b/.test(raw);
+      if (!hasPricingLink) {
+        errors.push(`[Blog Publish Guard: ${file}] Published post missing internal link to /pricing.`);
+      }
+
+      // 4. Local page link check
+      const hasLocalLink = /\/web-design-agency-(kashmir|srinagar|anantnag)\b/.test(raw);
+      if (!hasLocalLink) {
+        errors.push(`[Blog Publish Guard: ${file}] Published post missing internal link to a local page (/web-design-agency-kashmir, /web-design-agency-srinagar, or /web-design-agency-anantnag).`);
+      }
+
+      // 5. At least two other blog posts link check
+      const currentSlug = file.replace(/\.mdx?$/, '');
+      const blogLinks = Array.from(raw.matchAll(/\/blog\/([a-z0-9-]+)/g))
+        .map((m) => m[1])
+        .filter((slug) => slug !== currentSlug && slug !== 'feed.xml');
+      const uniqueOtherBlogLinks = new Set(blogLinks);
+
+      if (uniqueOtherBlogLinks.size < 2) {
+        errors.push(`[Blog Publish Guard: ${file}] Published post must link to at least two other blog posts (found ${uniqueOtherBlogLinks.size} links to other posts).`);
+      }
+
+      blogAuditResults.push({
+        file,
+        status: 'PUBLISHED',
+        markersClean: !raw.includes('[FURKAN') && !raw.includes('[VERIFY'),
+        hasServiceLink,
+        hasPricingLink,
+        hasLocalLink,
+        otherBlogLinksCount: uniqueOtherBlogLinks.size,
+      });
+    } else {
+      blogAuditResults.push({
+        file,
+        status: 'DRAFT',
+      });
+    }
+  }
+}
+
 console.log('='.repeat(90));
 console.log('ROUTE AUDIT SUMMARY:');
 console.log('='.repeat(90));
@@ -145,6 +211,21 @@ for (const p of passedRoutes) {
   console.log(
     `✓ ${p.route.padEnd(42)} | Title (${p.titleLen}/60) | Desc (${p.descLen}/155) | H1: ${p.h1Count} | Canonical: YES | OG: YES`
   );
+}
+
+if (blogAuditResults.length > 0) {
+  console.log('='.repeat(90));
+  console.log('BLOG PUBLISH GUARD SUMMARY:');
+  console.log('='.repeat(90));
+  for (const b of blogAuditResults) {
+    if (b.status === 'PUBLISHED') {
+      console.log(
+        `✓ [PUBLISHED] ${b.file.padEnd(42)} | Markers Clean: ${b.markersClean ? 'YES' : 'NO'} | Service: YES | Pricing: YES | Local: YES | Other Posts: ${b.otherBlogLinksCount}`
+      );
+    } else {
+      console.log(`• [DRAFT]     ${b.file.padEnd(42)} | (Draft - hidden from production)`);
+    }
+  }
 }
 console.log('='.repeat(90));
 

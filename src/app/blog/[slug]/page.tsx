@@ -236,6 +236,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <MDXRemote source={post.content} components={mdxComponents} />
         </div>
 
+        {/* Author Box */}
+        <div className="mt-12 p-6 bg-paper border border-line rounded-2xl text-body text-ink">
+          <p className="m-0">
+            Written by{' '}
+            <Link href="/about" className="text-blue hover:underline font-semibold">
+              Furkan Mushtaq
+            </Link>
+            , founder of Waadi Media in Anantnag.
+          </p>
+        </div>
+
         {/* End of Post Share and Call to Action */}
         <div className="mt-16 pt-8 border-t border-line space-y-12">
           <div className="flex items-center justify-between">
