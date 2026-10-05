@@ -2,7 +2,6 @@
 
 import React, { useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { GoogleAnalytics } from '@next/third-parties/google';
 import { getAnalyticsConsent, setAnalyticsConsent } from '@/lib/analytics';
 
 interface CookieNoticeProps {
@@ -42,9 +41,6 @@ export function CookieNotice({ gaId }: CookieNoticeProps) {
 
   return (
     <>
-      {/* Load GA4 only if consent is granted and gaId exists */}
-      {consent === 'granted' && gaId && <GoogleAnalytics gaId={gaId} />}
-
       {/* Show notice only if user hasn't made a choice yet */}
       {consent === null && (
         <div

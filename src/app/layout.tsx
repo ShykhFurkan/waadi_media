@@ -105,6 +105,27 @@ export default function RootLayout({
       <head>
         <JsonLd data={getProfessionalServiceSchema()} />
         <JsonLd data={getWebSiteSchema()} />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+            />
+            <script
+              id="google-analytics"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                    page_path: window.location.pathname,
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body className="min-h-screen bg-paper text-ink font-sans antialiased flex flex-col selection:bg-saffron selection:text-ink">
         {/* Skip to main content for accessibility */}
