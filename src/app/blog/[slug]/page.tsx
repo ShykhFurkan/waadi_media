@@ -67,7 +67,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 const mdxComponents = {
-  JsonLd,
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
     const text = typeof props.children === 'string' ? props.children : '';
     const id = text
