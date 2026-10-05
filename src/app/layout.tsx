@@ -7,7 +7,6 @@ import { ClientDeferred } from '@/components/layout/ClientDeferred';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getProfessionalServiceSchema, getWebSiteSchema } from '@/lib/seo';
 import { siteConfig } from '@/config/site';
-import { GoogleTagManager } from '@next/third-parties/google';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -102,12 +101,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-FRL8C83R8C';
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-TNMQXH79';
 
   return (
     <html lang="en" className={`${archivo.variable} ${instrumentSerif.variable} ${outfit.variable}`}>
-      {gtmId && <GoogleTagManager gtmId={gtmId} />}
       <head>
+        {/* Google Tag Manager */}
+        {gtmId && (
+          <script
+            id="google-tag-manager"
+            dangerouslySetInnerHTML={{
+              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`,
+            }}
+          />
+        )}
+        {/* End Google Tag Manager */}
         <JsonLd data={getProfessionalServiceSchema()} />
         <JsonLd data={getWebSiteSchema()} />
         {gaId && (
@@ -133,6 +145,18 @@ export default function RootLayout({
         )}
       </head>
       <body className="min-h-screen bg-paper text-ink font-sans antialiased flex flex-col selection:bg-saffron selection:text-ink">
+        {/* Google Tag Manager (noscript) */}
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
+        {/* End Google Tag Manager (noscript) */}
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
