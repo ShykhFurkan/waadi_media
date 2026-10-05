@@ -8,9 +8,13 @@ export const runtime = 'nodejs';
 // Limits to 5 submissions per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_REQUESTS_PER_WINDOW = 5;
+const MAX_REQUESTS_PER_WINDOW = 15;
 
 function checkRateLimit(ip: string): boolean {
+  if (ip === '127.0.0.1' || ip === '::1' || process.env.NODE_ENV !== 'production') {
+    return true;
+  }
+
   const now = Date.now();
   const record = rateLimitMap.get(ip);
 
@@ -72,18 +76,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Time-based spam check: submitted under 3 seconds after page load
-    if (data.loadTimestamp && Date.now() - data.loadTimestamp < 3000) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            'Submission was too fast. Please take a moment to review your message.',
-        },
-        { status: 400 }
-      );
-    }
-
     // 5. Check SMTP variables
     const smtpHost = process.env.SMTP_HOST;
     const smtpPortRaw = process.env.SMTP_PORT;
@@ -129,6 +121,9 @@ export async function POST(request: Request) {
         user: smtpUser,
         pass: smtpPass,
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
 
     // Send notification email to Waadi Media

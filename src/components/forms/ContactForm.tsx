@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useForm, Controller, useWatch, FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   contactFormSchema,
   ContactFormData,
   budgetOptions,
+  sanitizePhoneNumber,
 } from '@/lib/validations/contact';
 import { useContactSubmit } from '@/hooks/useContactSubmit';
 import { Input } from '@/components/ui/Input';
@@ -19,7 +20,7 @@ import { packagesData } from '@/data/packages';
 import { pricingItems } from '@/data/pricing';
 import { siteConfig } from '@/config/site';
 import { trackEvent } from '@/lib/analytics';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const SERVICE_CHIP_OPTIONS = [
@@ -171,9 +172,22 @@ export function ContactForm({
     }
   };
 
+  const onInvalid = (fieldErrors: FieldErrors<ContactFormData>) => {
+    const errorKeys = Object.keys(fieldErrors);
+    if (errorKeys.length > 0) {
+      const firstField = errorKeys[0];
+      const el = document.querySelector(`[name="${firstField}"]`) as HTMLElement | null;
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+      }
+    }
+  };
+
   const onSubmit = (data: ContactFormData) => {
     submitContact({
       ...data,
+      phone: sanitizePhoneNumber(data.phone),
       loadTimestamp,
       sourcePage,
     });
@@ -184,26 +198,49 @@ export function ContactForm({
     e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
+  const successRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSuccess && successRef.current) {
+      successRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (serverError && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [serverError]);
+
   if (isSuccess) {
     return (
       <div
+        ref={successRef}
+        role="status"
+        aria-live="polite"
         className={cn(
-          'p-6 sm:p-10 bg-paper border-[3px] border-ink rounded-[24px] text-center space-y-4 shadow-hard-md',
+          'p-6 sm:p-10 bg-paper border-[3px] border-ink rounded-[24px] text-center space-y-5 shadow-hard-md animate-pop-overshoot',
           className
         )}
       >
-        <div className="w-14 h-14 rounded-full bg-mint border-2 border-ink text-ink mx-auto flex items-center justify-center shadow-hard-sm">
-          <CheckCircle2 className="w-8 h-8" />
+        <div className="w-16 h-16 rounded-full bg-mint border-[3px] border-ink text-ink mx-auto flex items-center justify-center shadow-hard-sm">
+          <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />
         </div>
-        <h2 className="text-h2 text-ink">Thanks, we got your message.</h2>
+        <div className="space-y-2">
+          <span className="inline-block px-3.5 py-1 bg-mint text-ink text-xs font-bold uppercase tracking-wider rounded-full border-2 border-ink shadow-hard-sm">
+            ✓ Message Sent Successfully
+          </span>
+          <h2 className="text-h2 text-ink">Thanks, we got your message!</h2>
+        </div>
         <p className="text-lead text-ink/80 max-w-md mx-auto">
-          We&apos;ll reply on WhatsApp or by email within one business day. If it&apos;s urgent, call{' '}
+          We&apos;ll reply on WhatsApp or by email within one business day. If it&apos;s urgent, feel free to call us at{' '}
           <a href={`tel:${siteConfig.contact.tel}`} className="text-chinar font-bold underline">
             {siteConfig.contact.phone}
           </a>
           .
         </p>
-        <div className="pt-4">
+        <div className="pt-2">
           <Button
             type="button"
             variant="saffron"
@@ -219,7 +256,7 @@ export function ContactForm({
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, onInvalid)}
       onFocus={handleFirstInteraction}
       className={cn('p-6 sm:p-10 bg-paper border-[3px] border-ink rounded-[24px] space-y-6 shadow-hard-md', className)}
       noValidate
@@ -341,23 +378,37 @@ export function ContactForm({
       </div>
 
       {serverError && (
-        <div className="p-4 bg-chinar/10 border-[2px] border-chinar rounded-xl text-sm text-ink flex items-start gap-3">
+        <div
+          ref={errorRef}
+          role="alert"
+          aria-live="assertive"
+          className="p-4 bg-chinar/10 border-[3px] border-chinar rounded-2xl text-sm text-ink flex items-start gap-3 shadow-hard-sm animate-pop-overshoot"
+        >
           <AlertCircle className="w-5 h-5 text-chinar shrink-0 mt-0.5" />
-          <div>
-            <strong className="block text-ink font-bold">Your message didn&apos;t send.</strong>
-            <p className="text-ink/80 mt-0.5">
-              Check your connection and try again, or{' '}
+          <div className="space-y-1">
+            <strong className="block text-ink font-bold text-base">Your message could not be sent</strong>
+            <p className="text-ink/80 text-sm">{serverError}</p>
+            <p className="text-xs text-ink/70 pt-0.5">
+              Please check your connection and try again, or{' '}
               <a
                 href={siteConfig.contact.whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-chinar font-bold underline"
               >
-                message us on WhatsApp
+                message us directly on WhatsApp
               </a>
               .
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Form validation warning banner */}
+      {Object.keys(errors).length > 0 && (
+        <div className="p-3.5 bg-chinar/10 border-[2px] border-chinar rounded-xl text-sm font-semibold text-chinar flex items-center gap-2.5 animate-pop-overshoot">
+          <AlertCircle className="w-5 h-5 shrink-0 text-chinar" />
+          <span>Please fill in the required fields highlighted above before sending.</span>
         </div>
       )}
 
@@ -367,9 +418,15 @@ export function ContactForm({
           type="submit"
           variant="saffron"
           disabled={isLoading}
-          className="w-full h-12 min-h-[44px] text-base font-bold shadow-hard-sm"
+          onClick={handleSubmit(onSubmit, onInvalid)}
+          className="w-full h-12 min-h-[44px] text-base font-bold shadow-hard-sm flex items-center justify-center gap-2"
         >
-          {isLoading ? 'Sending...' : 'Send message'}
+          {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+          {isLoading
+            ? 'Sending message...'
+            : serverError
+            ? 'Failed to send — Click to try again'
+            : 'Send message'}
         </Button>
       </div>
     </form>

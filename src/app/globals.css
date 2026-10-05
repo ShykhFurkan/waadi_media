@@ -11,6 +11,10 @@
   --color-mint: var(--mint);
   --color-sky: var(--sky);
   --color-white: var(--white);
+  --color-error: var(--error);
+  --color-line: var(--line);
+  --color-mist: var(--mist);
+  --color-graphite: var(--graphite);
 
   --font-display: var(--font-display);
   --font-accent: var(--font-accent);
@@ -29,6 +33,10 @@
   --mint: #6FE3C1;
   --sky: #9FD0FF;
   --white: #FFFFFF;
+  --error: #DC2626;
+  --line: rgba(11, 11, 11, 0.15);
+  --mist: #666053;
+  --graphite: #1F1D1A;
 
   /* Font Families */
   --font-display: 'Archivo', Impact, sans-serif;

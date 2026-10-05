@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export const indianPhoneRegex = /^(?:\+91|91)?[6-9]\d{9}$/;
+export const sanitizePhoneNumber = (phone: string): string => {
+  return phone.replace(/[\s\-\(\)\.]/g, '');
+};
+
+// Matches 10-digit Indian mobile numbers with optional +91, 91, or 0 prefix
+export const indianPhoneRegex = /^(?:\+91|91|0)?[6-9]\d{9}$/;
 
 export const budgetOptions = [
   'Under ₹10,000',
@@ -12,14 +17,21 @@ export const budgetOptions = [
 
 export const contactFormSchema = z.object({
   name: z.string().trim().min(1, 'Enter your name'),
-  phone: z.string().trim().regex(indianPhoneRegex, 'Enter a 10-digit phone number'),
+  phone: z
+    .string()
+    .trim()
+    .min(1, 'Enter your phone number')
+    .refine(
+      (val) => indianPhoneRegex.test(sanitizePhoneNumber(val)),
+      'Enter a valid 10-digit phone number'
+    ),
   email: z.string().trim().email('Enter a valid email').optional().or(z.literal('')),
   services: z.array(z.string()),
   budget: z.string(),
   message: z
     .string()
     .trim()
-    .min(10, 'Tell us a little about your business (at least 10 characters)')
+    .min(5, 'Tell us a little about your business (at least 5 characters)')
     .max(2000, 'Message cannot exceed 2000 characters'),
   honeypot: z.string().max(0, 'Spam detected'),
   loadTimestamp: z.number().optional(),
