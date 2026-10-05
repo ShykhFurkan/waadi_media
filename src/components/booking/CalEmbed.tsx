@@ -8,7 +8,8 @@ import { defaultWhatsAppMessages, whatsappLink } from '@/lib/whatsapp';
 import { Phone, MessageCircle, Mail } from 'lucide-react';
 
 export function CalEmbed() {
-  const calLink = process.env.NEXT_PUBLIC_CAL_LINK || siteConfig.calLink;
+  const rawCalLink = process.env.NEXT_PUBLIC_CAL_LINK || siteConfig.calLink;
+  const calLink = rawCalLink?.replace(/^https?:\/\/(app\.)?cal\.com\//, '').replace(/\/$/, '') || '';
   const isUnconfigured = !calLink || calLink.includes('your-username') || calLink === '';
   const [loadFailed, setLoadFailed] = useState(isUnconfigured);
   const [isLoading, setIsLoading] = useState(!isUnconfigured);

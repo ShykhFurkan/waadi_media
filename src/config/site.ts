@@ -52,7 +52,7 @@ export const siteConfig = {
   },
 
   // Third party configurations
-  calLink: process.env.NEXT_PUBLIC_CAL_LINK || "waadimedia/free-call", // [CONFIRM]
+  calLink: process.env.NEXT_PUBLIC_CAL_LINK || "shykh-furkan-cdiycf/30min",
   gaId: process.env.NEXT_PUBLIC_GA_ID || "",
 
   // Business logic & rules
