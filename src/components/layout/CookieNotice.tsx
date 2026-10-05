@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { getAnalyticsConsent, setAnalyticsConsent } from '@/lib/analytics';
 
 
+export interface CookieNoticeProps {
+  gaId?: string;
+}
+
 function subscribe(callback: () => void) {
   window.addEventListener('waadi-consent-change', callback);
   return () => window.removeEventListener('waadi-consent-change', callback);
@@ -20,7 +24,8 @@ function getServerSnapshot() {
 
 const emptySubscribe = () => () => {};
 
-export function CookieNotice() {
+export function CookieNotice(props?: CookieNoticeProps) {
+  void props;
   const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
