@@ -7,6 +7,7 @@ const postsDirectory = path.join(process.cwd(), 'content', 'blog');
 
 export type BlogPostMetadata = {
   title: string;
+  metaTitle?: string;
   slug: string;
   description: string;
   date: string;
@@ -44,6 +45,7 @@ export function getAllPosts(includeDrafts = process.env.NODE_ENV !== 'production
 
       return {
         title: data.title || '',
+        metaTitle: data.metaTitle || (data.title && data.title.length <= 60 ? data.title : undefined),
         slug: data.slug || slug,
         description: data.description || '',
         date: data.date || '',
@@ -102,6 +104,7 @@ export function getPostBySlug(slug: string, includeDrafts = process.env.NODE_ENV
   return {
     metadata: {
       title: data.title || '',
+      metaTitle: data.metaTitle || (data.title && data.title.length <= 60 ? data.title : undefined),
       slug: data.slug || slug,
       description: data.description || '',
       date: data.date || '',

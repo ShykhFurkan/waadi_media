@@ -35,9 +35,12 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const postUrl = `${siteConfig.url}/blog/${post.metadata.slug}`;
 
   const pageTitle =
-    post.metadata.title.length + 14 <= 60
+    post.metadata.metaTitle ||
+    (post.metadata.title.length + 14 <= 60
       ? `${post.metadata.title} - Waadi Media`
-      : post.metadata.title;
+      : post.metadata.title.length <= 60
+      ? post.metadata.title
+      : `${post.metadata.title.slice(0, 57)}...`);
 
   return {
     title: pageTitle,
@@ -64,6 +67,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 const mdxComponents = {
+  JsonLd,
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
     const text = typeof props.children === 'string' ? props.children : '';
     const id = text
