@@ -52,7 +52,7 @@ export function ServicesListSection() {
           <div>
             <Link
               href="/services"
-              className="inline-flex items-center gap-1 font-display font-black text-base uppercase underline decoration-[3px] underline-offset-4 hover:text-chinar transition-colors"
+              className="inline-flex items-center gap-1 min-h-[44px] font-display font-black text-base uppercase underline decoration-[3px] underline-offset-4 hover:text-chinar transition-colors"
             >
               <span>See all 8 services</span>
               <span>→</span>
@@ -60,8 +60,8 @@ export function ServicesListSection() {
           </div>
         </div>
 
-        {/* 8-Tile Bento Grid of Mixed Sizes and Fills */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {/* 8-Tile Bento Grid: single column on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {servicesData.map((service, index) => {
             const color = tileColors[index % tileColors.length];
             const icon = iconList[index % iconList.length];
@@ -85,8 +85,8 @@ export function ServicesListSection() {
               <Link
                 key={service.slug}
                 href={`/services/${service.slug}`}
-                style={{ transform: `rotate(${rotate}deg)` }}
-                className={`tile-neo ${colorBgClasses} text-ink p-7 sm:p-8 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg hover:scale-[1.02] transition-all flex flex-col justify-between ${
+                style={{ '--service-rotate': `${rotate}deg` } as React.CSSProperties}
+                className={`tile-neo ${colorBgClasses} text-ink p-5 sm:p-8 rounded-[20px] border-[3px] border-ink shadow-hard-sm sm:shadow-hard-md hover:shadow-hard-lg hover:scale-[1.02] transition-all flex flex-col justify-between rotate-0 sm:[transform:rotate(var(--service-rotate))] ${
                   isColSpan2 ? 'md:col-span-2 lg:col-span-1' : ''
                 }`}
               >

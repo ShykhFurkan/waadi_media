@@ -43,9 +43,9 @@ export function Sticker({
 
   return (
     <div
-      style={{ transform: `rotate(${clampedRotate}deg)` }}
+      style={{ '--sticker-rotate': `${clampedRotate}deg` } as React.CSSProperties}
       className={cn(
-        'sticker-neo inline-flex items-center justify-center font-display text-xs tracking-wider select-none border-[3px] border-ink ring-2 ring-white shadow-hard-sm cursor-default transition-transform hover:scale-105',
+        'sticker-neo inline-flex items-center justify-center font-display text-xs tracking-wider select-none border-[3px] border-ink ring-2 ring-white shadow-hard-sm cursor-default transition-transform hover:scale-105 rotate-0 sm:[transform:rotate(var(--sticker-rotate))]',
         shape === 'pill' ? 'rounded-full px-3.5 py-1.5' : 'rounded-full w-12 h-12 p-1 text-center',
         colorClasses[color],
         className

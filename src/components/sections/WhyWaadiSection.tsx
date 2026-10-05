@@ -59,13 +59,13 @@ export function WhyWaadiSection() {
           </h2>
         </div>
 
-        {/* Four Tilted Bento Tiles (-1.5 to +1.5 degrees) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Four Bento Tiles: single column on mobile, tilted on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           {points.map((point) => (
             <div
               key={point.num}
-              style={{ transform: `rotate(${point.rotate}deg)` }}
-              className={`tile-neo ${point.color} text-ink p-8 sm:p-10 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg transition-transform`}
+              style={{ '--tile-rotate': `${point.rotate}deg` } as React.CSSProperties}
+              className={`tile-neo ${point.color} text-ink p-5 sm:p-10 rounded-[20px] border-[3px] border-ink shadow-hard-sm sm:shadow-hard-md hover:shadow-hard-lg transition-transform rotate-0 sm:[transform:rotate(var(--tile-rotate))]`}
             >
               <div className="flex items-center justify-between mb-4">
                 <span className="font-display font-black text-2xl text-ink">

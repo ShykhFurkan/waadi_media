@@ -52,13 +52,13 @@ export function Accordion({
               aria-expanded={isOpen}
               aria-controls={panelId}
               onClick={() => toggleItem(item.id)}
-              className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-display text-lg sm:text-xl font-bold text-ink cursor-pointer select-none"
+              className="w-full p-5 sm:p-6 min-h-[56px] flex items-center justify-between gap-4 text-left font-display text-lg sm:text-xl font-bold text-ink cursor-pointer select-none"
             >
               <span className="pr-2">{item.question}</span>
               {/* Plus sticker that rotates 45 degrees */}
               <span
                 className={cn(
-                  'shrink-0 w-10 h-10 rounded-full border-[3px] border-ink flex items-center justify-center transition-all duration-200 shadow-hard-sm',
+                  'shrink-0 w-11 h-11 min-h-[44px] min-w-[44px] rounded-full border-[3px] border-ink flex items-center justify-center transition-all duration-200 shadow-hard-sm',
                   isOpen
                     ? 'rotate-45 bg-chinar text-white'
                     : 'bg-saffron text-ink hover:scale-105'

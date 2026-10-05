@@ -100,31 +100,44 @@ const mdxComponents = {
     );
   },
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p className="text-body text-graphite mb-6 leading-relaxed" {...props} />
+    <p className="text-[17px] sm:text-[18px] text-ink mb-6 leading-relaxed font-sans" {...props} />
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc pl-6 space-y-2 mb-6 text-body text-graphite" {...props} />
+    <ul className="list-disc pl-6 space-y-2 mb-6 text-[17px] sm:text-[18px] text-ink leading-relaxed" {...props} />
   ),
   ol: (props: React.OlHTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal pl-6 space-y-2 mb-6 text-body text-graphite" {...props} />
+    <ol className="list-decimal pl-6 space-y-2 mb-6 text-[17px] sm:text-[18px] text-ink leading-relaxed" {...props} />
   ),
   li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
-    <li className="leading-relaxed" {...props} />
+    <li className="leading-relaxed text-[17px] sm:text-[18px] text-ink" {...props} />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a
-      className="text-blue hover:text-blue-deep underline font-medium transition-colors"
+      className="text-chinar hover:underline font-bold transition-colors"
       {...props}
     />
   ),
   blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
     <blockquote
-      className="border-l-2 border-blue pl-4 py-1 italic text-graphite my-6 bg-snow/50 rounded-r-lg"
+      className="border-l-4 border-chinar pl-4 py-2 italic text-ink my-6 bg-paper-2 rounded-r-lg font-serif text-[18px]"
       {...props}
     />
   ),
   strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong className="font-semibold text-ink" {...props} />
+    <strong className="font-bold text-ink" {...props} />
+  ),
+  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+    <div className="overflow-x-auto my-6 max-w-full border-[2px] border-ink rounded-[16px] bg-paper shadow-hard-sm">
+      <table className="min-w-full text-left border-collapse text-sm" {...props} />
+    </div>
+  ),
+  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
+    <div className="overflow-x-auto my-6 max-w-full rounded-[16px] border-[2px] border-ink bg-paper-2 p-4 shadow-hard-sm">
+      <pre className="text-sm font-mono overflow-x-auto" {...props} />
+    </div>
+  ),
+  code: (props: React.HTMLAttributes<HTMLElement>) => (
+    <code className="font-mono text-sm bg-paper-2 px-1.5 py-0.5 rounded border border-ink/30" {...props} />
   ),
 };
 
@@ -159,7 +172,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Back Link */}
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-xs font-medium text-mist hover:text-blue transition-colors mb-10"
+          className="min-h-[44px] inline-flex items-center gap-2 text-xs font-medium text-mist hover:text-blue transition-colors mb-6"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Notes from the valley</span>
@@ -203,31 +216,33 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </header>
 
-        {/* Table of Contents for posts over 1,000 words */}
+        {/* Collapsible Table of Contents for posts over 1,000 words */}
         {showTableOfContents && (
-          <nav
+          <details
+            open
             aria-label="Table of contents"
-            className="p-6 bg-paper border border-line rounded-2xl mb-12 space-y-3"
+            className="group p-5 bg-paper border-[3px] border-ink rounded-[20px] mb-12 shadow-hard-sm"
           >
-            <span className="text-xs uppercase tracking-wider text-mist font-semibold block">
-              In this guide
-            </span>
-            <ul className="space-y-2 text-sm">
+            <summary className="font-display font-black text-sm uppercase cursor-pointer select-none min-h-[44px] flex items-center justify-between text-ink hover:text-chinar transition-colors">
+              <span>In this guide</span>
+              <span className="text-xs transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <ul className="space-y-2 text-sm pt-3 border-t-2 border-ink/15 mt-2">
               {post.headings
                 .filter((h) => h.level === 2)
                 .map((heading) => (
                   <li key={heading.id}>
                     <a
                       href={`#${heading.id}`}
-                      className="text-graphite hover:text-blue transition-colors flex items-center gap-2"
+                      className="text-ink hover:text-chinar transition-colors flex items-center gap-2 min-h-[36px]"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-chinar shrink-0" />
                       <span>{heading.text}</span>
                     </a>
                   </li>
                 ))}
             </ul>
-          </nav>
+          </details>
         )}
 
         {/* Article Body Rendered via MDX */}

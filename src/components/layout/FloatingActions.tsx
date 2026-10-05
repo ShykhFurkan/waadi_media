@@ -47,17 +47,23 @@ export function FloatingActions() {
         </a>
       </div>
 
-      {/* Mobile Sticky Bottom Bar (3 equal buttons: Call, WhatsApp, Book a call) */}
+      {/* Mobile Sticky Bottom Bar (56px tall + safe area inset, 44px buttons per Requirement B.7) */}
       {!isKeyboardOpen && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper/95 backdrop-blur-md border-t border-line px-3 py-2 shadow-floating">
-          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
+        <div
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper border-t-[3px] border-ink px-3 flex items-center shadow-hard-md"
+          style={{
+            height: 'calc(56px + env(safe-area-inset-bottom, 0px))',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          }}
+        >
+          <div className="grid grid-cols-3 gap-2 w-full max-w-md mx-auto">
             {/* 1. Phone Call */}
             <a
               href={`tel:${siteConfig.contact.tel}`}
               onClick={() => trackEvent({ name: 'click_call', params: { location: 'mobile_sticky_bar', phone: siteConfig.contact.tel } })}
-              className="h-11 rounded-full border border-line flex items-center justify-center gap-1.5 text-xs font-medium text-ink bg-snow hover:bg-paper transition-colors"
+              className="h-11 min-h-[44px] rounded-full border-2 border-ink flex items-center justify-center gap-1.5 text-xs font-bold text-ink bg-sky shadow-hard-sm active:translate-y-0.5 transition-transform select-none"
             >
-              <Phone className="w-3.5 h-3.5 stroke-[1.5] text-blue" />
+              <Phone className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Call</span>
             </a>
 
@@ -67,9 +73,9 @@ export function FloatingActions() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent({ name: 'click_whatsapp', params: { location: 'mobile_sticky_bar' } })}
-              className="h-11 rounded-full border border-line flex items-center justify-center gap-1.5 text-xs font-semibold text-ink bg-[#25D366] hover:opacity-95 transition-opacity"
+              className="h-11 min-h-[44px] rounded-full border-2 border-ink flex items-center justify-center gap-1.5 text-xs font-bold text-ink bg-mint shadow-hard-sm active:translate-y-0.5 transition-transform select-none"
             >
-              <MessageSquare className="w-3.5 h-3.5 stroke-[1.5]" />
+              <MessageSquare className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>WhatsApp</span>
             </a>
 
@@ -77,9 +83,9 @@ export function FloatingActions() {
             <Link
               href="/book-a-call"
               onClick={() => trackEvent({ name: 'cta_click', params: { label: 'Book a call', location: 'mobile_sticky_bar' } })}
-              className="h-11 rounded-full bg-blue text-white flex items-center justify-center gap-1.5 text-xs font-medium hover:bg-blue-deep transition-colors"
+              className="h-11 min-h-[44px] rounded-full border-2 border-ink bg-saffron text-ink font-bold flex items-center justify-center gap-1.5 text-xs shadow-hard-sm active:translate-y-0.5 transition-transform select-none"
             >
-              <Calendar className="w-3.5 h-3.5 stroke-[1.5]" />
+              <Calendar className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Book call</span>
             </Link>
           </div>

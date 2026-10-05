@@ -53,7 +53,7 @@ export function BlogListClient({
 
   return (
     <div className="space-y-12">
-      {/* Category Chips */}
+      {/* Category Chips (min 44px height, 8px gap) */}
       <div className="flex flex-wrap gap-2 pt-2">
         {CATEGORIES.map((category) => {
           const isSelected = selectedCategory === category;
@@ -63,10 +63,10 @@ export function BlogListClient({
               type="button"
               onClick={() => setSelectedCategory(category)}
               className={cn(
-                'px-4 py-2 rounded-full text-xs font-medium border transition-colors cursor-pointer',
+                'h-11 min-h-[44px] px-4 rounded-full text-xs font-bold border-[2px] border-ink transition-colors cursor-pointer select-none shadow-hard-sm active:translate-y-0.5',
                 isSelected
-                  ? 'bg-blue text-white border-blue'
-                  : 'bg-paper text-graphite border-line hover:border-mist'
+                  ? 'bg-chinar text-white'
+                  : 'bg-white text-ink hover:bg-paper'
               )}
             >
               {category}
@@ -77,84 +77,86 @@ export function BlogListClient({
 
       {/* Featured Latest Post */}
       {featuredPost && (
-        <article className="group p-8 sm:p-12 bg-paper border border-line rounded-3xl hover:border-blue transition-colors shadow-floating relative">
-          <div className="flex flex-wrap items-center gap-4 text-xs text-mist mb-4">
-            <span className="px-3 py-1 rounded-full bg-blue-tint text-blue font-medium">
+        <article className="group p-6 sm:p-10 bg-paper border-[3px] border-ink rounded-[24px] shadow-hard-sm sm:shadow-hard-md relative">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-ink/75 mb-4">
+            <span className="px-3 py-1 rounded-full bg-saffron border border-ink text-ink font-bold">
               {featuredPost.category}
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 font-medium">
               <Calendar className="w-3.5 h-3.5" />
               {featuredPost.date}
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 font-medium">
               <Clock className="w-3.5 h-3.5" />
               {featuredPost.readingTime}
             </span>
             {featuredPost.draft && (
-              <span className="px-2.5 py-0.5 rounded-full bg-error/10 text-error font-medium">
+              <span className="px-2.5 py-0.5 rounded-full bg-chinar/10 text-chinar font-bold">
                 Draft for review
               </span>
             )}
           </div>
 
-          <h2 className="text-h2 text-ink group-hover:text-blue transition-colors mb-4">
+          <h2 className="text-h2 text-ink group-hover:text-chinar transition-colors mb-4">
             <Link href={`/blog/${featuredPost.slug}`}>
               {featuredPost.title}
             </Link>
           </h2>
 
-          <p className="text-lead text-graphite mb-6 max-w-3xl">
+          <p className="text-lead text-ink/80 mb-6 max-w-3xl">
             {featuredPost.description}
           </p>
 
           <Link
             href={`/blog/${featuredPost.slug}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue group-hover:text-blue-deep transition-colors"
+            className="inline-flex items-center gap-1.5 h-11 min-h-[44px] text-sm font-bold text-chinar hover:underline transition-colors"
           >
-            Read article
+            <span>Read article</span>
+            <span>→</span>
           </Link>
         </article>
       )}
 
       {/* Grid of Remaining Posts */}
       {gridPosts.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 pt-4">
           {gridPosts.map((post) => (
             <article
               key={post.slug}
-              className="group p-6 sm:p-8 bg-paper border border-line rounded-2xl hover:border-blue transition-colors flex flex-col justify-between"
+              className="group p-5 sm:p-8 bg-paper border-[3px] border-ink rounded-[20px] shadow-hard-sm sm:shadow-hard-md flex flex-col justify-between"
             >
               <div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-mist mb-3">
-                  <span className="px-2.5 py-0.5 rounded-full bg-snow border border-line text-graphite font-medium">
+                <div className="flex flex-wrap items-center gap-2.5 text-xs text-ink/75 mb-3">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-ink text-ink font-bold">
                     {post.category}
                   </span>
-                  <span>{post.date}</span>
+                  <span className="font-medium">{post.date}</span>
                   <span>&bull;</span>
-                  <span>{post.readingTime}</span>
+                  <span className="font-medium">{post.readingTime}</span>
                   {post.draft && (
-                    <span className="text-error font-medium text-[11px]">
+                    <span className="text-chinar font-bold text-[11px]">
                       (Draft)
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-h3 text-ink group-hover:text-blue transition-colors mb-2.5">
+                <h3 className="text-h3 text-ink group-hover:text-chinar transition-colors mb-2.5">
                   <Link href={`/blog/${post.slug}`}>
                     {post.title}
                   </Link>
                 </h3>
 
-                <p className="text-sm text-graphite line-clamp-3 mb-6">
+                <p className="text-sm text-ink/80 line-clamp-3 mb-6">
                   {post.description}
                 </p>
               </div>
 
               <Link
                 href={`/blog/${post.slug}`}
-                className="text-sm font-medium text-blue group-hover:text-blue-deep transition-colors"
+                className="inline-flex items-center gap-1 h-11 min-h-[44px] text-sm font-bold text-chinar hover:underline transition-colors"
               >
-                Read article
+                <span>Read article</span>
+                <span>→</span>
               </Link>
             </article>
           ))}

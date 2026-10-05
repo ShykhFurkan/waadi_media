@@ -20,25 +20,25 @@ export default function NotFound() {
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <Link
               href="/services"
-              className="px-5 py-2.5 bg-paper border border-line rounded-full text-sm font-medium hover:border-blue hover:text-blue transition-colors shadow-sm"
+              className="h-11 min-h-[44px] px-6 bg-paper border-[2px] border-ink rounded-full text-sm font-bold text-ink hover:bg-paper-2 transition-colors shadow-hard-sm flex items-center justify-center"
             >
               Services
             </Link>
             <Link
               href="/pricing"
-              className="px-5 py-2.5 bg-paper border border-line rounded-full text-sm font-medium hover:border-blue hover:text-blue transition-colors shadow-sm"
+              className="h-11 min-h-[44px] px-6 bg-paper border-[2px] border-ink rounded-full text-sm font-bold text-ink hover:bg-paper-2 transition-colors shadow-hard-sm flex items-center justify-center"
             >
               Pricing
             </Link>
             <Link
               href="/work"
-              className="px-5 py-2.5 bg-paper border border-line rounded-full text-sm font-medium hover:border-blue hover:text-blue transition-colors shadow-sm"
+              className="h-11 min-h-[44px] px-6 bg-paper border-[2px] border-ink rounded-full text-sm font-bold text-ink hover:bg-paper-2 transition-colors shadow-hard-sm flex items-center justify-center"
             >
               Work
             </Link>
             <Link
               href="/contact"
-              className="px-5 py-2.5 bg-blue text-white rounded-full text-sm font-medium hover:bg-blue-deep transition-colors shadow-sm"
+              className="h-11 min-h-[44px] px-6 bg-saffron text-ink border-[2px] border-ink rounded-full text-sm font-bold hover:bg-yellow-400 transition-colors shadow-hard-sm flex items-center justify-center"
             >
               Contact
             </Link>

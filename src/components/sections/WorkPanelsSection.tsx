@@ -54,8 +54,8 @@ export function WorkPanelsSection() {
             return (
               <div
                 key={project.slug}
-                style={{ transform: `rotate(${rotate}deg)` }}
-                className={`tile-neo ${colorBgClasses} text-ink p-7 sm:p-10 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg transition-transform duration-200`}
+                style={{ '--panel-rotate': `${rotate}deg` } as React.CSSProperties}
+                className={`tile-neo ${colorBgClasses} text-ink p-5 sm:p-10 rounded-[20px] border-[3px] border-ink shadow-hard-sm sm:shadow-hard-md hover:shadow-hard-lg transition-transform duration-200 rotate-0 sm:[transform:rotate(var(--panel-rotate))]`}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                   {/* Left: Project Details & Stickers (5 cols) */}
@@ -71,10 +71,10 @@ export function WorkPanelsSection() {
                       )}
                     </div>
 
-                    <Link href={`/work/${project.slug}`} className="block group">
-                      <h3 className="text-h2 text-ink group-hover:underline decoration-[3px] underline-offset-4">
+                    <Link href={`/work/${project.slug}`} className="block group py-1.5 min-h-[44px] flex items-center">
+                      <h2 className="text-h2 text-ink group-hover:underline decoration-[3px] underline-offset-4">
                         {project.name}
-                      </h3>
+                      </h2>
                     </Link>
 
                     <p className="text-body font-medium">
@@ -92,10 +92,10 @@ export function WorkPanelsSection() {
                       ))}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-6 pt-4">
+                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-4">
                       <Link
                         href={`/work/${project.slug}`}
-                        className="inline-flex items-center gap-1 font-display font-black text-sm uppercase underline decoration-[3px] underline-offset-4 hover:text-chinar transition-colors"
+                        className="inline-flex items-center gap-1 font-display font-black text-sm uppercase underline decoration-[3px] underline-offset-4 hover:text-chinar transition-colors min-h-[44px]"
                       >
                         <span>Read case study</span>
                         <span>→</span>
@@ -103,7 +103,7 @@ export function WorkPanelsSection() {
                       <OutboundLink
                         href={project.liveUrl}
                         label={project.name}
-                        className="inline-flex items-center gap-1 font-display font-black text-sm uppercase text-ink/80 hover:text-ink transition-colors"
+                        className="inline-flex items-center gap-1 font-display font-black text-sm uppercase text-ink/80 hover:text-ink transition-colors min-h-[44px]"
                       >
                         <span>Visit site</span>
                         <span>↗</span>

@@ -104,7 +104,7 @@ export default function WorkPage() {
                     <OutboundLink
                       href={project.liveUrl}
                       label={project.name}
-                      className="text-sm font-medium text-graphite hover:text-blue transition-colors underline underline-offset-4"
+                      className="min-h-[44px] inline-flex items-center text-sm font-medium text-graphite hover:text-blue transition-colors underline underline-offset-4"
                     >
                       Visit site
                     </OutboundLink>

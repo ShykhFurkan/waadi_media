@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/pricing.test.ts",
+    "test:mobile": "playwright test tests/mobile.spec.ts",
     "seo:check": "node scripts/seo-check.mjs",
     "mail:test": "node scripts/test-mail.mjs"
   },
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.3.8",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.2",

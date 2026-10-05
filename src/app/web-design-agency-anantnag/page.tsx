@@ -67,11 +67,11 @@ export default function AnantnagLocalPage() {
   const featuredCaseStudy = projectsData.find((p) => p.slug === 'wonder-delight-tours-travels') || projectsData[0];
 
   return (
-    <div className="w-full min-h-screen bg-snow text-graphite py-16 md:py-24">
+    <div className="w-full min-h-screen bg-snow text-graphite pt-14 pb-16 sm:py-24">
       <JsonLd data={faqSchema} />
       <JsonLd data={breadcrumbsSchema} />
 
-      <div className="max-w-[1000px] mx-auto px-5 sm:px-8 space-y-16 md:space-y-20">
+      <div className="max-w-[1000px] mx-auto px-5 sm:px-8 space-y-12 sm:space-y-16 md:space-y-20">
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="text-xs text-mist font-medium flex items-center gap-2">
           <Link href="/" className="hover:text-blue transition-colors">Home</Link>
@@ -80,7 +80,7 @@ export default function AnantnagLocalPage() {
         </nav>
 
         {/* Hero Section */}
-        <div className="max-w-3xl space-y-6">
+        <div className="max-w-3xl space-y-4 sm:space-y-6">
           <span className="text-xs uppercase tracking-wider text-blue font-semibold block">
             Hometown Digital Agency &bull; Anantnag, Jammu &amp; Kashmir
           </span>
@@ -183,7 +183,7 @@ export default function AnantnagLocalPage() {
             </div>
             <Link
               href="/pricing"
-              className="text-sm font-semibold text-blue hover:text-blue-deep transition-colors whitespace-nowrap"
+              className="text-sm font-semibold text-blue hover:text-blue-deep transition-colors whitespace-nowrap min-h-[44px] inline-flex items-center"
             >
               See all prices
             </Link>
@@ -197,7 +197,7 @@ export default function AnantnagLocalPage() {
               >
                 <div className="max-w-xl">
                   <h3 className="text-xl font-sans font-semibold text-ink mb-1">
-                    <Link href={`/services/${service.slug}`} className="hover:text-blue transition-colors">
+                    <Link href={`/services/${service.slug}`} className="hover:text-blue transition-colors min-h-[44px] min-w-[44px] inline-flex items-center">
                       {service.name}
                     </Link>
                   </h3>
@@ -212,7 +212,7 @@ export default function AnantnagLocalPage() {
                   </span>
                   <Link
                     href={`/services/${service.slug}`}
-                    className="text-xs font-semibold px-4 py-2 rounded-full border border-line hover:border-blue hover:text-blue transition-colors"
+                    className="text-xs font-semibold px-4 py-2.5 rounded-full border border-line hover:border-blue hover:text-blue transition-colors min-h-[44px] inline-flex items-center"
                   >
                     View service
                   </Link>
@@ -254,14 +254,14 @@ export default function AnantnagLocalPage() {
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Link
                 href={`/work/${featuredCaseStudy.slug}`}
-                className="text-sm font-semibold px-5 py-2.5 rounded-full bg-blue text-white hover:bg-blue-deep transition-colors"
+                className="min-h-[44px] inline-flex items-center text-sm font-semibold px-5 py-2.5 rounded-full bg-blue text-white hover:bg-blue-deep transition-colors"
               >
                 Read full case study
               </Link>
               <OutboundLink
                 href={featuredCaseStudy.liveUrl}
                 label={featuredCaseStudy.name}
-                className="text-sm text-graphite hover:text-ink transition-colors"
+                className="min-h-[44px] inline-flex items-center text-sm text-graphite hover:text-ink transition-colors"
               >
                 Visit live website
               </OutboundLink>

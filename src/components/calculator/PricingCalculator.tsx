@@ -134,20 +134,22 @@ function CalculatorInner() {
   // Contact page URL with preselected items
   const quoteContactUrl = `/contact?items=${selectedIds.join(',')}${businessType ? `&sector=${encodeURIComponent(businessType)}` : ''}`;
 
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
   return (
     <div className="w-full">
-      {/* Quick-start Chips */}
-      <div className="mb-10 p-6 bg-paper border border-line rounded-2xl">
-        <span className="text-xs uppercase tracking-wider text-mist font-semibold block mb-3">
+      {/* Quick-start Chips (min 44px height, 8px spacing per B.12) */}
+      <div className="mb-8 p-5 sm:p-6 bg-paper border-[3px] border-ink rounded-[20px] shadow-hard-sm">
+        <span className="text-xs uppercase tracking-wider text-ink/75 font-mono font-bold block mb-3">
           Quick start combinations
         </span>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {quickStarts.map((qs) => (
             <button
               key={qs.label}
               type="button"
               onClick={() => handleQuickStart(qs.ids)}
-              className="px-4 py-2 rounded-full border border-line bg-snow hover:border-blue hover:text-blue text-sm font-medium text-ink transition-colors cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-2"
+              className="h-11 min-h-[44px] px-4 rounded-full border-[2px] border-ink bg-white hover:bg-saffron text-sm font-bold text-ink transition-colors cursor-pointer select-none shadow-hard-sm active:translate-y-0.5"
             >
               {qs.label}
             </button>
@@ -155,56 +157,56 @@ function CalculatorInner() {
         </div>
       </div>
 
-      {/* Two Column Layout on Desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        {/* Left Column (8 cols): Step 1 & Step 2 */}
-        <div className="lg:col-span-8 space-y-12">
+      {/* Main Layout: Single column on mobile, 2 columns on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column (12 cols on mobile, 8 cols on desktop): Step 1 & Step 2 */}
+        <div className="lg:col-span-8 space-y-8">
           {/* Step 1: Select services & features */}
           <div>
-            <div className="mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue block mb-1">
+            <div className="mb-4">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-chinar block mb-1">
                 Step 1 of 2
               </span>
-              <h3 className="text-2xl font-sans font-bold text-ink">
+              <h3 className="text-2xl font-display font-black text-ink uppercase">
                 What do you need?
               </h3>
-              <p className="text-sm text-mist mt-1">
+              <p className="text-sm font-medium text-ink/80 mt-1">
                 Select the items relevant to your project. Starting prices shown in INR.
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {serviceGroups.map((group) => (
-                <div key={group.slug} className="p-6 bg-paper border border-line rounded-2xl">
-                  <h4 className="text-base font-semibold text-ink mb-4 pb-2 border-b border-line">
+                <div key={group.slug} className="p-4 sm:p-6 bg-paper border-[3px] border-ink rounded-[20px] shadow-hard-sm">
+                  <h4 className="text-base font-display font-black text-ink uppercase mb-3 pb-2 border-b-2 border-ink/20">
                     {group.serviceName}
                   </h4>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {group.items.map((item) => {
                       const isChecked = selectedIds.includes(item.id);
                       return (
                         <label
                           key={item.id}
                           className={cn(
-                            'flex items-start justify-between gap-4 p-3.5 rounded-xl border transition-all cursor-pointer select-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue',
+                            'flex items-center justify-between gap-3 p-3.5 sm:p-4 min-h-[52px] rounded-[14px] border-[2px] border-ink transition-all cursor-pointer select-none',
                             isChecked
-                              ? 'border-blue bg-blue-tint/40 text-ink'
-                              : 'border-line/70 hover:border-mist/50 bg-white text-graphite'
+                              ? 'bg-saffron/40 text-ink shadow-hard-sm'
+                              : 'bg-white hover:bg-paper text-ink'
                           )}
                         >
-                          <div className="flex items-start gap-3">
+                          <div className="flex items-center gap-3">
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => handleToggleItem(item.id)}
-                              className="mt-1 w-4 h-4 rounded text-blue border-line focus:ring-blue accent-blue cursor-pointer focus-visible:outline-2 focus-visible:outline-blue focus-visible:outline-offset-2"
+                              className="w-5 h-5 min-w-[20px] rounded border-2 border-ink accent-chinar cursor-pointer"
                             />
                             <div>
-                              <span className="font-medium text-sm text-ink block">
+                              <span className="font-bold text-base text-ink block leading-snug">
                                 {item.label}
                               </span>
                               {item.note && (
-                                <span className="text-xs text-mist block mt-0.5">
+                                <span className="text-xs text-ink/75 block mt-0.5">
                                   {item.note}
                                 </span>
                               )}
@@ -212,10 +214,10 @@ function CalculatorInner() {
                           </div>
 
                           <div className="text-right shrink-0">
-                            <span className="text-sm font-semibold text-ink tabular-numbers">
+                            <span className="text-sm sm:text-base font-bold text-ink tabular-numbers font-mono block">
                               {formatINR(item.price)}
                             </span>
-                            <span className="text-[11px] text-mist block font-normal">
+                            <span className="text-[11px] text-ink/75 block font-medium">
                               {item.unit}
                             </span>
                           </div>
@@ -229,14 +231,14 @@ function CalculatorInner() {
           </div>
 
           {/* Step 2: Business type (optional) */}
-          <div className="p-6 bg-paper border border-line rounded-2xl">
-            <span className="text-xs font-semibold uppercase tracking-wider text-blue block mb-1">
+          <div className="p-4 sm:p-6 bg-paper border-[3px] border-ink rounded-[20px] shadow-hard-sm">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-chinar block mb-1">
               Step 2 of 2 (Optional)
             </span>
-            <h3 className="text-xl font-sans font-bold text-ink mb-2">
+            <h3 className="text-xl font-display font-black text-ink uppercase mb-1">
               Tell us a little about your business
             </h3>
-            <p className="text-sm text-mist mb-4">
+            <p className="text-sm font-medium text-ink/80 mb-4">
               Helps us understand your market and industry seasons.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -248,10 +250,10 @@ function CalculatorInner() {
                     type="button"
                     onClick={() => setBusinessType(isSelected ? '' : type)}
                     className={cn(
-                      'px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border cursor-pointer select-none',
+                      'h-11 min-h-[44px] px-4 rounded-full text-xs font-bold border-[2px] border-ink transition-colors cursor-pointer select-none shadow-hard-sm active:translate-y-0.5',
                       isSelected
-                        ? 'bg-blue text-white border-blue'
-                        : 'bg-snow border-line text-graphite hover:text-ink hover:border-mist/60'
+                        ? 'bg-chinar text-white'
+                        : 'bg-white text-ink hover:bg-paper'
                     )}
                   >
                     {type}
@@ -262,44 +264,44 @@ function CalculatorInner() {
           </div>
         </div>
 
-        {/* Right Column (4 cols): Sticky Summary on Desktop */}
-        <div className="lg:col-span-4 sticky top-28">
-          <div className="p-7 bg-paper border border-line rounded-3xl shadow-floating space-y-6">
+        {/* Right Column: Sticky Summary on Desktop */}
+        <div className="hidden lg:block lg:col-span-4 sticky top-28">
+          <div className="p-7 bg-paper border-[3px] border-ink rounded-[24px] shadow-hard-md space-y-6">
             <div>
-              <span className="text-xs uppercase tracking-wider text-mist font-semibold block mb-1">
+              <span className="text-xs uppercase font-mono font-bold text-ink/70 block mb-1">
                 Estimate Summary
               </span>
-              <h4 className="text-xl font-sans font-bold text-ink">
+              <h4 className="text-xl font-display font-black text-ink uppercase">
                 Estimated starting price
               </h4>
-              <p className="text-xs text-mist mt-0.5">
+              <p className="text-xs text-ink/75 mt-0.5">
                 Your final quote comes after a free call.
               </p>
             </div>
 
-            {/* Live Totals Region (aria-live="polite" per Section 11.5) */}
+            {/* Live Totals Region */}
             <div
               role="region"
               aria-live="polite"
               aria-atomic="true"
-              className="space-y-4 border-y border-line py-5"
+              className="space-y-4 border-y-2 border-ink/20 py-5"
             >
               {/* One-time total */}
               <div>
-                <span className="text-xs text-mist block">One-time (from)</span>
+                <span className="text-xs text-ink/70 font-mono font-bold uppercase block">One-time (from)</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-price text-ink tabular-numbers font-display">
+                  <span className="text-price text-ink tabular-numbers font-display font-bold">
                     {formatINR(estimate.oneTimeTotal)}
                   </span>
                   {estimate.appliesDiscount && (
-                    <span className="text-xs line-through text-mist tabular-numbers">
+                    <span className="text-xs line-through text-ink/60 tabular-numbers font-mono">
                       {formatINR(estimate.oneTimeSubtotal)}
                     </span>
                   )}
                 </div>
 
                 {estimate.appliesDiscount && (
-                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-md bg-blue-tint text-blue text-xs font-semibold">
+                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-saffron border border-ink text-ink text-xs font-bold shadow-hard-sm">
                     10% bundle saving (-{formatINR(estimate.bundleSaving)})
                   </span>
                 )}
@@ -307,11 +309,11 @@ function CalculatorInner() {
 
               {/* Monthly total */}
               {estimate.monthlyTotal > 0 && (
-                <div className="border-t border-line/60 pt-3">
-                  <span className="text-xs text-mist block">Monthly retainer (from)</span>
-                  <span className="text-2xl font-display text-ink tabular-numbers">
+                <div className="border-t-2 border-ink/20 pt-3">
+                  <span className="text-xs text-ink/70 font-mono font-bold uppercase block">Monthly retainer (from)</span>
+                  <span className="text-2xl font-display font-bold text-ink tabular-numbers">
                     {formatINR(estimate.monthlyTotal)}
-                    <span className="text-xs font-normal text-mist ml-1">/month</span>
+                    <span className="text-xs font-bold text-ink/75 ml-1">/month</span>
                   </span>
                 </div>
               )}
@@ -320,7 +322,7 @@ function CalculatorInner() {
             {/* Selected Items List with Remove Buttons */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-graphite uppercase tracking-wider">
+                <span className="text-xs font-bold font-mono text-ink uppercase tracking-wider">
                   Selected items ({estimate.selectedItems.length})
                 </span>
                 {estimate.selectedItems.length > 0 && (
@@ -330,7 +332,7 @@ function CalculatorInner() {
                       setSelectedIds([]);
                       updateUrl([]);
                     }}
-                    className="text-xs text-mist hover:text-error transition-colors"
+                    className="text-xs text-chinar hover:underline font-bold"
                   >
                     Clear all
                   </button>
@@ -338,30 +340,30 @@ function CalculatorInner() {
               </div>
 
               {estimate.selectedItems.length === 0 ? (
-                <p className="text-xs text-mist py-3 italic">
+                <p className="text-xs text-ink/60 py-3 italic">
                   Select items from the list to build an estimate.
                 </p>
               ) : (
-                <ul className="max-h-48 overflow-y-auto divide-y divide-line/60 pr-1 space-y-1">
+                <ul className="max-h-48 overflow-y-auto divide-y-2 divide-ink/10 pr-1 space-y-1">
                   {estimate.selectedItems.map((item) => (
                     <li
                       key={item.id}
                       className="py-1.5 flex items-center justify-between gap-2 text-xs"
                     >
-                      <span className="text-graphite truncate max-w-[190px]">
+                      <span className="text-ink font-medium truncate max-w-[190px]">
                         {item.label}
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="font-medium text-ink tabular-numbers">
+                        <span className="font-bold font-mono text-ink tabular-numbers">
                           {formatINR(item.price)}
                         </span>
                         <button
                           type="button"
                           aria-label={`Remove ${item.label}`}
                           onClick={() => handleToggleItem(item.id)}
-                          className="w-4 h-4 rounded flex items-center justify-center text-mist hover:text-error"
+                          className="w-6 h-6 rounded-full border border-ink bg-white flex items-center justify-center text-ink hover:bg-chinar hover:text-white transition-colors"
                         >
-                          <X className="w-3 h-3 stroke-[2]" />
+                          <X className="w-3 h-3 stroke-[2.5]" />
                         </button>
                       </div>
                     </li>
@@ -386,9 +388,9 @@ function CalculatorInner() {
                     },
                   })
                 }
-                className="w-full h-12 rounded-full bg-[#25D366] text-ink font-semibold flex items-center justify-center gap-2 text-sm hover:opacity-95 transition-opacity"
+                className="btn-neo w-full h-12 bg-mint text-ink font-bold flex items-center justify-center gap-2 text-sm shadow-hard-sm hover:shadow-hard-md"
               >
-                <MessageSquare className="w-4 h-4 stroke-[1.5]" />
+                <MessageSquare className="w-4 h-4 stroke-[2.5]" />
                 <span>Send on WhatsApp</span>
               </a>
 
@@ -404,7 +406,7 @@ function CalculatorInner() {
                     },
                   })
                 }
-                className="w-full h-12 rounded-full border-[1.5px] border-ink text-ink flex items-center justify-center text-sm font-medium hover:bg-snow transition-colors"
+                className="btn-neo w-full h-12 bg-saffron text-ink flex items-center justify-center text-sm font-bold shadow-hard-sm hover:shadow-hard-md"
               >
                 Get an exact quote
               </Link>
@@ -421,11 +423,154 @@ function CalculatorInner() {
                     },
                   })
                 }
-                className="w-full h-10 text-xs font-medium text-graphite hover:text-blue flex items-center justify-center transition-colors"
+                className="w-full h-11 text-xs font-bold text-ink/80 hover:text-ink hover:underline flex items-center justify-center transition-colors"
               >
                 Book a free call
               </Link>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Summary Bar (Requirement B.10) */}
+      <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-30 bg-paper border-t-[3px] border-ink shadow-hard-md">
+        {/* Expandable Breakdown Drawer */}
+        {mobileDrawerOpen && (
+          <div className="p-4 border-b-2 border-ink/20 max-h-[50vh] overflow-y-auto space-y-4 bg-paper-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold text-ink uppercase tracking-wider">
+                Selected ({estimate.selectedItems.length} items)
+              </span>
+              <div className="flex items-center gap-3">
+                {estimate.selectedItems.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedIds([]);
+                      updateUrl([]);
+                    }}
+                    className="min-h-[44px] flex items-center text-xs text-chinar font-bold hover:underline"
+                  >
+                    Clear all
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full border border-ink bg-white flex items-center justify-center text-ink text-sm font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <ul className="divide-y divide-ink/15 space-y-1">
+              {estimate.selectedItems.map((item) => (
+                <li key={item.id} className="py-2 flex items-center justify-between gap-2 text-xs">
+                  <span className="text-ink font-medium truncate max-w-[200px]">{item.label}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-mono font-bold text-ink">{formatINR(item.price)}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${item.label}`}
+                      onClick={() => handleToggleItem(item.id)}
+                      className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full border border-ink bg-white flex items-center justify-center text-ink"
+                    >
+                      <X className="w-4 h-4 stroke-[2.5]" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Mobile Actions: WhatsApp, Get quote, Book a call (all full-width) */}
+            <div className="space-y-2 pt-2 border-t-2 border-ink/20">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  trackEvent({
+                    name: 'calculator_cta_click',
+                    params: {
+                      action: 'whatsapp',
+                      totalOneTime: estimate.oneTimeTotal,
+                      totalMonthly: estimate.monthlyTotal,
+                    },
+                  })
+                }
+                className="btn-neo w-full h-11 min-h-[44px] bg-mint text-ink font-bold flex items-center justify-center gap-2 text-xs shadow-hard-sm"
+              >
+                <MessageSquare className="w-4 h-4 stroke-[2.5]" />
+                <span>Send on WhatsApp</span>
+              </a>
+
+              <Link
+                href={quoteContactUrl}
+                onClick={() =>
+                  trackEvent({
+                    name: 'calculator_cta_click',
+                    params: {
+                      action: 'quote',
+                      totalOneTime: estimate.oneTimeTotal,
+                      totalMonthly: estimate.monthlyTotal,
+                    },
+                  })
+                }
+                className="btn-neo w-full h-11 min-h-[44px] bg-saffron text-ink font-bold flex items-center justify-center text-xs shadow-hard-sm"
+              >
+                Get an exact quote
+              </Link>
+
+              <Link
+                href="/book-a-call"
+                onClick={() =>
+                  trackEvent({
+                    name: 'calculator_cta_click',
+                    params: {
+                      action: 'call',
+                      totalOneTime: estimate.oneTimeTotal,
+                      totalMonthly: estimate.monthlyTotal,
+                    },
+                  })
+                }
+                className="btn-neo w-full h-11 min-h-[44px] bg-white text-ink font-bold flex items-center justify-center text-xs shadow-hard-sm"
+              >
+                Book a free call
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Compact Collapsed Bar */}
+        <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="font-display font-black text-lg text-ink tabular-numbers">
+                {formatINR(estimate.oneTimeTotal)}
+              </span>
+              {estimate.monthlyTotal > 0 && (
+                <span className="text-xs font-mono font-bold text-chinar">
+                  +{formatINR(estimate.monthlyTotal)}/mo
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+              className="min-h-[44px] flex items-center text-[11px] font-bold text-ink/75 hover:text-ink underline"
+            >
+              {mobileDrawerOpen ? 'Hide breakdown ▾' : `View breakdown (${estimate.selectedItems.length}) ▴`}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={quoteContactUrl}
+              className="btn-neo h-11 min-h-[44px] px-4 bg-saffron text-ink font-bold text-xs flex items-center justify-center shadow-hard-sm"
+            >
+              Get quote
+            </Link>
           </div>
         </div>
       </div>

@@ -70,21 +70,21 @@ export function ShareButtons({
   )}`;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <button
         onClick={handleCopyLink}
         type="button"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line text-xs font-medium text-graphite hover:border-blue hover:text-blue transition-colors"
+        className="inline-flex items-center gap-2 px-4 h-11 min-h-[44px] rounded-full border-[2px] border-ink bg-white text-xs font-bold text-ink hover:bg-paper transition-colors shadow-hard-sm active:translate-y-0.5"
         title="Copy link to clipboard"
       >
         {copied ? (
           <>
-            <Check className="w-3.5 h-3.5 text-success" />
+            <Check className="w-4 h-4 text-mint stroke-[2.5]" />
             <span>Copied</span>
           </>
         ) : (
           <>
-            <Copy className="w-3.5 h-3.5 text-mist" />
+            <Copy className="w-4 h-4 text-ink stroke-[2.5]" />
             <span>Copy link</span>
           </>
         )}
@@ -95,10 +95,10 @@ export function ShareButtons({
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackEvent({ name: 'click_whatsapp', params: { location: 'blog_share' } })}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line text-xs font-medium text-graphite hover:border-whatsapp hover:text-whatsapp transition-colors"
+        className="inline-flex items-center gap-2 px-4 h-11 min-h-[44px] rounded-full border-[2px] border-ink bg-mint text-xs font-bold text-ink hover:opacity-90 transition-opacity shadow-hard-sm active:translate-y-0.5"
         title="Share on WhatsApp"
       >
-        <MessageCircle className="w-3.5 h-3.5 text-whatsapp" />
+        <MessageCircle className="w-4 h-4 stroke-[2.5]" />
         <span>Share</span>
       </a>
     </div>

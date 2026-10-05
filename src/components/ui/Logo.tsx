@@ -29,7 +29,7 @@ export function Logo({
   return (
     <Link
       href={href}
-      className="inline-block focus-visible:rounded-lg"
+      className="inline-flex items-center min-h-[44px] min-w-[44px] focus-visible:rounded-lg"
       prefetch={priority ? true : undefined}
     >
       {content}

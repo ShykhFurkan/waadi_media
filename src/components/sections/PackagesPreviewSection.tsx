@@ -36,8 +36,8 @@ export function PackagesPreviewSection() {
           </div>
         </div>
 
-        {/* 3 Neo-Brutalist Package Tiles */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center pt-4">
+        {/* 3 Neo-Brutalist Package Tiles: single column on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 items-center pt-4">
           {previewPackages.map((pkg) => {
             const isFeatured = pkg.popular;
             const packageWhatsAppUrl = whatsappLink(defaultWhatsAppMessages.package(pkg.name));
@@ -45,10 +45,10 @@ export function PackagesPreviewSection() {
             return (
               <div
                 key={pkg.id}
-                className={`tile-neo p-8 sm:p-10 rounded-[20px] border-[3px] border-ink flex flex-col justify-between transition-all ${
+                className={`tile-neo p-5 sm:p-10 rounded-[20px] border-[3px] border-ink flex flex-col justify-between transition-all ${
                   isFeatured
-                    ? 'bg-saffron md:-translate-y-4 shadow-hard-lg z-10'
-                    : 'bg-paper-2 shadow-hard-md'
+                    ? 'bg-saffron md:-translate-y-4 shadow-hard-sm sm:shadow-hard-lg z-10'
+                    : 'bg-paper-2 shadow-hard-sm sm:shadow-hard-md'
                 }`}
               >
                 <div>
@@ -102,7 +102,7 @@ export function PackagesPreviewSection() {
                 <div className="space-y-3 pt-4 border-t-2 border-ink/20">
                   <Link
                     href={`/contact?package=${pkg.id}`}
-                    className={`btn-neo w-full h-[52px] rounded-full font-sans font-bold text-base flex items-center justify-center transition-all ${
+                    className={`btn-neo w-full h-11 sm:h-[52px] min-h-[44px] rounded-full font-sans font-bold text-base flex items-center justify-center transition-all ${
                       isFeatured
                         ? 'bg-ink text-white hover:bg-black'
                         : 'bg-saffron text-ink hover:bg-yellow-400'
@@ -114,7 +114,7 @@ export function PackagesPreviewSection() {
                     href={packageWhatsAppUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full h-10 text-xs font-mono font-bold uppercase tracking-wider text-ink/80 hover:text-ink hover:underline flex items-center justify-center transition-colors"
+                    className="w-full h-11 min-h-[44px] text-xs font-mono font-bold uppercase tracking-wider text-ink/80 hover:text-ink hover:underline flex items-center justify-center transition-colors"
                   >
                     Ask on WhatsApp ↗
                   </a>

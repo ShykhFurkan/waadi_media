@@ -93,7 +93,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8 space-y-24">
         {/* 1. Hero Section */}
         <section className="max-w-4xl space-y-6">
-          <nav className="flex items-center gap-2 text-xs text-mist">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-mist">
             <Link href="/" className="hover:text-blue transition-colors">Home</Link>
             <span>/</span>
             <Link href="/services" className="hover:text-blue transition-colors">Services</Link>
@@ -270,10 +270,10 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                 <h3 className="text-h2 text-ink">{proofProject.name}</h3>
                 <p className="text-body text-graphite">{proofProject.summary}</p>
                 <p className="text-xs text-mist">{service.proofNote}</p>
-                <div className="pt-2 flex items-center gap-4">
+                <div className="pt-2 flex flex-wrap items-center gap-4">
                   <Link
                     href={`/work/${proofProject.slug}`}
-                    className="text-sm font-medium text-blue hover:text-blue-deep transition-colors"
+                    className="min-h-[44px] inline-flex items-center text-sm font-medium text-blue hover:text-blue-deep transition-colors"
                   >
                     Read case study
                   </Link>
@@ -281,7 +281,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                     href={proofProject.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-medium text-graphite hover:text-ink transition-colors"
+                    className="min-h-[44px] inline-flex items-center text-sm font-medium text-graphite hover:text-ink transition-colors"
                   >
                     Visit live site ↗
                   </a>

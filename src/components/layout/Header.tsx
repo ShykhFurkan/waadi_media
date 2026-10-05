@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Menu, X, Phone, MessageSquare } from 'lucide-react';
+import { ChevronDown, Menu, X, Phone, MessageSquare, Mail } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/Button';
 import { servicesData } from '@/data/services';
@@ -16,6 +16,7 @@ export function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   // Close menus on route change
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -43,16 +44,47 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [mobileMenuOpen]);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll and handle Escape / focus trap when mobile sheet is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'contain';
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setMobileMenuOpen(false);
+          return;
+        }
+
+        if (e.key === 'Tab' && sheetRef.current) {
+          const focusableEls = sheetRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusableEls.length === 0) return;
+
+          const firstEl = focusableEls[0];
+          const lastEl = focusableEls[focusableEls.length - 1];
+
+          if (e.shiftKey && document.activeElement === firstEl) {
+            e.preventDefault();
+            lastEl.focus();
+          } else if (!e.shiftKey && document.activeElement === lastEl) {
+            e.preventDefault();
+            firstEl.focus();
+          }
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.overscrollBehavior = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
     } else {
       document.body.style.overflow = '';
+      document.body.style.overscrollBehavior = '';
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [mobileMenuOpen]);
 
   const navLinks = [
@@ -68,11 +100,11 @@ export function Header() {
       {/* Floating Pill Nav with 3px border and hard shadow */}
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 pt-3 transition-transform duration-200 ease-out',
+          'fixed top-0 left-0 right-0 z-40 px-3 sm:px-8 pt-[calc(0.125rem+env(safe-area-inset-top,0px))] sm:pt-3 transition-transform duration-200 ease-out',
           isVisible ? 'translate-y-0' : '-translate-y-28'
         )}
       >
-        <div className="max-w-[1100px] mx-auto bg-paper border-[3px] border-ink shadow-hard-md rounded-full px-5 sm:px-7 py-2.5 flex items-center justify-between">
+        <div className="max-w-[1100px] mx-auto bg-paper border-[3px] border-ink shadow-hard-md rounded-full px-3.5 sm:px-7 py-0.5 sm:py-2.5 flex items-center justify-between">
           {/* Brand Logo */}
           <Logo />
 
@@ -192,98 +224,136 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile Full-Screen Sheet with giant Archivo links */}
+      {/* Mobile Bottom-Sheet Navigation Menu (85dvh per Requirement B.6) */}
       {mobileMenuOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation Menu"
-          className="fixed inset-0 z-50 bg-paper flex flex-col justify-between p-6 sm:p-10 overflow-y-auto animate-in fade-in duration-150"
-        >
-          {/* Top Bar inside Menu */}
-          <div className="flex items-center justify-between border-b-[3px] border-ink pb-4">
-            <Logo />
-            <button
-              type="button"
-              aria-label="Close menu"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-12 h-12 rounded-full border-[3px] border-ink bg-chinar text-ink shadow-hard-sm flex items-center justify-center font-bold"
-            >
-              <X className="w-6 h-6 stroke-[2.5]" />
-            </button>
-          </div>
+        <>
+          {/* Backdrop Overlay */}
+          <div
+            className="fixed inset-0 z-50 bg-ink/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
 
-          {/* Giant Archivo Navigation Links */}
-          <nav className="my-auto py-8 flex flex-col space-y-3">
-            <Link
-              href="/services"
-              onClick={() => setMobileMenuOpen(false)}
-              className="font-display text-4xl sm:text-5xl text-ink hover:text-chinar transition-colors"
-            >
-              Services
-            </Link>
-
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
+          {/* Bottom Sheet Modal */}
+          <div
+            ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation Menu"
+            className="fixed bottom-0 left-0 right-0 z-50 h-[85dvh] max-h-[85dvh] bg-paper border-t-[4px] border-ink rounded-t-[32px] shadow-hard-lg flex flex-col justify-between p-6 sm:p-8 overflow-y-auto overscroll-contain transition-transform duration-300 ease-out"
+            style={{
+              paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
+              transform: 'translateY(0%)',
+            }}
+          >
+            {/* Top Sheet Header with Drag Handle & Close */}
+            <div className="flex items-center justify-between border-b-[3px] border-ink pb-3 shrink-0">
+              <Logo />
+              <button
+                type="button"
+                aria-label="Close menu"
                 onClick={() => setMobileMenuOpen(false)}
-                className="font-display text-4xl sm:text-5xl text-ink hover:text-chinar transition-colors"
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full border-[3px] border-ink bg-chinar text-ink shadow-hard-sm flex items-center justify-center font-bold"
               >
-                {link.label}
+                <X className="w-5 h-5 stroke-[2.5]" />
+              </button>
+            </div>
+
+            {/* Middle: Large Links in Lower/Thumb-reachable Area */}
+            <nav className="my-auto py-4 flex flex-col space-y-2">
+              <Link
+                href="/services"
+                onClick={() => setMobileMenuOpen(false)}
+                className="font-display text-3xl sm:text-4xl text-ink hover:text-chinar transition-colors min-h-[44px] flex items-center"
+              >
+                Services
               </Link>
-            ))}
-          </nav>
 
-          {/* Bottom Actions: Call and WhatsApp */}
-          <div className="border-t-[3px] border-ink pt-6 space-y-3">
-            <Button
-              href="/book-a-call"
-              variant="saffron"
-              className="w-full text-base"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                trackEvent({
-                  name: 'cta_click',
-                  params: { label: 'Book a free call', location: 'header_mobile_menu' },
-                });
-              }}
-            >
-              Book a free call
-            </Button>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="font-display text-3xl sm:text-4xl text-ink hover:text-chinar transition-colors min-h-[44px] flex items-center"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
 
-            <div className="grid grid-cols-2 gap-3">
-              <a
-                href={`tel:${siteConfig.contact.tel}`}
-                onClick={() =>
+            {/* Bottom Actions: Call, WhatsApp, Email & Book a call & Bottom Close Button */}
+            <div className="border-t-[3px] border-ink pt-4 space-y-3 shrink-0">
+              <Button
+                href="/book-a-call"
+                variant="saffron"
+                className="w-full text-base min-h-[48px]"
+                onClick={() => {
+                  setMobileMenuOpen(false);
                   trackEvent({
-                    name: 'click_call',
-                    params: { location: 'header_mobile_menu', phone: siteConfig.contact.tel },
-                  })
-                }
-                className="h-[52px] rounded-full border-[3px] border-ink bg-sky text-ink font-bold flex items-center justify-center gap-2 shadow-hard-sm active:translate-x-1 active:translate-y-1 active:shadow-none"
+                    name: 'cta_click',
+                    params: { label: 'Book a free call', location: 'header_mobile_menu' },
+                  });
+                }}
               >
-                <Phone className="w-5 h-5 stroke-[2.5]" />
-                <span>Call</span>
-              </a>
-              <a
-                href={siteConfig.contact.whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent({
-                    name: 'click_whatsapp',
-                    params: { location: 'header_mobile_menu' },
-                  })
-                }
-                className="h-[52px] rounded-full border-[3px] border-ink bg-mint text-ink font-bold flex items-center justify-center gap-2 shadow-hard-sm active:translate-x-1 active:translate-y-1 active:shadow-none"
+                Book a free call
+              </Button>
+
+              {/* 3 Action Buttons: Call, WhatsApp, Email */}
+              <div className="grid grid-cols-3 gap-2">
+                <a
+                  href={`tel:${siteConfig.contact.tel}`}
+                  onClick={() =>
+                    trackEvent({
+                      name: 'click_call',
+                      params: { location: 'header_mobile_menu', phone: siteConfig.contact.tel },
+                    })
+                  }
+                  className="h-12 min-h-[44px] rounded-full border-[3px] border-ink bg-sky text-ink font-bold flex items-center justify-center gap-1.5 shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 text-xs select-none"
+                >
+                  <Phone className="w-4 h-4 stroke-[2.5]" />
+                  <span>Call</span>
+                </a>
+                <a
+                  href={siteConfig.contact.whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    trackEvent({
+                      name: 'click_whatsapp',
+                      params: { location: 'header_mobile_menu' },
+                    })
+                  }
+                  className="h-12 min-h-[44px] rounded-full border-[3px] border-ink bg-mint text-ink font-bold flex items-center justify-center gap-1.5 shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 text-xs select-none"
+                >
+                  <MessageSquare className="w-4 h-4 stroke-[2.5]" />
+                  <span>WhatsApp</span>
+                </a>
+                <a
+                  href={`mailto:${siteConfig.contact.email}`}
+                  onClick={() =>
+                    trackEvent({
+                      name: 'click_email',
+                      params: { location: 'header_mobile_menu' },
+                    })
+                  }
+                  className="h-12 min-h-[44px] rounded-full border-[3px] border-ink bg-paper-2 text-ink font-bold flex items-center justify-center gap-1.5 shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 text-xs select-none"
+                >
+                  <Mail className="w-4 h-4 stroke-[2.5]" />
+                  <span>Email</span>
+                </a>
+              </div>
+
+              {/* Dedicated Close Button at the very bottom */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full h-11 min-h-[44px] rounded-full border-[2px] border-ink/40 bg-paper text-ink/75 hover:text-ink font-display font-bold uppercase text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                <MessageSquare className="w-5 h-5 stroke-[2.5]" />
-                <span>WhatsApp</span>
-              </a>
+                <span>Close Menu</span>
+              </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

@@ -38,7 +38,7 @@ export default function ServicesPage() {
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8 space-y-20">
         {/* Header */}
         <div className="max-w-3xl space-y-4">
-          <nav className="flex items-center gap-2 text-xs text-mist mb-2">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-mist mb-2">
             <Link href="/" className="hover:text-blue transition-colors">Home</Link>
             <span>/</span>
             <span className="text-ink font-medium">Services</span>

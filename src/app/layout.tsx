@@ -11,6 +11,7 @@ import { siteConfig } from '@/config/site';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
   themeColor: '#FBF6EA',
 };
 
@@ -115,7 +116,7 @@ export default function RootLayout({
         </a>
 
         <Header />
-        <main id="main-content" className="flex-1 w-full pb-16 md:pb-0">
+        <main id="main-content" className="flex-1 w-full pb-[calc(56px+env(safe-area-inset-bottom,0px))] md:pb-0">
           {children}
         </main>
         <Footer />

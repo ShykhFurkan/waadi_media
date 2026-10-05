@@ -14,11 +14,11 @@ const marqueeServices = [
 
 export function CrossingMarquees() {
   return (
-    <div className="relative py-12 sm:py-20 overflow-hidden select-none bg-paper pointer-events-none">
-      <div className="pointer-events-auto relative py-6">
+    <div className="relative py-12 sm:py-20 overflow-hidden [contain:paint] select-none bg-paper pointer-events-none w-full max-w-full">
+      <div className="pointer-events-auto relative py-6 overflow-hidden [contain:paint] w-full max-w-full">
         {/* Band 1: Ink background, Paper text, Saffron star glyphs, -3 degrees */}
         <div
-          className="group relative w-full overflow-hidden py-3.5 bg-ink text-paper border-y-[3px] border-ink shadow-hard-sm -rotate-3 z-10"
+          className="group relative w-full max-w-full overflow-hidden [contain:paint] py-3.5 bg-ink text-paper border-y-[3px] border-ink shadow-hard-sm -rotate-3 z-10"
         >
           <div className="flex w-max animate-marquee-forward motion-reduce:animate-none group-hover:[animation-play-state:paused]">
             {[1, 2].map((group) => (
@@ -40,7 +40,7 @@ export function CrossingMarquees() {
 
         {/* Band 2: Saffron background, Ink text, +2 degrees */}
         <div
-          className="group relative w-full overflow-hidden py-3.5 bg-saffron text-ink border-y-[3px] border-ink shadow-hard-md rotate-2 z-20 -mt-3 sm:-mt-5"
+          className="group relative w-full max-w-full overflow-hidden [contain:paint] py-3.5 bg-saffron text-ink border-y-[3px] border-ink shadow-hard-md rotate-2 z-20 -mt-3 sm:-mt-5"
         >
           <div className="flex w-max animate-marquee-backward motion-reduce:animate-none group-hover:[animation-play-state:paused]">
             {[1, 2].map((group) => (

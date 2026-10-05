@@ -32,15 +32,15 @@ export function CtaBandSection() {
             </p>
 
             {/* Action Buttons: Saffron Button + WhatsApp Button */}
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button href="/book-a-call" variant="saffron" className="px-9 text-base">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <Button href="/book-a-call" variant="saffron" className="w-full sm:w-auto px-8 h-11 sm:h-[52px] text-base font-bold">
                 Book a free call
               </Button>
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-neo bg-white text-ink h-[52px] px-8 rounded-full flex items-center justify-center font-bold text-base shadow-hard-sm hover:shadow-hard-md"
+                className="btn-neo bg-white text-ink w-full sm:w-auto h-11 sm:h-[52px] min-h-[44px] px-8 rounded-full flex items-center justify-center font-bold text-base shadow-hard-sm hover:shadow-hard-md"
               >
                 Message on WhatsApp
               </a>

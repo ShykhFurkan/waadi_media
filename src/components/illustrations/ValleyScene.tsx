@@ -79,17 +79,32 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [reducedMotion, variant]);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Heights per variant to preserve zero CLS
   const heightClasses = {
-    hero: 'h-[320px] sm:h-[420px] md:h-[500px] lg:h-[560px] w-full',
+    hero: 'h-[160px] sm:h-[320px] md:h-[480px] lg:h-[540px] w-full',
     footer: 'h-[120px] sm:h-[180px] md:h-[220px] w-full',
     mini: 'h-[80px] sm:h-[120px] w-full',
   }[variant];
 
   // Parallax translation rates per brief
-  // Far layers: 0.1x, near mountains: 0.25x, lake & shikara: 0.4x, tree: 0.55x, foreground: 0.8x
-  const getLayerTransform = (rate: number, pointerMultiplier: number) => {
+  // Mobile: maximum 3 moving layers (layers 4, 6, 8 only), no pointer effects, reduced movement
+  const getLayerTransform = (layerIndex: number, rate: number, pointerMultiplier: number) => {
     if (reducedMotion || variant !== 'hero') return undefined;
+    if (isMobile) {
+      // Only 3 moving layers on mobile
+      if (![4, 6, 8].includes(layerIndex)) return undefined;
+      const yShift = scrollYProgress * rate * 30;
+      return `translate3d(0px, ${yShift.toFixed(1)}px, 0)`;
+    }
     const yShift = scrollYProgress * rate * 70 + mouseOffset.y * pointerMultiplier;
     const xShift = mouseOffset.x * pointerMultiplier;
     return `translate3d(${xShift.toFixed(1)}px, ${yShift.toFixed(1)}px, 0)`;
@@ -132,7 +147,7 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
         {/* 2. Sun Disc (Saffron with thick ink outline) */}
         <g
           style={{
-            transform: getLayerTransform(0.08, 0.2),
+            transform: getLayerTransform(2, 0.08, 0.2),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -150,9 +165,9 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
 
         {/* 3. Clouds (Drifting, white with 3px ink outline) */}
         <g
-          className={reducedMotion ? '' : 'animate-drift-cloud'}
+          className={reducedMotion || isMobile ? '' : 'animate-drift-cloud'}
           style={{
-            transform: getLayerTransform(0.12, 0.3),
+            transform: getLayerTransform(3, 0.12, 0.3),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -180,9 +195,9 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
 
         {/* 9. Birds drifting */}
         <g
-          className={reducedMotion ? '' : 'animate-drift-bird'}
+          className={reducedMotion || isMobile ? '' : 'animate-drift-bird'}
           style={{
-            transform: getLayerTransform(0.15, 0.35),
+            transform: getLayerTransform(9, 0.15, 0.35),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -194,7 +209,7 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
         {/* 4. Far Mountains (Blue and Sky with 3px ink outlines) */}
         <g
           style={{
-            transform: getLayerTransform(0.1, 0.35),
+            transform: getLayerTransform(4, 0.1, 0.35),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -215,7 +230,7 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
         {/* 5. Near Mountains with Snow Caps (Paper & Mint with 3px ink outline) */}
         <g
           style={{
-            transform: getLayerTransform(0.25, 0.5),
+            transform: getLayerTransform(5, 0.25, 0.5),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -236,7 +251,7 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
         {/* 6. Dal Lake Band (Sky blue with waves and Chinar-red Shikara) */}
         <g
           style={{
-            transform: getLayerTransform(0.4, 0.65),
+            transform: getLayerTransform(6, 0.4, 0.65),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -284,7 +299,7 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
         {/* 7. Big Chinar Tree (Orange-red foliage on the right bank) */}
         <g
           style={{
-            transform: getLayerTransform(0.55, 0.8),
+            transform: getLayerTransform(7, 0.55, 0.8),
             transition: 'transform 0.15s ease-out',
           }}
         >
@@ -307,7 +322,7 @@ export function ValleyScene({ variant = 'hero', className }: ValleySceneProps) {
         {/* 8. Foreground Valley Bank, Crocus Flowers & Grass (Saffron & Mint) */}
         <g
           style={{
-            transform: getLayerTransform(0.8, 1.0),
+            transform: getLayerTransform(8, 0.8, 1.0),
             transition: 'transform 0.15s ease-out',
           }}
         >

@@ -61,12 +61,12 @@ export function ProcessSection() {
             <RiverRibbon variant="horizontal" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 relative z-10">
             {steps.map((step) => (
               <div
                 key={step.num}
-                style={{ transform: `rotate(${step.rotate}deg)` }}
-                className={`tile-neo ${step.color} text-ink p-7 sm:p-8 rounded-[20px] border-[3px] border-ink shadow-hard-md hover:shadow-hard-lg flex flex-col justify-between`}
+                style={{ '--step-rotate': `${step.rotate}deg` } as React.CSSProperties}
+                className={`tile-neo ${step.color} text-ink p-5 sm:p-8 rounded-[20px] border-[3px] border-ink shadow-hard-sm sm:shadow-hard-md hover:shadow-hard-lg flex flex-col justify-between rotate-0 sm:[transform:rotate(var(--step-rotate))]`}
               >
                 <div>
                   {/* Number Badge (the only numbered section per brief) */}

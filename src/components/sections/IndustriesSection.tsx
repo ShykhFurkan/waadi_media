@@ -80,13 +80,13 @@ export function IndustriesSection() {
         </div>
 
         {/* Wrapped Row of Chunky Pills with Icons */}
-        <div className="flex flex-wrap gap-4 sm:gap-6 items-stretch">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-6 items-stretch">
           {industries.map((ind) => (
             <Link
               key={ind.name}
               href={ind.href}
-              style={{ transform: `rotate(${ind.rotate}deg)` }}
-              className={`p-6 sm:p-7 rounded-[20px] border-[3px] border-ink ${ind.color} text-ink shadow-hard-md hover:shadow-hard-lg hover:scale-105 transition-all flex flex-col justify-between max-w-sm flex-1 min-w-[280px]`}
+              style={{ '--ind-rotate': `${ind.rotate}deg` } as React.CSSProperties}
+              className={`p-5 sm:p-7 rounded-[20px] border-[3px] border-ink ${ind.color} text-ink shadow-hard-sm sm:shadow-hard-md hover:shadow-hard-lg hover:scale-105 transition-all flex flex-col justify-between w-full sm:w-auto sm:max-w-sm sm:flex-1 sm:min-w-[280px] rotate-0 sm:[transform:rotate(var(--ind-rotate))]`}
             >
               <div>
                 <div className="flex items-center gap-3 mb-3">

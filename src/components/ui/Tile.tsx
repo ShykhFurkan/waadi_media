@@ -48,13 +48,16 @@ export function Tile({
     lg: 'shadow-hard-lg',
   }[shadow];
 
-  const rotationStyle = rotate !== 0 ? { transform: `rotate(${rotate}deg)` } : undefined;
+  const rotationStyle =
+    rotate !== 0
+      ? ({ '--tile-rotate': `${rotate}deg` } as React.CSSProperties)
+      : undefined;
 
   return (
     <Component
       style={rotationStyle}
       className={cn(
-        'tile-neo p-7 sm:p-9 rounded-[20px] border-[3px] border-ink',
+        'tile-neo p-5 sm:p-9 rounded-[20px] border-[3px] border-ink shadow-hard-sm sm:shadow-hard-md rotate-0 sm:[transform:rotate(var(--tile-rotate))]',
         colorClasses[color],
         shadowClasses,
         className
