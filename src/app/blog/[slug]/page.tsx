@@ -208,6 +208,33 @@ const mdxComponents = {
   ),
   Button,
   Callout,
+  BlogCta: () => (
+    <div className="my-10 p-6 sm:p-8 bg-paper border-[3px] border-ink rounded-[24px] shadow-hard-md">
+      <h3 className="text-h2 text-ink mb-3">Ready to grow your business online?</h3>
+      <p className="text-[17px] sm:text-[18px] text-ink leading-relaxed mb-6 font-sans">
+        At Waadi Media, we are a{' '}
+        <Link href="/web-design-agency-kashmir" className="text-chinar hover:underline font-bold">
+          web design agency in Kashmir
+        </Link>
+        . We build websites, software and organic growth strategies for local businesses, with{' '}
+        <Link href="/pricing" className="text-chinar hover:underline font-bold">
+          transparent pricing
+        </Link>
+        , simple explanations and fair support.
+      </p>
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <Button href="https://wa.me/917780940317" external variant="saffron">
+          Chat with us on WhatsApp
+        </Button>
+        <Button href="mailto:contact@waadimedia.com" external variant="secondary">
+          Email: contact@waadimedia.com
+        </Button>
+      </div>
+      <p className="text-xs font-bold text-mist uppercase tracking-wide m-0">
+        Built in the valley. Made for your business.
+      </p>
+    </div>
+  ),
 };
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
