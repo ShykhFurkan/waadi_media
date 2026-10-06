@@ -14,11 +14,15 @@ export type BlogPostMetadata = {
   updated?: string;
   category: string;
   keyword: string;
+  keywords?: string[];
   cover?: string;
+  coverAlt?: string;
   draft?: boolean;
   author: string;
   readingTime: string;
   wordCount: number;
+  faqs?: { question: string; answer: string }[];
+  relatedSlugs?: string[];
 };
 
 export type BlogPost = {
@@ -52,11 +56,15 @@ export function getAllPosts(includeDrafts = process.env.NODE_ENV !== 'production
         updated: data.updated,
         category: data.category || 'General',
         keyword: data.keyword || '',
+        keywords: data.keywords,
         cover: data.cover,
+        coverAlt: data.coverAlt,
         draft: Boolean(data.draft),
         author: data.author || 'Furkan Mushtaq',
         readingTime: readStats.text,
         wordCount,
+        faqs: data.faqs,
+        relatedSlugs: data.relatedSlugs,
       } as BlogPostMetadata;
     })
     .filter((post) => includeDrafts || !post.draft)
@@ -111,23 +119,37 @@ export function getPostBySlug(slug: string, includeDrafts = process.env.NODE_ENV
       updated: data.updated,
       category: data.category || 'General',
       keyword: data.keyword || '',
+      keywords: data.keywords,
       cover: data.cover,
+      coverAlt: data.coverAlt,
       draft: isDraft,
       author: data.author || 'Furkan Mushtaq',
       readingTime: readStats.text,
       wordCount,
+      faqs: data.faqs,
+      relatedSlugs: data.relatedSlugs,
     },
     content,
     headings,
   };
 }
 
-export function getRelatedPosts(currentSlug: string, category: string, limit = 2): BlogPostMetadata[] {
+export function getRelatedPosts(
+  currentSlug: string,
+  category: string,
+  limit = 2,
+  preferredSlugs?: string[]
+): BlogPostMetadata[] {
   const all = getAllPosts();
   const others = all.filter((p) => p.slug !== currentSlug);
 
-  const sameCategory = others.filter((p) => p.category.toLowerCase() === category.toLowerCase());
-  const differentCategory = others.filter((p) => p.category.toLowerCase() !== category.toLowerCase());
+  const preferred = preferredSlugs
+    ? others.filter((p) => preferredSlugs.includes(p.slug))
+    : [];
+  const remaining = others.filter((p) => !preferred.some((pr) => pr.slug === p.slug));
 
-  return [...sameCategory, ...differentCategory].slice(0, limit);
+  const sameCategory = remaining.filter((p) => p.category.toLowerCase() === category.toLowerCase());
+  const differentCategory = remaining.filter((p) => p.category.toLowerCase() !== category.toLowerCase());
+
+  return [...preferred, ...sameCategory, ...differentCategory].slice(0, limit);
 }

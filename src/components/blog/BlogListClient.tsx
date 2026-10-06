@@ -25,7 +25,9 @@ export function BlogListClient({
   const filteredPosts = useMemo(() => {
     if (selectedCategory === 'All') return posts;
     return posts.filter(
-      (p) => p.category.toLowerCase() === selectedCategory.toLowerCase()
+      (p) =>
+        p.category.toLowerCase() === selectedCategory.toLowerCase() ||
+        (selectedCategory === 'Business' && p.category.toLowerCase().startsWith('business'))
     );
   }, [posts, selectedCategory]);
 

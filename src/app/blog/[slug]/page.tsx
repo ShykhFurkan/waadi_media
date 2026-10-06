@@ -1,13 +1,15 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
 import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/mdx';
 import { siteConfig } from '@/config/site';
 import { Button } from '@/components/ui/Button';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { getArticleSchema, getBreadcrumbSchema } from '@/lib/seo';
+import { getBreadcrumbSchema, getFaqPageSchema } from '@/lib/seo';
 import { ReadingProgressBar, ShareButtons } from '@/components/blog/BlogPostClientElements';
 import { Clock, Calendar, ArrowLeft } from 'lucide-react';
 
@@ -42,29 +44,79 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       ? post.metadata.title
       : `${post.metadata.title.slice(0, 57)}...`);
 
+  const coverUrl = post.metadata.cover
+    ? (post.metadata.cover.startsWith('http') ? post.metadata.cover : `${siteConfig.url}${post.metadata.cover}`)
+    : undefined;
+
   return {
     title: pageTitle,
     description: post.metadata.description,
+    keywords: post.metadata.keywords || (post.metadata.keyword ? [post.metadata.keyword] : undefined),
+    authors: [{ name: post.metadata.author }],
     alternates: {
       canonical: `/blog/${post.metadata.slug}`,
+      languages: {
+        'en-IN': `/blog/${post.metadata.slug}`,
+      },
     },
     openGraph: {
-      title: `${post.metadata.title} - Waadi Media`,
+      title: post.metadata.title,
       description: post.metadata.description,
       url: postUrl,
       type: 'article',
-      publishedTime: post.metadata.date,
-      modifiedTime: post.metadata.updated || post.metadata.date,
+      siteName: siteConfig.name,
+      locale: 'en_IN',
+      publishedTime: post.metadata.date.includes('T') ? post.metadata.date : `${post.metadata.date}T09:00:00+05:30`,
+      modifiedTime: (post.metadata.updated || post.metadata.date).includes('T')
+        ? (post.metadata.updated || post.metadata.date)
+        : `${post.metadata.updated || post.metadata.date}T09:00:00+05:30`,
       authors: [post.metadata.author],
-      tags: [post.metadata.category, post.metadata.keyword],
+      tags: [post.metadata.category, ...(post.metadata.keywords || [post.metadata.keyword])],
+      images: coverUrl
+        ? [
+            {
+              url: coverUrl,
+              width: 1200,
+              height: 630,
+              alt: post.metadata.coverAlt || post.metadata.title,
+            },
+          ]
+        : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title: post.metadata.title,
       description: post.metadata.description,
+      images: coverUrl ? [coverUrl] : undefined,
+    },
+    robots: {
+      index: true,
+      follow: true,
     },
   };
 }
+
+const Callout = ({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title?: string;
+}) => {
+  return (
+    <div className="my-8 p-6 sm:p-7 bg-paper border-[3px] border-ink rounded-[20px] shadow-hard-sm">
+      {title && (
+        <div className="font-display font-black text-sm uppercase tracking-wider text-ink mb-3 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-saffron border border-ink" />
+          <span>{title}</span>
+        </div>
+      )}
+      <div className="text-[17px] sm:text-[18px] text-ink leading-relaxed [&>p:last-child]:mb-0 [&>ul:last-child]:mb-0">
+        {children}
+      </div>
+    </div>
+  );
+};
 
 const mdxComponents = {
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
@@ -111,15 +163,21 @@ const mdxComponents = {
   li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
     <li className="leading-relaxed text-[17px] sm:text-[18px] text-ink" {...props} />
   ),
-  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a
-      className="text-chinar hover:underline font-bold transition-colors"
-      {...props}
-    />
-  ),
+  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    const href = props.href || '';
+    const isExternal = href.startsWith('http://') || href.startsWith('https://');
+    return (
+      <a
+        className="text-chinar hover:underline font-bold transition-colors"
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noopener noreferrer' : undefined}
+        {...props}
+      />
+    );
+  },
   blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
     <blockquote
-      className="border-l-4 border-chinar pl-4 py-2 italic text-ink my-6 bg-paper-2 rounded-r-lg font-serif text-[18px]"
+      className="border-l-[6px] border-chinar pl-6 pr-4 py-4 italic text-ink my-8 bg-paper border-y-[2px] border-r-[2px] border-ink rounded-[16px] shadow-hard-sm font-serif text-[18px] leading-relaxed"
       {...props}
     />
   ),
@@ -127,9 +185,18 @@ const mdxComponents = {
     <strong className="font-bold text-ink" {...props} />
   ),
   table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
-    <div className="overflow-x-auto my-6 max-w-full border-[2px] border-ink rounded-[16px] bg-paper shadow-hard-sm">
+    <div className="overflow-x-auto my-8 max-w-full border-[3px] border-ink rounded-[18px] bg-paper shadow-hard-sm">
       <table className="min-w-full text-left border-collapse text-sm" {...props} />
     </div>
+  ),
+  thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+    <thead className="bg-paper-2 border-b-2 border-ink" {...props} />
+  ),
+  th: (props: React.ThHTMLAttributes<HTMLTableCellElement>) => (
+    <th className="p-3.5 sm:p-4 border-b-2 border-ink font-sans font-bold text-ink text-left text-sm" {...props} />
+  ),
+  td: (props: React.TdHTMLAttributes<HTMLTableCellElement>) => (
+    <td className="p-3.5 sm:p-4 border-b border-ink/20 text-ink leading-relaxed text-sm" {...props} />
   ),
   pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
     <div className="overflow-x-auto my-6 max-w-full rounded-[16px] border-[2px] border-ink bg-paper-2 p-4 shadow-hard-sm">
@@ -139,6 +206,8 @@ const mdxComponents = {
   code: (props: React.HTMLAttributes<HTMLElement>) => (
     <code className="font-mono text-sm bg-paper-2 px-1.5 py-0.5 rounded border border-ink/30" {...props} />
   ),
+  Button,
+  Callout,
 };
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
@@ -151,9 +220,42 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const postUrl = `${siteConfig.url}/blog/${post.metadata.slug}`;
-  const relatedPosts = getRelatedPosts(slug, post.metadata.category, 2);
+  const relatedPosts = getRelatedPosts(slug, post.metadata.category, 2, post.metadata.relatedSlugs);
 
-  const articleSchema = getArticleSchema(post.metadata);
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.metadata.title,
+    description: post.metadata.description,
+    image: post.metadata.cover
+      ? (post.metadata.cover.startsWith('http') ? post.metadata.cover : `${siteConfig.url}${post.metadata.cover}`)
+      : `${siteConfig.url}/blog/${post.metadata.slug}/opengraph-image`,
+    datePublished: post.metadata.date.includes('T') ? post.metadata.date : `${post.metadata.date}T09:00:00+05:30`,
+    dateModified: (post.metadata.updated || post.metadata.date).includes('T')
+      ? (post.metadata.updated || post.metadata.date)
+      : `${post.metadata.updated || post.metadata.date}T09:00:00+05:30`,
+    inLanguage: 'en-IN',
+    mainEntityOfPage: postUrl,
+    author: {
+      '@type': 'Person',
+      name: post.metadata.author,
+      jobTitle: 'Founder, Waadi Media',
+      url: siteConfig.url,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: { '@type': 'ImageObject', url: `${siteConfig.url}/logo.png` },
+    },
+    about: ['Jammu and Kashmir startups', 'Digital marketing', 'Local SEO'],
+    keywords: post.metadata.keywords ? post.metadata.keywords.join(', ') : post.metadata.keyword,
+  };
+
+  const faqSchema = post.metadata.faqs && post.metadata.faqs.length > 0
+    ? getFaqPageSchema(post.metadata.faqs)
+    : null;
+
   const breadcrumbsSchema = getBreadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Blog', url: '/blog' },
@@ -166,6 +268,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <article className="w-full min-h-screen bg-snow text-graphite py-16 md:py-24">
       <ReadingProgressBar slug={post.metadata.slug} title={post.metadata.title} />
       <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
       <JsonLd data={breadcrumbsSchema} />
 
       <div className="max-w-[800px] mx-auto px-5 sm:px-8">
@@ -216,6 +319,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </header>
 
+        {/* Cover Image */}
+        {post.metadata.cover && (
+          <div className="mb-12 overflow-hidden rounded-[24px] border-[3px] border-ink bg-paper shadow-hard-md">
+            <Image
+              src={post.metadata.cover}
+              alt={post.metadata.coverAlt || post.metadata.title}
+              width={1200}
+              height={630}
+              priority
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        )}
+
         {/* Collapsible Table of Contents for posts over 1,000 words */}
         {showTableOfContents && (
           <details
@@ -247,7 +364,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Article Body Rendered via MDX */}
         <div className="prose-content">
-          <MDXRemote source={post.content} components={mdxComponents} />
+          <MDXRemote
+            source={post.content}
+            components={mdxComponents}
+            options={{
+              mdxOptions: {
+                remarkPlugins: [remarkGfm],
+              },
+            }}
+          />
         </div>
 
         {/* Author Box */}
