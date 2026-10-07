@@ -55,9 +55,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     authors: [{ name: post.metadata.author }],
     alternates: {
       canonical: `/blog/${post.metadata.slug}`,
-      languages: {
-        'en-IN': `/blog/${post.metadata.slug}`,
-      },
     },
     openGraph: {
       title: post.metadata.title,
