@@ -2,12 +2,21 @@
  * Site-wide configuration and business constants for Waadi Media.
  * All items marked [CONFIRM] can be edited here by the owner.
  */
+function resolveCanonicalSiteUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!envUrl) return "https://www.waadimedia.com";
+  if (envUrl === "https://waadimedia.com" || envUrl === "http://waadimedia.com" || envUrl === "waadimedia.com") {
+    return "https://www.waadimedia.com";
+  }
+  return envUrl;
+}
+
 export const siteConfig = {
   name: "Waadi Media",
   legalName: "Waadi Media",
   tagline: "Built in the valley. Made for your business.",
-  domain: "waadimedia.com",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://waadimedia.com",
+  domain: "www.waadimedia.com",
+  url: resolveCanonicalSiteUrl(),
   foundedYear: 2026,
   
   // Location
